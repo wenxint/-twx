@@ -81,7 +81,7 @@ Babel配置可以通过多种方式提供，最常见的是`.babelrc`文件或`b
 ```javascript
 module.exports = function(api) {
   api.cache(true);
-
+  
   return {
     presets: [
       ["@babel/preset-env", {
@@ -116,22 +116,22 @@ module.exports = function(api) {
         "chrome": "58",
         "ie": "11"
       },
-
+      
       // polyfill策略：
       // - false: 不引入polyfill（默认）
       // - usage: 按需添加（推荐）
       // - entry: 需要在入口文件导入全部polyfill
       "useBuiltIns": "usage",
-
+      
       // 指定corejs版本
       "corejs": { "version": 3, "proposals": true },
-
+      
       // 是否将ES模块语法转换为其他模块类型
       "modules": false, // 'auto' | 'amd' | 'umd' | 'systemjs' | 'commonjs' | 'cjs' | false
-
+      
       // 是否松散模式（允许底层引擎优化）
       "loose": false,
-
+      
       // 调试模式，输出目标环境信息
       "debug": false
     }]
@@ -163,19 +163,19 @@ module.exports = function(api) {
   "plugins": [
     // 类属性转换
     "@babel/plugin-proposal-class-properties",
-
+    
     // 私有方法和私有字段
     "@babel/plugin-proposal-private-methods",
-
+    
     // 可选链操作符
     "@babel/plugin-proposal-optional-chaining",
-
+    
     // 空值合并操作符
     "@babel/plugin-proposal-nullish-coalescing-operator",
-
+    
     // 装饰器
     ["@babel/plugin-proposal-decorators", { "legacy": true }],
-
+    
     // 动态导入
     "@babel/plugin-syntax-dynamic-import"
   ]
@@ -343,29 +343,29 @@ class Animal {
   private name: string;
   protected age: number;
   readonly species: string;
-
+  
   // 构造函数
   constructor(name: string, age: number, species: string) {
     this.name = name;
     this.age = age;
     this.species = species;
   }
-
+  
   // 方法
   public makeSound(): void {
     console.log("Some generic sound");
   }
-
+  
   // 静态方法
   static createAnimal(name: string): Animal {
     return new Animal(name, 0, "unknown");
   }
-
+  
   // Getter/Setter
   get animalName(): string {
     return this.name;
   }
-
+  
   set animalName(value: string) {
     this.name = value;
   }
@@ -376,7 +376,7 @@ class Dog extends Animal {
   constructor(name: string, age: number) {
     super(name, age, "canine");
   }
-
+  
   makeSound(): void {
     console.log("Woof!");
   }
@@ -457,7 +457,7 @@ class Greeter2 {
   constructor(message: string) {
     this.greeting = message;
   }
-
+  
   @enumerable(false)
   greet() {
     return "Hello, " + this.greeting;
@@ -468,15 +468,15 @@ class Greeter2 {
 function format(formatString: string) {
   return function (target: any, propertyKey: string) {
     let value = target[propertyKey];
-
+    
     const getter = function() {
       return `${formatString} ${value}`;
     };
-
+    
     const setter = function(newVal: string) {
       value = newVal;
     };
-
+    
     Object.defineProperty(target, propertyKey, {
       get: getter,
       set: setter,
@@ -506,52 +506,52 @@ npm install --save-dev typescript
   "compilerOptions": {
     // 目标JavaScript版本
     "target": "es2020",
-
+    
     // 模块系统
     "module": "esnext",
-
+    
     // 严格类型检查
     "strict": true,
-
+    
     // 模块解析策略
     "moduleResolution": "node",
-
+    
     // 启用装饰器
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-
+    
     // 源码映射
     "sourceMap": true,
-
+    
     // lib引用
     "lib": ["dom", "dom.iterable", "esnext"],
-
+    
     // 允许导入JSON
     "resolveJsonModule": true,
-
+    
     // 允许JavaScript
     "allowJs": true,
-
+    
     // 生成声明文件
     "declaration": true,
-
+    
     // 跳过库检查
     "skipLibCheck": true,
-
+    
     // 保持JSX语法
     "jsx": "react",
-
+    
     // 导入辅助
     "esModuleInterop": true,
-
+    
     // 基础目录
     "baseUrl": ".",
-
+    
     // 路径别名
     "paths": {
       "@/*": ["src/*"]
     },
-
+    
     // 输出目录
     "outDir": "dist"
   },
@@ -648,12 +648,12 @@ npm install --save-dev @types/node
 // 创建types/my-library/index.d.ts
 declare module 'my-library' {
   export function doSomething(value: string): number;
-
+  
   export interface Options {
     debug?: boolean;
     timeout?: number;
   }
-
+  
   export default class MyLibrary {
     constructor(options?: Options);
     init(): void;
@@ -891,4 +891,4 @@ npm install --save-dev typescript @types/node
 
 3. **在使用Babel编译TypeScript时有哪些限制？**
 
-   Babel不执行类型检查，某些TypeScript特性（如const枚举、命名空间）不被支持，需要单独运行TypeScript类型检查步骤。此外，Babel不生成.d.ts文件，如果需要声明文件，仍需使用TypeScript编译器。
+   Babel不执行类型检查，某些TypeScript特性（如const枚举、命名空间）不被支持，需要单独运行TypeScript类型检查步骤。此外，Babel不生成.d.ts文件，如果需要声明文件，仍需使用TypeScript编译器。 
