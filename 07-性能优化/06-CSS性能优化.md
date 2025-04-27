@@ -198,6 +198,157 @@ div.content ul li a { color: red; } /* 浏览器先找所有a，再检查是否�
   background-color: var(--primary-color);
   color: white;
   padding: calc(var(--spacing-unit) * 2);
+}
+```
+
+#### 2. 减少冗余代码
+- **使用简写属性**：减少代码量
+  ```css
+  /* 优化前 */
+  .element {
+    margin-top: 10px;
+    margin-right: 20px;
+    margin-bottom: 10px;
+    margin-left: 20px;
+  }
+
+  /* 优化后 */
+  .element {
+    margin: 10px 20px;
+  }
+  ```
+- **合并相似规则**：减少重复声明
+- **使用CSS预处理器**：Sass/Less的嵌套、混合、函数等功能
+
+#### 3. 文件大小优化
+- **移除未使用的CSS**：使用PurgeCSS、UnCSS等工具
+- **压缩CSS**：移除空格、注释和不必要的字符
+- **拆分CSS文件**：按路由或功能拆分，实现按需加载
+
+### 构建工具优化
+
+
+
+## 面试常见问题
+
+### 1. CSS选择器的性能影响是什么？如何优化？
+**答**：
+- **性能影响**：
+  - 浏览器从右向左匹配选择器
+  - 选择器越复杂，匹配过程越耗时
+  - 过深的嵌套会增加匹配成本
+- **优化策略**：
+  - 使用类选择器替代复杂选择器
+  - 避免使用通用选择器（*）作为关键选择器
+  - 减少选择器嵌套层级（不超过3层）
+  - 避免使用父选择器修饰符（如 `>`）作为关键选择器
+  - 使用BEM等命名方法减少选择器复杂度
+
+### 2. 什么是关键CSS？如何实现关键CSS的内联？
+**答**：
+- **关键CSS定义**：首屏渲染所必需的最小CSS集合
+- **实现方法**：
+  - 手动提取：分析首屏元素所需样式
+  - 自动化工具：Critical、Penthouse等
+  - 内联到HTML的`<head>`中
+  - 异步加载非关键CSS
+  ```html
+  <head>
+    <style>
+      /* 关键CSS */
+      header { height: 60px; }
+      .hero { background: #f0f0f0; }
+    </style>
+    <link rel="preload" href="main.css" as="style" onload="this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="main.css"></noscript>
+  </head>
+  ```
+
+### 3. CSS动画性能优化的关键点有哪些？
+**答**：
+- **使用transform和opacity**：这些属性只触发合成，不触发重排和重绘
+- **避免同时动画过多元素**：会增加GPU负担
+- **使用will-change提示浏览器**：但不要滥用
+- **使用requestAnimationFrame**：与浏览器渲染周期同步
+- **避免使用JavaScript频繁修改样式**：可能导致布局抖动
+- **使用CSS硬件加速**：transform: translateZ(0)或will-change: transform
+- **动画完成后移除will-change**：释放资源
+
+### 4. 如何减少CSS文件大小和提高加载性能？
+**答**：
+- **移除未使用的CSS**：使用PurgeCSS、UnCSS等工具
+- **压缩CSS**：使用cssnano、clean-css等工具
+- **使用简写属性**：如margin、padding、border等
+- **合并相似规则**：减少重复声明
+- **使用CSS变量**：减少重复值
+- **按需加载CSS**：根据路由或组件拆分CSS文件
+- **使用现代格式**：如CSS Modules、CSS-in-JS等
+- **利用缓存**：设置适当的缓存头部
+
+### 5. 什么是CSS的关键渲染路径？如何优化？
+**答**：
+- **关键渲染路径**：浏览器将CSS转换为渲染树的过程
+  1. 下载CSS文件
+  2. 解析CSS生成CSSOM
+  3. 将DOM和CSSOM合并为渲染树
+  4. 计算布局
+  5. 绘制页面
+- **优化策略**：
+  - 减少CSS文件大小
+  - 内联关键CSS
+  - 异步加载非关键CSS
+  - 使用媒体查询区分关键和非关键CSS
+  - 移除阻塞渲染的CSS
+  - 预加载关键CSS文件
+
+### 6. 如何识别和解决CSS性能瓶颈？
+**答**：
+- **识别方法**：
+  - 使用Chrome DevTools的Performance面板
+  - 分析渲染性能和布局抖动
+  - 使用Lighthouse评估CSS性能
+  - 检查重排和重绘事件
+- **解决方案**：
+  - 简化复杂的选择器
+  - 减少重排操作
+  - 优化动画性能
+  - 减少CSS文件大小
+  - 应用关键CSS技术
+  - 使用CSS containment隔离布局影响
+
+### 7. CSS-in-JS与传统CSS相比有哪些性能优缺点？
+**答**：
+- **优点**：
+  - 按需加载：只加载使用的组件样式
+  - 避免未使用的CSS
+  - 自动生成唯一类名，避免冲突
+  - 更好的代码分割
+- **缺点**：
+  - 运行时开销：动态生成和注入样式
+  - JavaScript包体积增加
+  - 首次渲染可能较慢
+  - 缓存效率降低
+- **性能优化**：
+  - 使用静态提取：构建时提取为CSS文件
+  - 使用服务端渲染预生成样式
+  - 选择轻量级实现（如styled-components、emotion）
+  - 使用缓存策略减少重复计算
+
+
+
+```css
+/* 使用CSS变量 */
+:root {
+  --primary-color: #3498db;
+  --secondary-color: #2ecc71;
+  --text-color: #333;
+  --spacing-unit: 8px;
+}
+
+.button {
+  background-color: var(--primary-color);
+  color: white;
+  padding: calc(var(--spacing-unit) * 2);
   margin-bottom: var(--spacing-unit);
 }
 
