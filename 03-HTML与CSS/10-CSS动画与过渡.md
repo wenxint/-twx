@@ -482,11 +482,13 @@ CSS动画若使用不当可能导致性能问题。以下是一些优化技巧�
 ```
 
 通常会触发硬件加速的属性：
+
 - transform
 - opacity
 - filter
 
 尽量避免动画：
+
 - width/height（触发布局）
 - top/left/right/bottom（不如transform：translate）
 - background-position（不如transform）
@@ -522,6 +524,7 @@ element.addEventListener('transitionend', function(event) {
 ### 4. 减少同时动画的元素数量
 
 大量元素同时动画会消耗大量资源。如有必要：
+
 - 对非可视区域的元素禁用动画
 - 使用动画库的节流功能
 - 考虑使用Canvas或WebGL进行复杂动画
@@ -690,24 +693,28 @@ animation.onfinish = () => console.log('动画完成');
 ### 1. CSS动画和JavaScript动画的区别和适用场景？
 
 **CSS动画优势**：
+
 - 性能通常更好，尤其是简单动画
 - 较简单的实现方式
 - 利用GPU硬件加速
 - 即使JavaScript线程繁忙也能运行
 
 **JavaScript动画优势**：
+
 - 更精细的控制
 - 支持动态变化和复杂逻辑
 - 支持更多高级效果和物理仿真
 - 可在不支持CSS动画的旧浏览器中降级
 
 **适用场景**：
+
 - CSS动画：简单过渡、悬停效果、循环动画
 - JavaScript动画：基于用户输入的动画、游戏、需要中途修改的动画
 
 ### 2. 过渡(transition)和动画(animation)的区别？
 
 主要区别：
+
 - 过渡需要触发条件（如hover），动画可以自动开始
 - 过渡只有开始和结束两个状态，动画可以定义多个关键帧状态
 - 过渡只能运行一次，动画可以循环或设置多次运行
@@ -716,6 +723,7 @@ animation.onfinish = () => console.log('动画完成');
 ### 3. 如何提高CSS动画性能？
 
 主要性能优化手段：
+
 - 使用transform和opacity等触发硬件加速的属性
 - 避免频繁改变触发布局的属性（width/height等）
 - 使用will-change属性提前通知浏览器
@@ -726,6 +734,7 @@ animation.onfinish = () => console.log('动画完成');
 ### 4. 什么是关键帧动画？如何定义和使用？
 
 关键帧动画是使用@keyframes规则定义的一系列样式变化：
+
 - 使用from/to或百分比定义动画阶段
 - 每个阶段可设置多个CSS属性变化
 - 通过animation-*属性或animation简写应用到元素
@@ -746,6 +755,7 @@ animation.onfinish = () => console.log('动画完成');
 ### 5. 如何处理不同浏览器对CSS3动画的兼容性问题？
 
 处理兼容性的主要方法：
+
 - 使用autoprefixer等工具自动添加供应商前缀
 - 为旧版浏览器提供回退样式
 - 使用特性检测（Modernizr等）判断支持情况
@@ -757,6 +767,7 @@ animation.onfinish = () => console.log('动画完成');
 CSS动画和过渡为Web开发者提供了强大的工具，用于创建引人注目的用户界面和交互体验。通过合理使用这些技术，可以显著提升用户体验，同时保持良好的性能和兼容性。
 
 关键要点：
+
 - 过渡(transition)适用于简单的状态变化
 - 变换(transform)可实现元素的移动、旋转、缩放而不影响布局
 - 关键帧动画(animation)提供更复杂和精细的控制
