@@ -1,6 +1,6 @@
 # Vite与ESBuild
 
-> Vite是一个现代前端构建工具，它利用浏览器原生ES模块能力和ESBuild的高性能来提供极速的开发体验。本文详细介绍Vite和ESBuild的核心概念、配置方法和实际应用。
+> Vite是一个现代前端构建工具，它利用浏览器原生ES模块能力和ESBuild的高性能来提供极速的开发体验。本文详细介绍Vite的核心概念、配置方法和实际应用。
 
 ## 1. Vite基础
 
@@ -8,26 +8,28 @@
 
 Vite（法语意为"快速"）是一个新型前端构建工具，由Vue.js的作者尤雨溪开发。它主要解决了传统打包工具在开发环境下速度慢的问题，具有以下特点：
 
-- 快速的冷启动
-- 即时的模块热更新
-- 真正的按需编译
-- 开箱即用的优化配置
-- 通用的插件接口
-- 完全类型化的API
+- 快速的冷启动：无需打包，直接启动开发服务器
+- 即时的模块热更新：基于原生ESM的HMR，更新速度极快
+- 真正的按需编译：只编译当前页面需要的代码
+- 开箱即用的优化配置：内置TypeScript、JSX、CSS等支持
+- 通用的插件接口：兼容Rollup插件生态
+- 完全类型化的API：提供完整的TypeScript类型支持
 
 ### 1.2 Vite的工作原理
 
 1. **开发环境**：
-   - 利用浏览器原生ES模块
-   - 按需编译
-   - 无需打包
-   - 路由懒加载
+   - 利用浏览器原生ES模块能力
+   - 按需编译，无需打包
+   - 路由懒加载支持
+   - 依赖预构建优化
+   - 源码映射支持
 
 2. **生产环境**：
    - 使用Rollup打包
    - 高度优化的构建过程
    - 自动代码分割
    - CSS代码分割
+   - 资源优化和压缩
 
 ### 1.3 基本使用
 
@@ -44,6 +46,9 @@ npm run dev
 
 # 构建生产版本
 npm run build
+
+# 预览生产构建
+npm run preview
 ```
 
 ## 2. Vite配置详解
@@ -59,11 +64,12 @@ import path from 'path'
 export default defineConfig({
   // 插件
   plugins: [vue()],
-  
+
   // 开发服务器选项
   server: {
     port: 3000,
     open: true,
+    cors: true,
     proxy: {
       '/api': {
         target: 'http://localhost:8080',
@@ -72,21 +78,31 @@ export default defineConfig({
       }
     }
   },
-  
+
   // 构建选项
   build: {
     target: 'es2015',
     outDir: 'dist',
     assetsDir: 'assets',
     minify: 'terser',
-    sourcemap: true
+    sourcemap: true,
+    // 分块策略
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor': ['vue', 'vue-router', 'pinia'],
+          'utils': ['lodash-es', 'axios']
+        }
+      }
+    }
   },
-  
+
   // 解析选项
   resolve: {
     alias: {
       '@': path.resolve(__dirname, 'src')
-    }
+    },
+    extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json']
   }
 })
 ```
@@ -103,6 +119,15 @@ VITE_API_URL=http://localhost:3000
 
 # .env.production
 VITE_API_URL=https://api.production.com
+
+# .env.local (本地开发，不提交到git)
+VITE_API_KEY=your-api-key
+```
+
+在代码中使用环境变量：
+```typescript
+console.log(import.meta.env.VITE_APP_TITLE)
+console.log(import.meta.env.VITE_API_URL)
 ```
 
 ### 2.3 CSS配置
@@ -120,7 +145,7 @@ export default defineConfig({
         javascriptEnabled: true
       }
     },
-    
+
     // PostCSS配置
     postcss: {
       plugins: [
@@ -128,12 +153,15 @@ export default defineConfig({
         postcssPresetEnv()
       ]
     },
-    
+
     // CSS模块化
     modules: {
       scopeBehavior: 'local',
       localsConvention: 'camelCase'
-    }
+    },
+
+    // CSS代码分割
+    devSourcemap: true
   }
 })
 ```
@@ -143,14 +171,20 @@ export default defineConfig({
 ```typescript
 export default defineConfig({
   // 静态资源处理
-  assetsInclude: ['**/*.gltf'],
-  
+  assetsInclude: ['**/*.gltf', '**/*.glb'],
+
   // 构建资源配置
   build: {
+    // 资源内联限制
+    assetsInlineLimit: 4096,
+
     rollupOptions: {
       output: {
+        // 资源文件命名
         assetFileNames: 'assets/[name].[hash].[ext]',
+        // 代码分割
         chunkFileNames: 'js/[name].[hash].js',
+        // 入口文件命名
         entryFileNames: 'js/[name].[hash].js'
       }
     }
@@ -158,167 +192,79 @@ export default defineConfig({
 })
 ```
 
-## 3. ESBuild基础
+## 3. Vite插件系统
 
-### 3.1 什么是ESBuild
-
-ESBuild是一个用Go语言编写的极速JavaScript打包器和压缩器，具有以下特点：
-
-- 极快的构建速度（比传统打包器快10-100倍）
-- 支持ES6和CommonJS模块
-- 支持TypeScript和JSX
-- 支持源码映射
-- 支持代码压缩
-- API简单易用
-
-### 3.2 ESBuild性能优势
-
-1. **并行处理**：
-   - 充分利用多核CPU
-   - 并行解析和生成代码
-
-2. **零配置**：
-   - 内置常用功能
-   - 合理的默认配置
-
-3. **内存效率**：
-   - 低内存占用
-   - 无需缓存文件
-
-### 3.3 基本使用
-
-```javascript
-// 安装
-npm install esbuild
-
-// API使用
-const esbuild = require('esbuild')
-
-esbuild.build({
-  entryPoints: ['app.js'],
-  bundle: true,
-  minify: true,
-  sourcemap: true,
-  target: ['chrome58', 'firefox57', 'safari11'],
-  outfile: 'out.js'
-}).catch(() => process.exit(1))
-```
-
-## 4. ESBuild配置详解
-
-### 4.1 基础配置
-
-```javascript
-const esbuild = require('esbuild')
-
-esbuild.build({
-  // 入口点
-  entryPoints: ['src/index.ts'],
-  
-  // 输出配置
-  outfile: 'dist/bundle.js',
-  
-  // 构建选项
-  bundle: true,
-  minify: true,
-  sourcemap: true,
-  
-  // 平台
-  platform: 'browser', // 或 'node'
-  
-  // 目标环境
-  target: ['es2015'],
-  
-  // 加载器
-  loader: {
-    '.png': 'dataurl',
-    '.svg': 'text'
-  }
-})
-```
-
-### 4.2 插件系统
-
-```javascript
-let envPlugin = {
-  name: 'env',
-  setup(build) {
-    // 处理环境变量
-    build.onResolve({ filter: /^env$/ }, args => ({
-      path: args.path,
-      namespace: 'env-ns'
-    }))
-    
-    build.onLoad({ filter: /.*/, namespace: 'env-ns' }, () => ({
-      contents: JSON.stringify(process.env),
-      loader: 'json'
-    }))
-  }
-}
-
-esbuild.build({
-  entryPoints: ['app.js'],
-  bundle: true,
-  outfile: 'out.js',
-  plugins: [envPlugin]
-})
-```
-
-## 5. Vite与ESBuild协同
-
-### 5.1 Vite中的ESBuild
-
-Vite在以下场景使用ESBuild：
-
-1. **依赖预构建**：
-   - 将CommonJS/UMD转换为ESM
-   - 提高页面加载性能
-
-2. **TypeScript/JSX转译**：
-   - 开发环境下的快速转译
-   - 不执行类型检查
-
-3. **代码压缩**：
-   - 生产构建时的JS压缩
-   - CSS压缩（实验性）
-
-### 5.2 优化配置
+### 3.1 常用插件
 
 ```typescript
 // vite.config.ts
+import vue from '@vitejs/plugin-vue'
+import vueJsx from '@vitejs/plugin-vue-jsx'
+import legacy from '@vitejs/plugin-legacy'
+import compression from 'vite-plugin-compression'
+
 export default defineConfig({
-  esbuild: {
-    // JSX
-    jsxFactory: 'h',
-    jsxFragment: 'Fragment',
-    
-    // 压缩选项
-    minify: true,
-    minifyIdentifiers: true,
-    minifySyntax: true,
-    minifyWhitespace: true,
-    
-    // 目标环境
-    target: 'es2015',
-    
-    // 自定义loader
-    loader: {
-      '.js': 'jsx'
-    }
-  },
-  
-  optimizeDeps: {
-    // 预构建选项
-    entries: ['./src/**/*.vue'],
-    exclude: ['your-package-name'],
-    include: ['lodash-es']
-  }
+  plugins: [
+    vue(),
+    vueJsx(),
+    legacy({
+      targets: ['defaults', 'not IE 11']
+    }),
+    compression({
+      algorithm: 'gzip',
+      ext: '.gz'
+    })
+  ]
 })
 ```
 
-## 6. 最佳实践
+### 3.2 自定义插件
 
-### 6.1 开发环境优化
+```typescript
+// my-plugin.ts
+export default function myPlugin() {
+  return {
+    name: 'my-plugin',
+
+    // 配置钩子
+    config(config) {
+      // 修改配置
+      return {
+        resolve: {
+          alias: {
+            '@': '/src'
+          }
+        }
+      }
+    },
+
+    // 转换钩子
+    transform(code, id) {
+      if (id.endsWith('.vue')) {
+        // 处理Vue文件
+        return {
+          code: code.replace('__PLACEHOLDER__', 'replaced'),
+          map: null
+        }
+      }
+    },
+
+    // 热更新钩子
+    handleHotUpdate({ file, server }) {
+      if (file.endsWith('.md')) {
+        server.ws.send({
+          type: 'full-reload',
+          path: '*'
+        })
+      }
+    }
+  }
+}
+```
+
+## 4. Vite性能优化
+
+### 4.1 开发环境优化
 
 1. **依赖预构建优化**：
 ```typescript
@@ -330,7 +276,8 @@ export default defineConfig({
       'vue-router',
       'pinia',
       'axios'
-    ]
+    ],
+    exclude: ['your-package-name']
   }
 })
 ```
@@ -340,13 +287,15 @@ export default defineConfig({
 export default defineConfig({
   server: {
     hmr: {
-      overlay: false
+      overlay: false,
+      protocol: 'ws',
+      host: 'localhost'
     }
   }
 })
 ```
 
-### 6.2 生产环境优化
+### 4.2 生产环境优化
 
 1. **代码分割**：
 ```typescript
@@ -370,20 +319,26 @@ export default defineConfig({
   build: {
     // 资源内联限制
     assetsInlineLimit: 4096,
-    
+
     // Gzip压缩
     rollupOptions: {
       plugins: [
         compression()
       ]
+    },
+
+    // 启用多线程
+    minify: 'terser',
+    terserOptions: {
+      parallel: true
     }
   }
 })
 ```
 
-## 7. 常见问题与解决方案
+## 5. 常见问题与解决方案
 
-### 7.1 开发环境问题
+### 5.1 开发环境问题
 
 1. **预构建缓存问题**：
 ```bash
@@ -404,7 +359,7 @@ export default defineConfig({
 })
 ```
 
-### 7.2 生产环境问题
+### 5.2 生产环境问题
 
 1. **构建性能问题**：
 ```typescript
@@ -429,25 +384,42 @@ export default defineConfig({
 })
 ```
 
-## 8. 面试常见问题
+## 6. 面试常见问题
 
 1. **Vite相比传统打包工具有什么优势？**
-   - 开发环境下更快的启动速度
-   - 真正的按需加载
-   - 更好的开发体验
-   - 优化的构建输出
+   - 开发环境下更快的启动速度：无需打包，直接启动
+   - 真正的按需加载：只编译当前页面需要的代码
+   - 更好的开发体验：基于原生ESM的HMR，更新速度极快
+   - 优化的构建输出：生产环境使用Rollup打包，输出优化
+   - 开箱即用的功能：内置TypeScript、JSX、CSS等支持
+   - 插件生态：兼容Rollup插件生态
 
-2. **ESBuild为什么这么快？**
-   - 使用Go语言编写，可直接编译为机器码
-   - 充分利用多核并行处理
-   - 从零开始构建的现代架构
-   - 高效的内存使用
+2. **Vite的开发环境和生产环境有什么区别？**
+   - 开发环境：
+     - 使用原生ESM，无需打包
+     - 按需编译，只编译当前页面需要的代码
+     - 基于原生ESM的HMR
+     - 依赖预构建优化
+   - 生产环境：
+     - 使用Rollup打包
+     - 代码分割和懒加载
+     - 资源优化和压缩
+     - 自动处理兼容性
 
-3. **Vite的开发环境和生产环境有什么区别？**
-   - 开发环境：原生ESM，无需打包
-   - 生产环境：使用Rollup打包，优化输出
-
-4. **如何在Vite中处理不同环境的配置？**
+3. **如何在Vite中处理不同环境的配置？**
    - 使用环境变量文件(.env)
    - 使用条件配置
-   - 使用模式(mode)区分环境 
+   - 使用模式(mode)区分环境
+   - 使用defineConfig进行类型安全的配置
+
+4. **Vite的依赖预构建是什么？有什么作用？**
+   - 将CommonJS/UMD转换为ESM
+   - 将有许多内部模块的依赖关系转换为单个模块
+   - 提高页面加载性能
+   - 减少浏览器请求数量
+
+5. **Vite的插件系统是如何工作的？**
+   - 基于Rollup插件系统
+   - 提供丰富的钩子函数
+   - 支持配置修改、代码转换、热更新等
+   - 可以自定义插件处理特定需求
