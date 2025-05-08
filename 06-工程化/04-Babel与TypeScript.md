@@ -9,6 +9,7 @@
 Babel是一个JavaScript编译器，它能将最新版本的JavaScript代码转换为向后兼容的JavaScript代码，使你能够使用最新的语言特性，而不必担心目标环境的支持情况。
 
 主要功能：
+
 - 转换语法（如ES6/ES7/ES8转ES5）
 - Polyfill特性（Promise, Map, Set等）
 - 源码转换（JSX, TypeScript等）
@@ -19,13 +20,14 @@ Babel是一个JavaScript编译器，它能将最新版本的JavaScript代码转�
 Babel的编译过程分为三个主要阶段：
 
 1. **解析(Parsing)**：将代码字符串解析成抽象语法树(AST)
+
    - 词法分析：将代码分解成tokens
    - 语法分析：将tokens重新整合成AST
-
 2. **转换(Transformation)**：对AST进行操作
-   - 通过插件系统修改AST节点
 
+   - 通过插件系统修改AST节点
 3. **生成(Code Generation)**：将转换后的AST重新生成代码字符串
+
    - 生成与原代码等效但目标环境可执行的代码
 
 ### 1.3 Babel核心模块
@@ -58,6 +60,7 @@ npm install --save core-js regenerator-runtime
 Babel配置可以通过多种方式提供，最常见的是`.babelrc`文件或`babel.config.js`：
 
 **.babelrc**：
+
 ```json
 {
   "presets": [
@@ -78,10 +81,11 @@ Babel配置可以通过多种方式提供，最常见的是`.babelrc`文件或`b
 ```
 
 **babel.config.js**（推荐用于monorepo项目）：
+
 ```javascript
 module.exports = function(api) {
   api.cache(true);
-  
+
   return {
     presets: [
       ["@babel/preset-env", {
@@ -116,22 +120,22 @@ module.exports = function(api) {
         "chrome": "58",
         "ie": "11"
       },
-      
+
       // polyfill策略：
       // - false: 不引入polyfill（默认）
       // - usage: 按需添加（推荐）
       // - entry: 需要在入口文件导入全部polyfill
       "useBuiltIns": "usage",
-      
+
       // 指定corejs版本
       "corejs": { "version": 3, "proposals": true },
-      
+
       // 是否将ES模块语法转换为其他模块类型
       "modules": false, // 'auto' | 'amd' | 'umd' | 'systemjs' | 'commonjs' | 'cjs' | false
-      
+
       // 是否松散模式（允许底层引擎优化）
       "loose": false,
-      
+
       // 调试模式，输出目标环境信息
       "debug": false
     }]
@@ -163,19 +167,19 @@ module.exports = function(api) {
   "plugins": [
     // 类属性转换
     "@babel/plugin-proposal-class-properties",
-    
+
     // 私有方法和私有字段
     "@babel/plugin-proposal-private-methods",
-    
+
     // 可选链操作符
     "@babel/plugin-proposal-optional-chaining",
-    
+
     // 空值合并操作符
     "@babel/plugin-proposal-nullish-coalescing-operator",
-    
+
     // 装饰器
     ["@babel/plugin-proposal-decorators", { "legacy": true }],
-    
+
     // 动态导入
     "@babel/plugin-syntax-dynamic-import"
   ]
@@ -237,6 +241,7 @@ export default {
 TypeScript是JavaScript的超集，添加了静态类型系统和其他高级特性，由Microsoft开发和维护。它编译为标准JavaScript，可以在任何JavaScript运行时环境中执行。
 
 主要特性：
+
 - 静态类型检查
 - 泛型支持
 - 接口和类型别名
@@ -257,6 +262,7 @@ TypeScript是JavaScript的超集，添加了静态类型系统和其他高级特
 ### 3.3 TypeScript与JavaScript的关系
 
 TypeScript是JavaScript的超集，这意味着：
+
 - 所有合法的JavaScript代码都是合法的TypeScript代码
 - TypeScript添加了类型系统和新特性
 - TypeScript最终编译为JavaScript
@@ -343,29 +349,29 @@ class Animal {
   private name: string;
   protected age: number;
   readonly species: string;
-  
+
   // 构造函数
   constructor(name: string, age: number, species: string) {
     this.name = name;
     this.age = age;
     this.species = species;
   }
-  
+
   // 方法
   public makeSound(): void {
     console.log("Some generic sound");
   }
-  
+
   // 静态方法
   static createAnimal(name: string): Animal {
     return new Animal(name, 0, "unknown");
   }
-  
+
   // Getter/Setter
   get animalName(): string {
     return this.name;
   }
-  
+
   set animalName(value: string) {
     this.name = value;
   }
@@ -376,7 +382,7 @@ class Dog extends Animal {
   constructor(name: string, age: number) {
     super(name, age, "canine");
   }
-  
+
   makeSound(): void {
     console.log("Woof!");
   }
@@ -457,7 +463,7 @@ class Greeter2 {
   constructor(message: string) {
     this.greeting = message;
   }
-  
+
   @enumerable(false)
   greet() {
     return "Hello, " + this.greeting;
@@ -468,15 +474,15 @@ class Greeter2 {
 function format(formatString: string) {
   return function (target: any, propertyKey: string) {
     let value = target[propertyKey];
-    
+
     const getter = function() {
       return `${formatString} ${value}`;
     };
-    
+
     const setter = function(newVal: string) {
       value = newVal;
     };
-    
+
     Object.defineProperty(target, propertyKey, {
       get: getter,
       set: setter,
@@ -506,52 +512,52 @@ npm install --save-dev typescript
   "compilerOptions": {
     // 目标JavaScript版本
     "target": "es2020",
-    
+
     // 模块系统
     "module": "esnext",
-    
+
     // 严格类型检查
     "strict": true,
-    
+
     // 模块解析策略
     "moduleResolution": "node",
-    
+
     // 启用装饰器
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    
+
     // 源码映射
     "sourceMap": true,
-    
+
     // lib引用
     "lib": ["dom", "dom.iterable", "esnext"],
-    
+
     // 允许导入JSON
     "resolveJsonModule": true,
-    
+
     // 允许JavaScript
     "allowJs": true,
-    
+
     // 生成声明文件
     "declaration": true,
-    
+
     // 跳过库检查
     "skipLibCheck": true,
-    
+
     // 保持JSX语法
     "jsx": "react",
-    
+
     // 导入辅助
     "esModuleInterop": true,
-    
+
     // 基础目录
     "baseUrl": ".",
-    
+
     // 路径别名
     "paths": {
       "@/*": ["src/*"]
     },
-    
+
     // 输出目录
     "outDir": "dist"
   },
@@ -648,12 +654,12 @@ npm install --save-dev @types/node
 // 创建types/my-library/index.d.ts
 declare module 'my-library' {
   export function doSomething(value: string): number;
-  
+
   export interface Options {
     debug?: boolean;
     timeout?: number;
   }
-  
+
   export default class MyLibrary {
     constructor(options?: Options);
     init(): void;
@@ -667,12 +673,14 @@ declare module 'my-library' {
 ### 6.1 为什么同时使用Babel和TypeScript
 
 **Babel优势**：
+
 - 可配置的JavaScript转换
 - 插件生态系统丰富
 - 与其他工具集成良好
 - 除语法外还可转换API
 
 **TypeScript优势**：
+
 - 静态类型检查
 - 更智能的IDE支持
 - 接口和高级类型功能
@@ -682,11 +690,12 @@ declare module 'my-library' {
 ### 6.2 两种协同方案
 
 1. **TypeScript编译，Babel转换**：
+
    - TypeScript仅进行类型检查（`tsc --noEmit`）
    - Babel处理代码转换（使用@babel/preset-typescript）
    - 此方案更为流行，构建速度更快
-
 2. **TypeScript全部处理**：
+
    - TypeScript负责类型检查和代码生成
    - 完全按照TypeScript规范处理
    - 类型和转换完全一致，但缺少Babel生态
@@ -748,6 +757,7 @@ npm install --save-dev @babel/core @babel/preset-env @babel/preset-react @babel/
 ```
 
 **tsconfig.json**：
+
 ```json
 {
   "compilerOptions": {
@@ -782,6 +792,7 @@ npm install --save-dev typescript vue-tsc @vue/tsconfig
 ```
 
 **tsconfig.json**：
+
 ```json
 {
   "compilerOptions": {
@@ -816,6 +827,7 @@ npm install --save-dev typescript @types/node
 ```
 
 **tsconfig.json**：
+
 ```json
 {
   "compilerOptions": {
@@ -841,16 +853,13 @@ npm install --save-dev typescript @types/node
 1. **Babel的主要功能是什么？**
 
    Babel的主要功能是将使用新版本JavaScript编写的代码转换为向后兼容的JavaScript代码，使其能在旧版浏览器或环境中运行。它可以转换新语法、提供polyfill、处理JSX和TypeScript等。
-
 2. **Babel的工作流程是什么？**
 
    Babel的工作流程分为三个主要阶段：解析(将代码转换为AST)、转换(通过插件修改AST)、生成(将AST转换回代码)。
-
 3. **@babel/preset-env与@babel/polyfill有什么区别？**
 
    - @babel/preset-env：智能预设，根据目标环境转换语法特性
    - @babel/polyfill：完整的ES6+环境polyfill(已弃用)，现在推荐使用core-js和useBuiltIns选项
-
 4. **解释useBuiltIns选项的不同值**
 
    - false：不引入polyfill
@@ -862,19 +871,17 @@ npm install --save-dev typescript @types/node
 1. **TypeScript相比JavaScript有哪些优势？**
 
    TypeScript相比JavaScript的主要优势包括静态类型检查、更好的IDE支持、提前发现错误、更安全的重构、类型作为文档、面向对象编程支持等。
-
 2. **interface和type有什么区别？**
 
    主要区别：
+
    - interface可以被继承和实现，type不能
    - interface可以被合并声明，type不能
    - type可以用于联合类型、交叉类型、元组等，更灵活
    - interface更适合定义对象结构，type适用于复杂类型定义
-
 3. **TypeScript中的泛型是什么？为什么使用它？**
 
    泛型是一种在定义函数、接口或类时不预先指定具体类型，而在使用时再指定类型的功能。使用泛型可以创建可重用的组件，支持多种类型，同时保持类型安全。
-
 4. **TypeScript的类型擦除是什么？**
 
    TypeScript的类型系统是"擦除型"的，意味着类型信息只在编译时使用，编译后生成的JavaScript代码不包含任何类型信息。这使TypeScript能够与JavaScript无缝互操作。
@@ -884,11 +891,9 @@ npm install --save-dev typescript @types/node
 1. **为什么在TypeScript项目中可能还需要Babel？**
 
    虽然TypeScript可以编译为JavaScript，但Babel拥有更丰富的转换插件生态系统，可以处理更多的语言特性和浏览器兼容性问题。另外，Babel可以更精细地控制输出代码，而TypeScript主要关注类型系统。
-
 2. **TypeScript和Babel协同工作的最佳实践是什么？**
 
    最佳实践是让TypeScript只负责类型检查（tsc --noEmit），而使用Babel（通过@babel/preset-typescript）进行代码转换。这样可以获得TypeScript的类型安全和Babel的转换能力，同时保持构建过程高效。
-
 3. **在使用Babel编译TypeScript时有哪些限制？**
 
-   Babel不执行类型检查，某些TypeScript特性（如const枚举、命名空间）不被支持，需要单独运行TypeScript类型检查步骤。此外，Babel不生成.d.ts文件，如果需要声明文件，仍需使用TypeScript编译器。 
+   Babel不执行类型检查，某些TypeScript特性（如const枚举、命名空间）不被支持，需要单独运行TypeScript类型检查步骤。此外，Babel不生成.d.ts文件，如果需要声明文件，仍需使用TypeScript编译器。
