@@ -133,3 +133,50 @@ function updateName() {
   userStore.setName('Bob')
 }
 </script>
+
+## 面试常见问题
+
+### 1. Pinia相比Vuex有哪些核心优势？
+
+**答**：Pinia相比Vuex的核心优势包括：
+- 更简洁的API：移除了mutations，直接通过actions修改状态
+- 完整的TypeScript支持：原生类型推导，减少手动类型声明
+- 模块化设计：每个store独立，无需复杂的命名空间配置
+- 极轻量体积：仅~1KB，优化打包体积
+- 开发工具支持：内置时间旅行调试和组件内store检查
+
+### 2. 如何在Pinia中实现状态持久化？
+
+**答**：可通过`pinia-plugin-persistedstate`插件实现状态持久化。示例：
+
+```javascript
+import { createPinia } from 'pinia'
+import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
+
+const pinia = createPinia()
+pinia.use(piniaPluginPersistedstate)
+
+// 在store中配置持久化
+export const useCounterStore = defineStore('counter', {  state: () => ({ count: 0 }),  persist: true // 启用持久化
+})```
+
+### 3. Pinia的actions中如何处理异步操作？
+
+**答**：Pinia的actions支持async/await，可直接在actions中编写异步逻辑。示例：
+
+```javascript
+actions: {
+  async fetchUser() {
+    try {
+      const res = await fetch('/api/user')
+      this.user = await res.json()
+    } catch (error) {
+      console.error('获取用户失败:', error)
+    }
+  }
+}
+```
+
+## 兼容性说明
+
+Pinia支持Vue 3.0+及Vue 2.7+（需配合`@vue/composition-api`）。现代浏览器（Chrome 64+, Firefox 67+, Safari 12.1+, Edge 79+）可直接使用，旧版浏览器（如IE11）需通过Babel转译ES6+语法。
