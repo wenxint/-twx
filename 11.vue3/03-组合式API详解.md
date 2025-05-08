@@ -431,7 +431,64 @@ const { x, y } = useMousePosition()
 
 ## 实战案例
 
-### 案例1：可复用的表单验证
+### 案例1：实现表单验证逻辑（组合式API）
+
+```javascript
+/**
+ * @description 使用组合式API封装表单验证逻辑
+ */
+import { ref, reactive, watch } from 'vue'
+
+function useFormValidation(initialValues, validationRules) {
+  // 表单数据
+  const formData = reactive(initialValues)
+  // 错误信息
+  const errors = ref({})
+
+  // 验证单个字段
+  const validateField = (field) => {
+    const rules = validationRules[field]
+    const value = formData[field]
+    let error = ''
+
+    if (rules.required && !value) {
+      error = `${field}是必填项`
+    }
+    if (rules.minLength && value.length < rules.minLength) {
+      error = `${field}至少需要${rules.minLength}个字符`
+    }
+    if (rules.pattern && !new RegExp(rules.pattern).test(value)) {
+      error = `${field}格式不正确`
+    }
+
+    errors.value[field] = error
+  }
+
+  // 验证所有字段
+  const validateAll = () => {
+    Object.keys(validationRules).forEach(field => validateField(field))
+    return Object.values(errors.value).every(e => !e)
+  }
+
+  // 监听字段变化自动验证
+  watch(() => formData, (newVal, oldVal) => {
+    Object.keys(newVal).forEach(field => {
+      if (newVal[field] !== oldVal[field]) {
+        validateField(field)
+      }
+    })
+  }, { deep: true })
+
+  return {
+    formData,
+    errors,
+    validateField,
+    validateAll
+  }
+}
+
+// 兼容性说明：支持Vue3.0+，需配合Vuelidate 2.0+使用（可选）
+```
 
 ```javascript
 /**
@@ -606,7 +663,46 @@ function submitForm() {
 </style>
 ```
 
-### 案例2：可复用的API调用状态管理
+### 案例2：实现数据请求逻辑（带加载状态）
+
+```javascript
+/**
+ * @description 使用组合式API封装带加载状态的数据请求
+ */
+import { ref, computed } from 'vue'
+import axios from 'axios'
+
+function useDataFetch(url) {
+  const data = ref(null)
+  const loading = ref(false)
+  const error = ref(null)
+
+  const fetchData = async () => {
+    loading.value = true
+    error.value = null
+    try {
+      const response = await axios.get(url)
+      data.value = response.data
+    } catch (err) {
+      error.value = err.message
+    } finally {
+      loading.value = false
+    }
+  }
+
+  const isEmpty = computed(() => !data.value || Object.keys(data.value).length === 0)
+
+  return {
+    data,
+    loading,
+    error,
+    fetchData,
+    isEmpty
+  }
+}
+
+// 兼容性说明：支持现代浏览器（Chrome 64+, Firefox 78+），需安装axios 0.27+依赖
+```
 
 ```javascript
 /**
@@ -803,6 +899,16 @@ defineExpose({
 })
 </script>
 ```
+
+## 兼容性说明
+
+组合式API对构建工具的兼容性要求如下：
+
+| 构建工具 | 最低版本 | 备注                     |
+|----------|----------|--------------------------|
+| Vite     | 2.0+     | 推荐使用，对Vue3优化最佳 |
+| Webpack  | 5.0+     | 需要配置vue-loader 17.0+  |
+| Vue CLI  | 4.5+     | 需选择Vue3预设           |
 
 ## 面试常见问题
 

@@ -493,7 +493,43 @@ Tree Shaking友好设计的优势：
 
 ## 实战案例
 
-### 案例1：使用渲染函数创建动态组件
+### 案例1：动态标题组件（支持响应式级别）
+
+```vue
+<template>
+  <div>
+    <dynamic-heading :level="1" title="主标题" />
+    <dynamic-heading :level="2" title="副标题" />
+    <dynamic-heading :level="3" title="小节标题" />
+
+    <button @click="increaseLevel">增加级别</button>
+    <button @click="decreaseLevel">减少级别</button>
+
+    <dynamic-heading :level="dynamicLevel" title="动态标题" />
+  </div>
+</template>
+
+<script setup>
+import { ref } from 'vue'
+import DynamicHeading from './DynamicHeading.vue'
+
+const dynamicLevel = ref(1)
+
+function increaseLevel() {
+  if (dynamicLevel.value < 6) {
+    dynamicLevel.value++
+  }
+}
+
+function decreaseLevel() {
+  if (dynamicLevel.value > 1) {
+    dynamicLevel.value--
+  }
+}
+</script>
+
+<!-- 兼容性说明：支持Vue3.0+，需配合Vite 3.0+或Webpack 5+构建 -->
+```
 
 ```javascript
 /**
@@ -576,7 +612,125 @@ function decreaseLevel() {
 </script>
 ```
 
-### 案例2：自定义渲染器
+### 案例2：自定义渲染器（Canvas绘图示例）
+
+```javascript
+/**
+ * @description 为Canvas创建自定义渲染器
+ * @file CanvasRenderer.js
+ */
+import { createRenderer } from 'vue'
+
+// 定义Canvas元素的处理方法
+const CanvasNodeOps = {
+  // 创建元素
+  createElement(type) {
+    // 返回Canvas绘图指令
+    return {
+      type,
+      props: {},
+      children: []
+    }
+  },
+
+  // 创建文本节点
+  createText(text) {
+    return {
+      type: 'text',
+      text
+    }
+  },
+
+  // 设置元素文本
+  setText(node, text) {
+    node.text = text
+  },
+
+  // 设置元素属性
+  patchProp(el, key, prevValue, nextValue) {
+    el.props[key] = nextValue
+  },
+
+  // 插入元素
+  insert(child, parent, anchor) {
+    if (!parent.children) {
+      parent.children = []
+    }
+    parent.children.push(child)
+  },
+
+  // 移除元素
+  remove(child) {
+    const parent = child.parent
+    if (parent) {
+      const index = parent.children.indexOf(child)
+      if (index !== -1) {
+        parent.children.splice(index, 1)
+      }
+    }
+  }
+}
+
+// 创建自定义渲染器
+export const renderer = createRenderer(CanvasNodeOps)
+
+// 渲染函数，将虚拟DOM渲染到Canvas
+export function render(vnode, canvas) {
+  const ctx = canvas.getContext('2d')
+
+  // 清空画布
+  ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+  // 使用渲染器渲染虚拟DOM
+  const root = renderer.createApp(vnode).mount(canvas)
+
+  // 绘制函数(递归处理虚拟DOM树)
+  function draw(node, x = 0, y = 0) {
+    if (!node) return
+
+    if (node.type === 'rect') {
+      ctx.fillStyle = node.props.color || 'black'
+      ctx.fillRect(
+        x + (node.props.x || 0),
+        y + (node.props.y || 0),
+        node.props.width || 50,
+        node.props.height || 50
+      )
+    } else if (node.type === 'circle') {
+      ctx.beginPath()
+      ctx.fillStyle = node.props.color || 'black'
+      ctx.arc(
+        x + (node.props.x || 0),
+        y + (node.props.y || 0),
+        node.props.radius || 25,
+        0,
+        Math.PI * 2
+      )
+      ctx.fill()
+    } else if (node.type === 'text') {
+      ctx.fillStyle = node.props.color || 'black'
+      ctx.font = node.props.font || '16px Arial'
+      ctx.fillText(
+        node.text || '',
+        x + (node.props.x || 0),
+        y + (node.props.y || 0)
+      )
+    }
+
+    // 递归绘制子节点
+    if (node.children) {
+      node.children.forEach(child => {
+        draw(child, x + (node.props.x || 0), y + (node.props.y || 0))
+      })
+    }
+  }
+
+  // 开始绘制
+  draw(root)
+}
+
+// 兼容性说明：支持现代浏览器（Chrome 64+, Firefox 78+），需启用Canvas API
+```
 
 Vue3允许创建自定义渲染器，用于非DOM环境：
 
@@ -1038,6 +1192,18 @@ Vue3对主流构建工具的支持情况：
 5. **组件挂载方式变化**：
    - `new Vue()`变为`createApp()`
    - 组件挂载不再返回组件实例，而是返回应用实例
+
+## 兼容性说明
+
+Vue3渲染系统对浏览器的兼容性要求如下：
+
+| 浏览器       | 最低版本 | 备注                     |
+|--------------|----------|--------------------------|
+| Chrome       | 64+      | 完全支持                 |
+| Firefox      | 78+      | 完全支持                 |
+| Safari       | 12.1+    | 完全支持                 |
+| Edge         | 79+      | 基于Chromium内核         |
+| IE           | 不支持   | 无Proxy和ES6支持         |
 
 ## 面试常见问题
 
