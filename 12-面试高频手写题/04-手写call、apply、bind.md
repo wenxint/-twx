@@ -31,30 +31,45 @@ boundFunc(); // 输出: Alice
 
 手写`call`、`apply`和`bind`的实现：
 ```javascript
-// 手写call
+// 手写call方法：修改函数执行时的this指向并立即执行
 Function.prototype.myCall = function(context, ...args) {
+  // 处理上下文：若未传入context则默认使用window（浏览器环境），null/undefined时也指向window
   context = context || window;
+  // 创建唯一Symbol作为临时属性名，避免覆盖对象原有属性
   const fn = Symbol('fn');
+  // 将当前函数（调用myCall的函数）挂载到context的临时属性上
   context[fn] = this;
+  // 执行临时属性（即原函数），传入剩余参数，此时函数内的this指向context
   const result = context[fn](...args);
+  // 删除临时属性，避免污染原context对象
   delete context[fn];
+  // 返回函数执行结果
   return result;
 };
 
-// 手写apply
+// 手写apply方法：与call类似，但参数通过数组传递
 Function.prototype.myApply = function(context, args) {
+  // 处理上下文：同call逻辑
   context = context || window;
+  // 创建唯一Symbol作为临时属性名
   const fn = Symbol('fn');
+  // 将当前函数挂载到context的临时属性上
   context[fn] = this;
+  // 执行函数：若有参数数组则展开传递，否则直接执行
   const result = args ? context[fn](...args) : context[fn]();
+  // 删除临时属性
   delete context[fn];
+  // 返回执行结果
   return result;
 };
 
-// 手写bind
+// 手写bind方法：返回一个绑定this的新函数
 Function.prototype.myBind = function(context, ...args) {
+  // 保存原函数引用（调用bind的函数）
   const self = this;
+  // 返回新函数，支持后续传递新参数
   return function(...newArgs) {
+    // 调用自定义的myCall方法，合并初始参数和新参数
     return self.myCall(context, ...args, ...newArgs);
   };
 };
