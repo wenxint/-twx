@@ -49,6 +49,7 @@ const proxy = new Proxy(person, {
 
 console.log(proxy.name); // 正在获取name属性 张三
 console.log(proxy.fullInfo); // 正在获取fullInfo属性 张三, 30岁
+console.log(person.fullInfo); // undefined
 ```
 
 #### set陷阱
@@ -307,6 +308,7 @@ Reflect.defineProperty(obj, 'name', { value: '张三' })
 ```
 
 Reflect方法的主要优势：
+
 1. 返回值更加合理（如`Reflect.defineProperty`返回布尔值而不是对象）
 2. 操作更加函数化，便于函数式编程
 3. 与Proxy API保持一致，便于组合使用
@@ -336,12 +338,99 @@ const proxy = new Proxy(target, handler);
 
 proxy.name = '李四'; // 设置name属性为李四
 console.log(proxy.name); // 获取name属性 李四
+console.log(target.name); // 获取name属性 李四
 ```
 
 使用Reflect的好处：
+
 1. 保持原始行为的同时添加新功能
 2. 正确传递`this`值（`receiver`参数）
 3. 处理原型链上的属性
+
+### 2. 正确传递this值（receiver参数）示例
+
+在继承场景中，Proxy通过Reflect传递`receiver`参数可以确保方法中的`this`指向正确的对象：
+
+```javascript
+// 父类
+class Parent {
+  sayHello() {
+    return `Hello, ${this.name}`; // this应指向子类实例
+  }
+}
+
+// 子类
+class Child extends Parent {
+  constructor(name) {
+    super();
+    this.name = name;
+  }
+}
+
+// 创建子类实例
+const child = new Child('小明');
+
+// 错误场景：未使用Reflect.get传递receiver时
+const badHandler = {
+  get(target, prop) {
+    // 直接访问目标对象的属性，未传递receiver
+    return target[prop];
+  }
+};
+const badProxy = new Proxy(child, badHandler);
+
+// 调用原型方法时，this会指向原始对象（child实例）吗？
+console.log('错误场景输出：', badProxy.sayHello()); // 输出：Hello, 小明（看似正确？）
+
+// 但如果代理对象有同名属性覆盖
+badProxy.name = '代理小明';
+console.log('错误场景覆盖后输出：', badProxy.sayHello()); // 输出：Hello, 小明（未获取到代理的name）
+
+// 正确场景：使用Reflect.get传递receiver
+const handler = {
+  get(target, prop, receiver) {
+    // 通过Reflect.get传递receiver（代理对象）
+    return Reflect.get(target, prop, receiver);
+  }
+};
+const proxy = new Proxy(child, handler);
+
+// 调用原型方法时，this会正确指向代理对象
+proxy.name = '代理小明';
+console.log('正确场景输出：', proxy.sayHello()); // 输出：Hello, 代理小明
+
+// 关键区别：Reflect.get会将receiver作为this传递给属性访问器
+// 错误场景中直接使用target[prop]，导致方法中的this指向原始对象而非代理对象
+```
+
+### 3. 处理原型链上的属性示例
+
+当目标对象继承自原型链时，Reflect可以正确处理原型链上的属性访问：
+
+```javascript
+// 原型对象
+const proto = { foo: 'protoValue' };
+
+// 目标对象继承自proto
+const target = Object.create(proto);
+target.bar = 'targetValue';
+
+// 创建代理，拦截get操作
+const handler = {
+  get(target, prop, receiver) {
+    console.log(`访问属性：${prop}`);
+    // 使用Reflect.get会自动遍历原型链
+    return Reflect.get(target, prop, receiver);
+  }
+};
+const proxy = new Proxy(target, handler);
+
+// 访问自身属性
+console.log(proxy.bar); // 输出：访问属性：bar  targetValue
+
+// 访问原型属性
+console.log(proxy.foo); // 输出：访问属性：foo  protoValue
+```
 
 ## 实际应用场景
 
@@ -728,23 +817,24 @@ Proxy和Reflect在所有现代浏览器中都得到了良好支持，但不支�
 ## 面试常见问题
 
 1. **什么是Proxy，它有什么用途？**
+
    - Proxy是ES6引入的用于拦截对象操作的功能
    - 主要用途包括：数据验证、格式化、访问控制、日志记录、性能优化、元编程等
-
 2. **Proxy与Object.defineProperty的区别是什么？**
+
    - Proxy可以拦截更多的操作（如`in`、`delete`等）
    - Proxy可以拦截整个对象而不仅是某个属性
    - Proxy是惰性的，仅当操作发生时才触发拦截器
    - Proxy可以拦截数组操作，更适合实现响应式系统
    - Proxy不可被polyfill，不支持IE
-
 3. **Reflect对象的主要用途是什么？**
+
    - 提供与Proxy处理程序一一对应的方法
    - 将对象操作变为函数形式（函数式编程）
    - 提供更可靠的函数返回值（如`Reflect.deleteProperty`返回布尔值）
    - 与Proxy结合使用更加方便
-
 4. **如何使用Proxy实现数据验证？**
+
    ```javascript
    const validator = {
      set(target, property, value) {
@@ -765,10 +855,12 @@ Proxy和Reflect在所有现代浏览器中都得到了良好支持，但不支�
    person.age = 30; // 成功
    // person.age = -5; // RangeError
    ```
-
 5. **Proxy可以实现Vue的响应式系统吗？**
+
    - 是的，Vue 3使用Proxy重写了响应式系统
    - Proxy相比Vue 2使用的Object.defineProperty有更好的性能和功能
    - Proxy可以检测到属性的添加和删除，以及数组索引和长度的变化
+
 ```
 </rewritten_file>
+```
