@@ -23,18 +23,29 @@ console.log(person instanceof Object); // 输出: true
 
 手写`instanceof`的实现：
 ```javascript
+/**
+ * @description 自定义实现instanceof运算符，检测构造函数的prototype是否存在于对象的原型链中
+ * @param {Object|Function} obj - 要检测的目标对象（注意：基本类型直接返回false）
+ * @param {Function} constructor - 用于检测的构造函数
+ * @return {boolean} 目标对象是否为构造函数的实例
+ */
 function myInstanceof(obj, constructor) {
-  // 基本类型直接返回false
+  // 处理基本类型：基本类型没有原型链，直接返回false（null也在此处处理）
   if (typeof obj !== 'object' && typeof obj !== 'function' || obj === null) {
     return false;
   }
+  // 获取目标对象的原型（等同于obj.__proto__，但推荐使用标准方法）
   let proto = Object.getPrototypeOf(obj);
+  // 遍历原型链，直到原型为null（原型链终点）
   while (proto !== null) {
+    // 检查当前原型是否等于构造函数的prototype属性
     if (proto === constructor.prototype) {
-      return true;
+      return true; // 找到匹配，返回true
     }
+    // 继续向上查找原型链
     proto = Object.getPrototypeOf(proto);
   }
+  // 遍历完整个原型链未找到匹配，返回false
   return false;
 }
 
