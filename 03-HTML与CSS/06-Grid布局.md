@@ -21,6 +21,18 @@ CSS Grid布局是一个二维布局系统，专为设计复杂的网页布局而
 }
 ```
 
+### HTML 示例
+```html
+<div class="container">
+  <div class="item">Item 1</div>
+  <div class="item">Item 2</div>
+  <div class="item">Item 3</div>
+</div>
+```
+
+### 预览效果
+三个子元素默认沿行方向排列成一行，每个子元素占据一列，宽度由内容自动填充。网格容器宽度占满父容器，子元素高度默认拉伸填充网格行高度。
+
 ## 定义网格结构
 
 ### 网格轨道尺寸
@@ -36,6 +48,21 @@ CSS Grid布局是一个二维布局系统，专为设计复杂的网页布局而
   grid-template-rows: 50px 100px;
 }
 ```
+
+### HTML 示例
+```html
+<div class="container">
+  <div class="item">Item 1</div>
+  <div class="item">Item 2</div>
+  <div class="item">Item 3</div>
+  <div class="item">Item 4</div>
+  <div class="item">Item 5</div>
+  <div class="item">Item 6</div>
+</div>
+```
+
+### 预览效果
+网格容器创建3列（宽度100px、剩余空间1:2分配）和2行（高度50px、100px），共6个单元格。6个子元素分别填充到6个单元格中，第一行高度50px，第二行高度100px，列宽分别为固定100px、自适应1份、自适应2份。
 
 单位可以混合使用：
 - `px`, `%`, `em`, `rem` - 绝对或相对长度
@@ -56,6 +83,19 @@ CSS Grid布局是一个二维布局系统，专为设计复杂的网页布局而
   grid-template-rows: repeat(3, 100px);
 }
 ```
+
+### HTML 示例
+```html
+<div class="container">
+  <div class="item">Col 1</div>
+  <div class="item">Col 2</div>
+  <!-- 省略中间8个item -->
+  <div class="item">Col 12</div>
+</div>
+```
+
+### 预览效果
+网格容器创建12列等宽（每列占1/12容器宽度）和3行（每行100px高度），子元素沿行方向依次填充，每行12个元素，共3行。适合实现12列栅格系统布局。
 
 repeat()函数也可以创建复杂模式：
 
@@ -91,6 +131,21 @@ repeat()函数也可以创建复杂模式：
 }
 ```
 
+### HTML 示例
+```html
+<div class="container">
+  <div class="item">Item 1</div>
+  <div class="item">Item 2</div>
+  <div class="item">Item 3</div>
+  <div class="item">Item 4</div>
+  <div class="item">Item 5</div>
+  <div class="item">Item 6</div>
+</div>
+```
+
+### 预览效果
+3列网格布局，列间距10px，行间距20px。子元素之间水平间隔10px，垂直间隔20px，间距不影响网格轨道尺寸（轨道宽度计算时会扣除间距）。
+
 ### 命名网格线
 
 可以在定义轨道尺寸时为网格线命名：
@@ -102,6 +157,21 @@ repeat()函数也可以创建复杂模式：
   grid-template-rows: [header-start] 100px [header-end content-start] auto [content-end];
 }
 ```
+
+### HTML 示例
+```html
+<div class="container">
+  <div class="item">Start</div>
+  <div class="item">Middle</div>
+  <div class="item">End</div>
+  <div class="item">Header</div>
+  <div class="item">Content</div>
+  <div class="item">Footer</div>
+</div>
+```
+
+### 预览效果
+网格列线命名为start、middle、end，行线命名为header-start、header-end等。子元素可通过线名定位，例如从start到end列跨越1fr+2fr宽度，header区域占据100px高度行。
 
 ### 命名网格区域
 
@@ -124,6 +194,20 @@ repeat()函数也可以创建复杂模式：
 .aside { grid-area: aside; }
 .footer { grid-area: footer; }
 ```
+
+### HTML 示例
+```html
+<div class="container">
+  <div class="header">Header</div>
+  <div class="sidebar">Sidebar</div>
+  <div class="content">Main Content</div>
+  <div class="aside">Aside</div>
+  <div class="footer">Footer</div>
+</div>
+```
+
+### 预览效果
+通过命名区域直观定义布局结构，header占满3列，sidebar和content、aside分别占据对应列，footer占满3列。适合实现经典的页头-侧边栏-主内容-页脚布局。
 
 使用`.`表示空单元格：
 
@@ -156,6 +240,18 @@ grid-template-areas:
   grid-area: 2 / 1 / 4 / 3;
 }
 ```
+
+### HTML 示例
+```html
+<div class="container">
+  <div class="item">跨越列1-3，行2-4的元素</div>
+  <div class="item">普通元素</div>
+  <div class="item">普通元素</div>
+</div>
+```
+
+### 预览效果
+目标元素占据列1到3（覆盖2列）、行2到4（覆盖2行），形成一个2x2的网格区域，其他元素自动填充剩余空间。
 
 也可以使用`span`关键字：
 
@@ -216,6 +312,16 @@ grid-template-areas:
   place-content: <align-content> <justify-content>;
 }
 ```
+
+### HTML 示例
+```html
+<div class="container" style="width: 500px; height: 300px; border: 1px solid #ccc;">
+  <div class="item" style="width: 100px; height: 50px;">Item</div>
+</div>
+```
+
+### 预览效果
+通过justify-items控制子元素在列轴（水平方向）的对齐方式（如start左对齐、center居中），align-items控制行轴（垂直方向）的对齐方式（如end底部对齐）。当网格总宽度小于容器时，justify-content控制轨道整体在容器中的对齐（如space-between两端对齐）。
 
 ### 项目属性
 
