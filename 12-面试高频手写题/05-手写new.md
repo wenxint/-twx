@@ -26,28 +26,51 @@ console.log(person.name); // 输出: Alice
 
 手写`new`的实现：
 
+```javascript
 /**
+ * @description 模拟new操作符的实现
+ * @param {Function} constructor - 构造函数
+ * @param {...any} args - 构造函数的参数
+ * @returns {Object} 新创建的实例对象（或构造函数返回的对象）
+ */
+function myNew(constructor, ...args) {
+    // 1. 创建一个空对象，并继承构造函数的原型
+    const obj = Object.create(constructor.prototype);
 
-* 模拟new操作符的实现
-* @param {Function} constructor - 构造函数
-* @param {...any} args - 构造函数的参数
-* @returns {object} - 新创建的实例对象
-  */
-  function myNew(constructor, ...args) {
-  // 1. 创建一个空对象，并将其原型指向构造函数的prototype
-  const obj = Object.create(constructor.prototype);
-  // 2. 执行构造函数，将this指向新对象，并传递参数
-  const result = constructor.apply(obj, args);
-  // 3. 如果构造函数返回对象，则返回result；否则返回新创建的对象
-  return typeof result === 'object' && result !== null ? result : obj;
-  }
+    // 2. 执行构造函数，绑定this为新对象，并传递参数
+    const result = constructor.apply(obj, args);
 
-// 使用示例
-function Person(name) {
-this.name = name;
+    // 3. 处理返回值：如果构造函数返回对象，则返回该对象；否则返回新创建的对象
+    return typeof result === 'object' && result !== null ? result : obj;
 }
-const person = myNew(Person, 'Bob');
-console.log(person.name); // 输出: Bob
+
+// 测试用例1：构造函数无显式返回
+function Person(name) {
+    this.name = name;
+}
+const person = myNew(Person, 'Alice');
+console.log(person.name); // 输出: Alice
+console.log(person instanceof Person); // 输出: true
+
+// 测试用例2：构造函数返回对象
+function Car(brand) {
+    this.brand = brand;
+    return { color: 'red' };
+}
+const car = myNew(Car, 'BMW');
+console.log(car.brand); // 输出: undefined（返回的是构造函数的对象）
+console.log(car.color); // 输出: red
+
+// 测试用例3：构造函数返回基本类型
+function Animal(type) {
+    this.type = type;
+    return 'dog';
+}
+const animal = myNew(Animal, 'mammal');
+console.log(animal.type); // 输出: 'mammal'（返回新创建的实例）
+console.log(animal instanceof Animal); // 输出: true
+```
+
 
 ## 面试常见问题
 
