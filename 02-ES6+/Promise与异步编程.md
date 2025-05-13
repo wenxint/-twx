@@ -212,111 +212,37 @@ Promise.resolve(1)
   });
 ```
 
-**Promise的组合方法：**
+## Promise组合方法
 
-1. **Promise.all()**：并行执行多个Promise，全部完成后统一处理结果
+Promise提供了多种组合方法，用于处理多个Promise的协作与结果聚合，以下是核心组合方法的详细说明：
 
-```javascript
-// 同时请求多个资源
-const promise1 = fetch('/api/users');
-const promise2 = fetch('/api/posts');
-const promise3 = fetch('/api/comments');
+### 1. Promise.all
 
-Promise.all([promise1, promise2, promise3])
-  .then(([usersResponse, postsResponse, commentsResponse]) => {
-    // 所有请求都成功完成
-    // 数组顺序与Promise数组顺序一致
-    return Promise.all([
-      usersResponse.json(),
-      postsResponse.json(),
-      commentsResponse.json()
-    ]);
-  })
-  .then(([users, posts, comments]) => {
-    console.log({ users, posts, comments });
-  })
-  .catch(error => {
-    // 任何一个Promise失败都会进入此处
-    console.error('至少有一个请求失败:', error);
-  });
-```
+**定义**：接收一个Promise可迭代对象（如数组），返回一个新Promise。
+**核心逻辑**：当所有输入的Promise都成功兑现时，新Promise兑现为包含所有结果的数组（顺序与输入顺序一致）；若任意一个Promise被拒绝，新Promise立即拒绝为第一个被拒绝的原因。
+**适用场景**：需要等待多个独立异步操作全部完成后再处理结果（如同时请求多个API数据汇总）。
+**特点**：强依赖所有操作成功，容错性低。
 
-2. **Promise.allSettled()**：等待所有Promise完成，无论是否成功
+### 2. Promise.allSettled
 
-```javascript
-const promises = [
-  Promise.resolve(1),
-  Promise.reject(new Error('出错了')),
-  Promise.resolve(3)
-];
+**定义**：接收一个Promise可迭代对象，返回一个新Promise。
+**核心逻辑**：等待所有输入的Promise完成（无论成功或失败），新Promise兑现为包含每个Promise结果对象的数组。每个结果对象包含`status`（'fulfilled'或'rejected'）和`value`（成功值）/`reason`（失败原因）。
+**适用场景**：需要获取所有异步操作的最终状态（如批量任务执行后统计成功/失败数量）。
+**特点**：完整记录所有结果，不提前终止。
 
-Promise.allSettled(promises)
-  .then(results => {
-    // 返回每个Promise的结果和状态
-    results.forEach((result, index) => {
-      if (result.status === 'fulfilled') {
-        console.log(`Promise ${index + 1} 成功:`, result.value);
-      } else {
-        console.log(`Promise ${index + 1} 失败:`, result.reason);
-      }
-    });
-  });
-// 输出:
-// Promise 1 成功: 1
-// Promise 2 失败: Error: 出错了
-// Promise 3 成功: 3
-```
+### 3. Promise.race
 
-3. **Promise.race()**：返回最先完成的Promise结果（无论成功或失败）
+**定义**：接收一个Promise可迭代对象，返回一个新Promise。
+**核心逻辑**：新Promise的状态由输入中最先完成（成功或失败）的Promise决定，即“赛跑”中第一个到达终点的结果。
+**适用场景**：需要响应最快的异步操作（如同时请求多个镜像资源，取最先加载的）。
+**特点**：仅关注最快完成的结果，忽略后续操作。
 
-```javascript
-// 带超时的请求示例
-function fetchWithTimeout(url, timeout = 5000) {
-  const fetchPromise = fetch(url);
+### 4. Promise.any
 
-  const timeoutPromise = new Promise((_, reject) => {
-    setTimeout(() => {
-      reject(new Error('请求超时'));
-    }, timeout);
-  });
-
-  return Promise.race([fetchPromise, timeoutPromise]);
-}
-
-fetchWithTimeout('/api/data', 3000)
-  .then(response => response.json())
-  .then(data => console.log('数据:', data))
-  .catch(error => console.error('错误:', error.message));
-```
-
-4. **Promise.any()**：返回第一个成功的Promise结果（ES2021引入）
-
-```javascript
-// 尝试从多个源获取数据
-const mirrors = [
-  'https://mirror1.example.com/api',
-  'https://mirror2.example.com/api',
-  'https://mirror3.example.com/api'
-];
-
-const fetchPromises = mirrors.map(url =>
-  fetch(url).then(response => {
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    return response.json();
-  })
-);
-
-Promise.any(fetchPromises)
-  .then(data => {
-    console.log('成功从其中一个镜像获取数据:', data);
-  })
-  .catch(error => {
-    // 所有Promise都失败时，这里接收到一个AggregateError
-    console.error('所有镜像源都失败了:', error.errors);
-  });
-```
+**定义**：接收一个Promise可迭代对象，返回一个新Promise。
+**核心逻辑**：等待至少一个输入的Promise成功兑现，新Promise兑现为第一个成功的结果；若所有Promise都拒绝，则新Promise拒绝为`AggregateError`（包含所有拒绝原因）。
+**适用场景**：需要至少一个成功结果（如多个支付渠道尝试，取第一个成功的）。
+**特点**：与`race`类似但仅关注成功，失败需所有都失败。
 
 **管理多个异步操作的高级模式：**
 
