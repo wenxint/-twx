@@ -145,4 +145,13 @@ function lengthOfLongestSubstring(s) {
 const s = "abcabcbb";
 console.log(lengthOfLongestSubstring(s)); // 输出 3
 
+//取消axios请求
+const controller = new AbortController();
+axios.get("/foo/bar", { signal: controller.signal }).then(function (response) {
+  //...
+});
+controller.abort();
+
+
+
 // https://juejin.cn/post/7353456468094599205?searchId=202505271123555EE696FDB0964BA59F47#heading-28
