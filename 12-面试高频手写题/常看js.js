@@ -92,3 +92,22 @@ Promise.MyAll([promise1, promise2, promise3, promise4])
   .catch((error) => {
     console.error("MyAll错误:", error);
   });
+
+// 柯里化函数
+  /**
+ * @description 通用柯里化函数
+ * @param {Function} fn - 要柯里化的原始函数
+ * @return {Function} 柯里化后的函数
+ */
+function curry(fn) {
+  // 收集参数的闭包变量
+  const collectArgs = (...args) => {
+    // 如果已收集参数数量满足原始函数要求，执行原始函数
+    if (args.length >= fn.length) {
+      return fn(...args);
+    }
+    // 否则返回新函数继续收集参数
+    return (...nextArgs) => collectArgs(...args, ...nextArgs);
+  };
+  return collectArgs;
+}
