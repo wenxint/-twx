@@ -166,4 +166,19 @@ var str = "100000000000",
 str.replace(reg, ",");
 str.replace(reg, ",")
 
+// 实现一个函数，0.1+0.2=0.3
+/**
+ * @description 判断两个浮点数是否近似相等
+ * @param {number} a - 第一个数
+ * @param {number} b - 第二个数
+ * @param {number} [epsilon=Number.EPSILON] - 误差容忍度（默认使用JS内置最小精度）
+ * @returns {boolean} 是否近似相等
+ */
+function floatEqual(a, b, epsilon = Number.EPSILON) {
+  return Math.abs(a - b) < epsilon;
+}
+
+// 使用示例
+console.log(floatEqual(0.1 + 0.2, 0.3)); // 输出 true
+
 // https://juejin.cn/post/7353456468094599205?searchId=202505271123555EE696FDB0964BA59F47#heading-28
