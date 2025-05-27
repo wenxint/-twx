@@ -94,7 +94,7 @@ Promise.MyAll([promise1, promise2, promise3, promise4])
   });
 
 // 柯里化函数
-  /**
+/**
  * @description 通用柯里化函数
  * @param {Function} fn - 要柯里化的原始函数
  * @return {Function} 柯里化后的函数
@@ -111,3 +111,17 @@ function curry(fn) {
   };
   return collectArgs;
 }
+// 手写mySetInterval
+function mySetInterval(callback, delay) {
+  // 初始调用
+  callback(); // 递归调用 setTimeout 来模拟 setInterval
+  const intervalId = setTimeout(() => {
+    // 清除前一个 setTimeout，防止在回调函数执行时间较长时产生累积的延迟
+    clearTimeout(intervalId); // 递归调用 mySetInterval
+    mySetInterval(callback, delay); // 执行回调函数
+  }, delay);
+}
+// 使用示例
+mySetInterval(() => console.log("Hello, world!"), 1000);
+
+// https://juejin.cn/post/7353456468094599205?searchId=202505271123555EE696FDB0964BA59F47#heading-28
