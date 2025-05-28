@@ -124,6 +124,8 @@ function mySetInterval(callback, delay) {
 // 使用示例
 mySetInterval(() => console.log("Hello, world!"), 1000);
 
+//mySetInterval 中的递归通过 setTimeout 转换为 异步递归 ，每次递归调用的触发点是事件循环的宏任务队列，而非当前调用栈的延续。因此，调用栈不会累积，自然不会触发栈溢出。
+
 //要找到字符串中出现的不重复字符的最长长度
 
 function lengthOfLongestSubstring(s) {
@@ -152,19 +154,18 @@ axios.get("/foo/bar", { signal: controller.signal }).then(function (response) {
 });
 controller.abort();
 
-
 // 千分位分隔符正则表达式（将长数字字符串转换为每三位用逗号分隔的格式，如 "1000000" → "1,000,000"）
 var str = "100000000000",
-    // 正则解释：
-    // - (?=(\B\d{3})+$)：正向先行断言，匹配后面能接「非单词边界+3位数字」且最终到达字符串结尾的位置
-    //   - \B：非单词边界（避免在数字开头前添加逗号）
-    //   - \d{3}：匹配3位数字
-    //   - (+)：前面的组合（\B\d{3}）至少出现1次（处理多组三位数字）
-    //   - $：匹配字符串结尾（确保从右往左分割）
-    // - g：全局匹配模式（替换所有符合条件的位置）
-    reg = /(?=(\B\d{3})+$)/g;
+  // 正则解释：
+  // - (?=(\B\d{3})+$)：正向先行断言，匹配后面能接「非单词边界+3位数字」且最终到达字符串结尾的位置
+  //   - \B：非单词边界（避免在数字开头前添加逗号）
+  //   - \d{3}：匹配3位数字
+  //   - (+)：前面的组合（\B\d{3}）至少出现1次（处理多组三位数字）
+  //   - $：匹配字符串结尾（确保从右往左分割）
+  // - g：全局匹配模式（替换所有符合条件的位置）
+  reg = /(?=(\B\d{3})+$)/g;
 str.replace(reg, ",");
-str.replace(reg, ",")
+str.replace(reg, ",");
 
 // 实现一个函数，0.1+0.2=0.3
 /**
@@ -181,14 +182,12 @@ function floatEqual(a, b, epsilon = Number.EPSILON) {
 // 使用示例
 console.log(floatEqual(0.1 + 0.2, 0.3)); // 输出 true
 
-
 //转化为驼峰命名
-var s1 = "get-element-by-id"
-var f = function(s) {
-  return s.replace(/-\w/g, function(x) {
-      return x.slice(1).toUpperCase();
-  })
-}
+var s1 = "get-element-by-id";
+var f = function (s) {
+  return s.replace(/-\w/g, function (x) {
+    return x.slice(1).toUpperCase();
+  });
+};
 
 // https://juejin.cn/post/7353456468094599205?searchId=202505271123555EE696FDB0964BA59F47#heading-28
-
