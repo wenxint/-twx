@@ -181,4 +181,14 @@ function floatEqual(a, b, epsilon = Number.EPSILON) {
 // 使用示例
 console.log(floatEqual(0.1 + 0.2, 0.3)); // 输出 true
 
+
+//转化为驼峰命名
+var s1 = "get-element-by-id"
+var f = function(s) {
+  return s.replace(/-\w/g, function(x) {
+      return x.slice(1).toUpperCase();
+  })
+}
+
 // https://juejin.cn/post/7353456468094599205?searchId=202505271123555EE696FDB0964BA59F47#heading-28
+

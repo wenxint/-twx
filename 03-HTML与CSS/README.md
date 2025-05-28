@@ -14,6 +14,8 @@
 8. [CSS预处理器](./08-CSS预处理器.md)
 9. [CSS变量与计算](./09-CSS变量与计算.md)
 10. [CSS动画与过渡](./10-CSS动画与过渡.md)
+11. [opacity、visibility与display](./11-opacity-visibility-display.md)
+12. [0.5px与三角形实现](./12-0.5px与三角形实现.md) - 包含0.5px细线和CSS三角形的多种实现方案及面试题
 
 ## 核心要点
 
