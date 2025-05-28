@@ -16,6 +16,7 @@
 10. [CSS动画与过渡](./10-CSS动画与过渡.md)
 11. [opacity、visibility与display](./11-opacity-visibility-display.md)
 12. [0.5px与三角形实现](./12-0.5px与三角形实现.md) - 包含0.5px细线和CSS三角形的多种实现方案及面试题
+13. [Sass常用语法规则](./13-Sass常用语法规则.md) - 介绍Sass的核心语法规则，包括变量、嵌套、混合、继承等特性
 
 ## 核心要点
 
