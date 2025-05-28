@@ -569,3 +569,12 @@ CORS是一种机制，允许不同源的网页向API发起请求。浏览器通�
 - **403 Forbidden**：表示"禁止访问"，服务器理解请求但拒绝执行。服务器知道客户端是谁，但该客户端没有访问资源的权限。
 
 简而言之：401是"我不认识你，请先身份验证"，403是"我认识你，但你没有权限"。
+
+### 6. `Cookie`和`Authorization`头在认证中的主要区别是什么？
+
+回答：
+- **存储位置**：Cookie存储在客户端浏览器（通过`Set-Cookie`响应头写入），而`Authorization`头通常存储在前端代码中（如`localStorage`或`sessionStorage`），通过手动添加到请求头。
+- **自动携带**：Cookie会被浏览器自动附加到同源请求中（受`SameSite`属性限制）；`Authorization`头需要前端显式设置（如通过`axios`的`headers`配置）。
+- **安全性**：Cookie易受CSRF攻击（需配合`SameSite=Strict`或CSRF令牌防护）；`Authorization`头（如JWT）通常通过`Bearer`方案传输，需配合HTTPS避免中间人攻击。
+- **作用范围**：Cookie可用于跨多个请求的长期会话管理（如用户登录状态）；`Authorization`头更适合短期、敏感的API访问（如访问受保护资源）。
+- **大小限制**：Cookie有严格的大小限制（通常4KB）；`Authorization`头的大小限制由服务器配置决定，适合传输较长的令牌（如JWT）。
