@@ -5,6 +5,7 @@
 ### 问题：什么是Promise？它如何解决回调地狱问题？
 
 **Promise**是ES6引入的一种异步编程解决方案，用于处理异步操作的最终完成（或失败）及其结果值。它代表一个异步操作的最终结果，有三种状态：
+
 - **待定（pending）**：初始状态，既没有被兑现，也没有被拒绝
 - **已兑现（fulfilled）**：操作成功完成
 - **已拒绝（rejected）**：操作失败
@@ -242,6 +243,12 @@ Promise.all([promise1, promise2, promise3])
 ```
 
 2. **Promise.allSettled()**：等待所有Promise完成，无论是否成功
+
+结果 ：一个数组，每个元素是描述对应Promise结果的对象，包含两个属性：
+
+- status ： 'fulfilled' （成功）或 'rejected' （失败）；
+- value （仅成功时存在）：Promise成功的返回值；
+- reason （仅失败时存在）：Promise失败的原因。
 
 ```javascript
 const promises = [
@@ -809,7 +816,6 @@ loader.getPromise()
 >     });
 > }
 > ```
->
 > 此外，在复杂应用中，实施全局的未处理Promise拒绝监听也很重要：
 >
 > ```javascript
@@ -821,5 +827,4 @@ loader.getPromise()
 >   event.preventDefault();
 > });
 > ```
->
 > 最后，当涉及到复杂的Promise链和组合时，图表或注释可以帮助团队理解异步流程。我会在代码中添加流程注释或在文档中使用序列图来说明复杂的Promise交互。
