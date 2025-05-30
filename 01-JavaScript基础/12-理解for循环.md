@@ -151,3 +151,79 @@ for (var i = 0; i < 3; i++) {
 - 缓存数组长度：避免每次循环都读取数组的`length`属性（如`const len = arr.length; for (let i = 0; i < len; i++) {...}`）。
 - 倒序循环：某些情况下倒序循环（如`for (let i = arr.length - 1; i >= 0; i--)`）可提高性能。
 - 分块处理：将大循环拆分为多个小循环，使用`setTimeout`或`requestIdleCallback`避免阻塞主线程。
+
+### 问题5：比较各种循环方法（for、for...in、for...of、forEach、map）的区别
+
+**答案**：
+
+1. **语法和用途**：
+   - **for循环**：`for(初始化; 条件; 迭代){...}`，最传统的循环方式，适合已知循环次数的场景。
+   - **for...in**：`for(let key in object){...}`，用于遍历对象的可枚举属性，返回键名。
+   - **for...of**：`for(let value of iterable){...}`，用于遍历可迭代对象（数组、字符串等），返回元素值。
+   - **forEach**：`array.forEach(callback)`，数组方法，对每个元素执行回调，无返回值。
+   - **map**：`array.map(callback)`，数组方法，对每个元素执行回调，返回新数组。
+
+2. **遍历对象**：
+   - for...in专为对象设计，但会遍历原型链上的属性，通常需配合hasOwnProperty使用。
+   - 其他方法不直接适用于普通对象，需借助Object.keys/values/entries等方法。
+
+3. **中断循环**：
+   - for、for...in、for...of支持break/continue中断循环。
+   - forEach和map不支持break/continue，除非使用try/catch抛出异常（不推荐）。
+
+4. **性能考虑**：
+   - 传统for循环通常性能最佳，尤其是处理大型数组时。
+   - for...in性能较差，不适合遍历大型对象或数组。
+   - forEach和map有函数调用开销，但代码更简洁易读。
+
+5. **异步处理**：
+   - for和for...of可与await配合，按顺序处理异步操作。
+   - forEach不会等待异步操作，不适合顺序执行异步任务。
+
+6. **最佳实践**：
+   - 遍历数组：首选for...of（需要值）或传统for（需要索引或性能关键）。
+   - 遍历对象：使用for...in配合hasOwnProperty，或Object.keys/entries。
+   - 数据转换：使用map创建基于原数组的新数组。
+   - 简单遍历：使用forEach执行副作用操作。
+   - 异步操作：使用for...of配合await，避免使用forEach。
+
+7. **代码示例**：
+
+```javascript
+// 遍历数组的不同方式
+const arr = [1, 2, 3, 4, 5];
+
+// 传统for循环
+for (let i = 0; i < arr.length; i++) {
+  console.log(arr[i]);
+}
+
+// for...in循环（不推荐用于数组）
+for (let index in arr) {
+  console.log(arr[index]); // index是字符串类型
+}
+
+// for...of循环
+for (let value of arr) {
+  console.log(value);
+}
+
+// forEach方法
+arr.forEach((value, index) => {
+  console.log(value, index);
+});
+
+// map方法
+const newArr = arr.map(value => value * 2);
+console.log(newArr); // [2, 4, 6, 8, 10]
+```
+
+8. **兼容性**：
+   - for循环和for...in：所有JavaScript环境都支持。
+   - for...of：ES6引入，IE不支持。
+   - forEach和map：ES5引入，IE9+支持。
+
+9. **特殊行为**：
+   - for...in会遍历到对象原型链上的可枚举属性。
+   - forEach不会遍历数组中的空元素（如[1,,3]中的空位）。
+   - map会保留数组中的空元素，但不会对空元素执行回调函数。
