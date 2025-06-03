@@ -321,3 +321,87 @@ const messyArr = [5, 3, 8, 4, 6]; // 创建一个未排序的数组
 console.log(bubbleSort(messyArr)); // 输出: [3, 4, 5, 6, 8]，展示排序后的结果
 
 // https://juejin.cn/post/7353456468094599205?searchId=202505271123555EE696FDB0964BA59F47#heading-28
+/**
+ * @description 快速排序算法
+ * @param {number[]} arr - 输入数组
+ * @return {number[]} 排序后的数组
+ */
+function quickSort(arr) {
+  // 基准情况：如果数组长度小于等于1，已经是排序状态，直接返回
+  // 这是递归终止条件，确保算法最终会结束
+  if (arr.length <= 1) return arr; // 基准情况：长度≤1直接返回
+
+  // 选择中间元素作为基准值（pivot）
+  // 选择策略影响算法效率，中间元素通常比首尾元素更平衡
+  // 更好的做法是随机选择基准值，以避免最坏情况
+  const pivot = arr[Math.floor(arr.length / 2)]; // 选择中间元素作为基准值
+
+  // 创建三个数组，分别存储小于、等于和大于基准值的元素
+  // 空间复杂度：O(n)，需要额外空间存储这些数组
+  const left = []; // 存储所有小于基准值的元素
+  const middle = []; // 存储所有等于基准值的元素
+  const right = []; // 存储所有大于基准值的元素
+
+  // 遍历原数组，将每个元素放入对应的分区
+  // 时间复杂度：O(n)，需要遍历数组中的每个元素一次
+  for (const num of arr) {
+    // 根据元素与基准值的比较结果，将其放入对应数组
+    // 每次比较和push操作的时间复杂度都是O(1)
+    if (num < pivot) left.push(num); // 小于基准值，放入left数组
+    else if (num === pivot) middle.push(num); // 等于基准值，放入middle数组
+    else right.push(num); // 大于基准值，放入right数组
+  }
+
+  // 递归地对left和right数组进行排序，并与middle数组合并
+  // 这是分治算法的核心：将问题分解为更小的子问题，解决后合并结果
+  // 时间复杂度：T(n) = 2T(n/2) + O(n)，根据主定理，解为O(n log n)
+  // 最坏情况（如已排序数组）：T(n) = T(n-1) + O(n)，解为O(n²)
+  return [...quickSort(left), ...middle, ...quickSort(right)];
+}
+
+// 调用示例
+const unsortedArr = [34, 12, 45, 6, 89, 23]; // 创建一个未排序的数组
+console.log(quickSort(unsortedArr)); // 输出: [6, 12, 23, 34, 45, 89]，展示排序后的结果
+
+// 手写call方法：修改函数执行时的this指向并立即执行
+Function.prototype.myCall = function (context, ...args) {
+  // 处理上下文：若未传入context则默认使用window（浏览器环境），null/undefined时也指向window
+  context = context || window;
+  // 创建唯一Symbol作为临时属性名，避免覆盖对象原有属性
+  const fn = Symbol("fn");
+  // 将当前函数（调用myCall的函数）挂载到context的临时属性上
+  context[fn] = this;
+  // 执行临时属性（即原函数），传入剩余参数，此时函数内的this指向context
+  const result = context[fn](...args);
+  // 删除临时属性，避免污染原context对象
+  delete context[fn];
+  // 返回函数执行结果
+  return result;
+};
+
+// 手写apply方法：与call类似，但参数通过数组传递
+Function.prototype.myApply = function (context, args) {
+  // 处理上下文：同call逻辑
+  context = context || window;
+  // 创建唯一Symbol作为临时属性名
+  const fn = Symbol("fn");
+  // 将当前函数挂载到context的临时属性上
+  context[fn] = this;
+  // 执行函数：若有参数数组则展开传递，否则直接执行
+  const result = args ? context[fn](...args) : context[fn]();
+  // 删除临时属性
+  delete context[fn];
+  // 返回执行结果
+  return result;
+};
+
+// 手写bind方法：返回一个绑定this的新函数
+Function.prototype.myBind = function (context, ...args) {
+  // 保存原函数引用（调用bind的函数）
+  const self = this;
+  // 返回新函数，支持后续传递新参数
+  return function (...newArgs) {
+    // 调用自定义的myCall方法，合并初始参数和新参数
+    return self.myCall(context, ...args, ...newArgs);
+  };
+};
