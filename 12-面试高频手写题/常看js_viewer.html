@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JavaScript 代码查看器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            display: flex;
+            min-height: 100vh;
+            background-color: #f8f9fa;
+        }
+        .sidebar {
+            width: 280px;
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            padding: 20px 0;
+            height: 100vh;
+            position: fixed;
+            overflow-y: auto;
+            transition: all 0.3s;
+        }
+        .sidebar-header {
+            padding: 0 20px 20px;
+            border-bottom: 1px solid #34495e;
+        }
+        .sidebar-header h1 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+        .search-container {
+            padding: 15px 20px;
+            position: sticky;
+            top: 0;
+            background-color: #2c3e50;
+            z-index: 10;
+        }
+        .search-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 4px;
+            background-color: #34495e;
+            color: #ecf0f1;
+            font-size: 14px;
+        }
+        .search-input::placeholder {
+            color: #95a5a6;
+        }
+        .nav-list {
+            list-style: none;
+            padding: 0 0 20px 0;
+        }
+        .nav-item {
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            /* 移除边框相关属性 */
+        }
+        .nav-item:hover {
+            background-color: #34495e;
+        }
+        .nav-item.active {
+            background-color: #3498db;
+            /* 移除边框相关属性 */
+        }
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            padding: 30px;
+            max-width: calc(100% - 280px);
+        }
+        .code-section {
+            margin-bottom: 40px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            padding: 25px;
+        }
+        .code-section h2 {
+            margin-bottom: 15px;
+            color: #2c3e50;
+            font-size: 1.8rem;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #ecf0f1;
+        }
+        .code-description {
+            margin-bottom: 20px;
+            color: #7f8c8d;
+        }
+        pre {
+            background-color: #f5f5f5;
+            padding: 20px;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin-bottom: 10px;
+            position: relative;
+        }
+        code {
+            font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+            font-size: 14px;
+            color: #333;
+        }
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 5px 10px;
+            font-size: 12px;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+        .copy-btn:hover {
+            opacity: 1;
+        }
+        .back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background-color: #3498db;
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .back-to-top.visible {
+            opacity: 1;
+        }
+        .back-to-top i {
+            font-size: 20px;
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                z-index: 1000;
+            }
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            .main-content {
+                margin-left: 0;
+                max-width: 100%;
+            }
+            .toggle-sidebar {
+                display: block;
+                position: fixed;
+                top: 20px;
+                left: 20px;
+                z-index: 1001;
+                background-color: #3498db;
+                color: white;
+                border: none;
+                border-radius: 4px;
+                padding: 8px 12px;
+                cursor: pointer;
+            }
+        }
+        /* 语法高亮样式 */
+        .hljs-comment,
+        .hljs-quote {
+            color: #8e908c;
+            font-style: italic;
+        }
+        .hljs-keyword,
+        .hljs-selector-tag {
+            color: #0086b3;
+            font-weight: bold;
+        }
+        .hljs-string,
+        .hljs-doctag,
+        .hljs-template-variable {
+            color: #7ec699;
+        }
+        .hljs-title,
+        .hljs-section,
+        .hljs-selector-id {
+            color: #dd4a68;
+            font-weight: bold;
+        }
+        .hljs-variable,
+        .hljs-template-variable {
+            color: #e90;
+        }
+        .hljs-subst {
+            color: #333;
+        }
+        .hljs-type,
+        .hljs-built_in,
+        .hljs-builtin-name,
+        .hljs-symbol,
+        .hljs-selector-attr,
+        .hljs-link {
+            color: #c76b29;
+        }
+        .hljs-number,
+        .hljs-attribute {
+            color: #c76b29;
+        }
+        .hljs-literal {
+            color: #0086b3;
+        }
+        .hljs-regexp,
+        .hljs-deletion {
+            color: #e90;
+        }
+        .hljs-addition,
+        .hljs-meta {
+            color: #7ec699;
+        }
+        .hljs-emphasis {
+            font-style: italic;
+        }
+        .hljs-strong {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h1>JavaScript 代码查看器</h1>
+            <p>常用 JavaScript 代码片段集合</p>
+        </div>
+        <div class="search-container">
+            <input type="text" class="search-input" id="searchInput" placeholder="搜索代码片段...">
+        </div>
+        <ul class="nav-list" id="navList">
+            <li class="nav-item" data-target="requestAnimationFrame">requestAnimationFrame 动画优化</li>
+            <li class="nav-item" data-target="promiseMyAll">Promise.MyAll 实现</li>
+            <li class="nav-item" data-target="curry">函数柯里化</li>
+            <li class="nav-item" data-target="mySetInterval">自定义 setInterval</li>
+            <li class="nav-item" data-target="lengthOfLongestSubstring">最长不重复子串</li>
+            <li class="nav-item" data-target="axiosCancel">Axios 请求取消</li>
+            <li class="nav-item" data-target="thousandSeparator">千分位分隔符</li>
+            <li class="nav-item" data-target="floatEqual">浮点数比较</li>
+            <li class="nav-item" data-target="hyphenToCamelCase">连字符转驼峰</li>
+            <li class="nav-item" data-target="binarySearch">二分查找</li>
+            <li class="nav-item" data-target="bubbleSort">冒泡排序</li>
+        </ul>
+    </div>
+
+    <button class="toggle-sidebar" id="toggleSidebar" style="display: none;">☰</button>
+
+    <div class="main-content">
+        <div class="code-section" id="requestAnimationFrame">
+            <h2>requestAnimationFrame 动画优化</h2>
+            <div class="code-description">
+                使用 requestAnimationFrame 实现平滑动画，相比 setTimeout 和 setInterval 具有更好的性能和更流畅的动画效果。
+            </div>
+            <pre><code class="javascript">// 使用 requestAnimationFrame 优化动画
+let position = 0;
+const targetPosition = 300; // 目标位置（300px）
+let animationId;
+
+function animate() {
+  position += 5;
+  element.style.transform = `translateX(${position}px)`;
+
+  // 达到目标位置时停止动画
+  if (position < targetPosition) {
+    animationId = requestAnimationFrame(animate);
+  } else {
+    cancelAnimationFrame(animationId); // 取消下一帧请求
+    console.log("动画已停止，最终位置：", position, "px");
+  }
+}
+
+// 启动动画
+animationId = requestAnimationFrame(animate);</code></pre>
+            <button class="copy-btn">复制代码</button>
+        </div>
+
+        <div class="code-section" id="promiseMyAll">
+            <h2>Promise.MyAll 实现</h2>
+            <div class="code-description">
+                手动实现 Promise.all 方法，接收一个 Promise 数组，返回一个新的 Promise，当所有 Promise 都成功时返回结果数组，任一 Promise 失败则返回失败原因。
+            </div>
+            <pre><code class="javascript">// 首先，让我们回顾一下MyAll的实现
+Promise.MyAll = function (promises) {
+  // 存储所有 Promise 的结果
+  let arr = [],
+    // 计数器,记录已完成的 Promise 数量
+    count = 0;
+
+  // 返回一个新的 Promise
+  return new Promise((resolve, reject) => {
+    // 处理空数组的情况
+    if (promises.length === 0) {
+      resolve([]);
+      return;
+    }
+
+    // 遍历传入的 promises 数组
+    promises.forEach((item, i) => {
+      // 将每个项转为 Promise 对象并执行
+      Promise.resolve(item).then(
+        (res) => {
+          // 按照原始顺序存储结果
+          arr[i] = res;
+          // 完成计数加1
+          count += 1;
+          // 当所有 Promise 都完成时,返回结果数组
+          if (count === promises.length) resolve(arr);
+        },
+        // 任何一个 Promise 失败时直接 reject
+        reject
+      );
+    });
+  });
+};
+
+// ==================== 调用示例 ====================
+
+/**
+ * 示例1: 处理全部成功的Promise
+ */
+console.log("\n===== 示例1: 全部成功的Promise =====");
+
+// 创建多种类型的Promise
+const promise1 = Promise.resolve(1); // 立即解决的Promise
+const promise2 = new Promise((resolve) => setTimeout(() => resolve(2), 1000)); // 延迟解决的Promise
+const promise3 = 3; // 非Promise值(会被自动转换为Promise)
+const promise4 = new Promise((resolve) => setTimeout(() => resolve(4), 500)); // 另一个延迟解决的Promise
+
+// 使用自定义的MyAll方法
+console.log("开始执行MyAll...");
+const startTimeMyAll = Date.now();
+
+Promise.MyAll([promise1, promise2, promise3, promise4])
+  .then((results) => {
+    const endTimeMyAll = Date.now();
+    console.log("MyAll结果:", results);
+    console.log("MyAll执行时间:", endTimeMyAll - startTimeMyAll, "ms");
+    console.log("MyAll结果类型:", Object.prototype.toString.call(results));
+    console.log(
+      "MyAll保持了原始顺序，即使promise2(1000ms)比promise4(500ms)晚完成"
+    );
+  })
+  .catch((error) => {
+    console.error("MyAll错误:", error);
+  });</code></pre>
+            <button class="copy-btn">复制代码</button>
+        </div>
+
+        <div class="code-section" id="curry">
+            <h2>函数柯里化</h2>
+            <div class="code-description">
+                实现函数柯里化，将接受多个参数的函数转换为接受单个参数的函数序列，每个函数返回一个新函数，直到收集所有参数后执行原函数。
+            </div>
+            <pre><code class="javascript">/**
+ * @description 通用柯里化函数
+ * @param {Function} fn - 要柯里化的原始函数
+ * @return {Function} 柯里化后的函数
+ */
+function curry(fn) {
+  // 收集参数的闭包变量
+  const collectArgs = (...args) => {
+    // 如果已收集参数数量满足原始函数要求，执行原始函数
+    if (args.length >= fn.length) {
+      return fn(...args);
+    }
+    // 否则返回新函数继续收集参数
+    return (...nextArgs) => collectArgs(...args, ...nextArgs);
+  };
+  return collectArgs;
+}</code></pre>
+            <button class="copy-btn">复制代码</button>
+        </div>
+
+        <div class="code-section" id="mySetInterval">
+            <h2>自定义 setInterval</h2>
+            <div class="code-description">
+                使用 setTimeout 实现 setInterval 的功能，可以避免 setInterval 的一些问题，如回调函数执行时间超过间隔时间导致的连续执行。
+            </div>
+            <pre><code class="javascript">// 手写mySetInterval
+function mySetInterval(callback, delay) {
+  // 初始调用
+  callback(); // 递归调用 setTimeout 来模拟 setInterval
+  const intervalId = setTimeout(() => {
+    // 清除前一个 setTimeout，防止在回调函数执行时间较长时产生累积的延迟
+    clearTimeout(intervalId); // 递归调用 mySetInterval
+    mySetInterval(callback, delay); // 执行回调函数
+  }, delay);
+}
+// 使用示例
+mySetInterval(() => console.log("Hello, world!"), 1000);
+
+//mySetInterval 中的递归通过 setTimeout 转换为 异步递归 ，每次递归调用的触发点是事件循环的宏任务队列，而非当前调用栈的延续。因此，调用栈不会累积，自然不会触发栈溢出。</code></pre>
+            <button class="copy-btn">复制代码</button>
+        </div>
+
+        <div class="code-section" id="lengthOfLongestSubstring">
+            <h2>最长不重复子串</h2>
+            <div class="code-description">
+                查找字符串中最长的不含重复字符的子串，使用滑动窗口算法实现，时间复杂度为 O(n)。
+            </div>
+            <pre><code class="javascript">function lengthOfLongestSubstring(s) {
+  let start = 0; // 窗口起始位置
+  let maxLength = 0; // 最长不重复子串的长度
+  let seen = new Set(); // 用于存储窗口内的字符
+  for (let end = 0; end < s.length; end++) {
+    // 如果当前字符已经在窗口内，则移动窗口的起始位置
+    while (seen.has(s[end])) {
+      seen.delete(s[start]);
+      start++;
+    } // 将当前字符添加到窗口内
+    seen.add(s[end]); // 更新最长不重复子串的长度
+    maxLength = Math.max(maxLength, end - start + 1);
+  }
+  return maxLength;
+}
+// 示例
+const s = "abcabcbb";
+console.log(lengthOfLongestSubstring(s)); // 输出 3</code></pre>
+            <button class="copy-btn">复制代码</button>
+        </div>
+
+        <div class="code-section" id="axiosCancel">
+            <h2>Axios 请求取消</h2>
+            <div class="code-description">
+                使用 AbortController 取消 Axios 请求，适用于用户快速切换页面或搜索条件变化时取消正在进行的请求。
+            </div>
+            <pre><code class="javascript">const controller = new AbortController();
+axios.get("/foo/bar", { signal: controller.signal }).then(function (response) {
+  //...
+});
+controller.abort();</code></pre>
+            <button class="copy-btn">复制代码</button>
+        </div>
+
+        <div class="code-section" id="thousandSeparator">
+            <h2>千分位分隔符</h2>
+            <div class="code-description">
+                使用正则表达式为数字添加千分位分隔符，使大数字更易读。
+            </div>
+            <pre><code class="javascript">// 千分位分隔符正则表达式（将长数字字符串转换为每三位用逗号分隔的格式，如 "1000000" → "1,000,000"）
+var str = "100000000000",
+  // 正则解释：
+  // - (?=(\B\d{3})+$)：正向先行断言，匹配后面能接「非单词边界+3位数字」且最终到达字符串结尾的位置
+  //   - \B：非单词边界（避免在数字开头前添加逗号）
+  //   - \d{3}：匹配3位数字
+  //   - (+)：前面的组合（\B\d{3}）至少出现1次（处理多组三位数字）
+  //   - $：匹配字符串结尾（确保从右往左分割）
+  // - g：全局匹配模式（替换所有符合条件的位置）
+  reg = /(?=(\B\d{3})+$)/g;
+str.replace(reg, ",");</code></pre>
+            <button class="copy-btn">复制代码</button>
+        </div>
+
+        <div class="code-section" id="floatEqual">
+            <h2>浮点数比较</h2>
+            <div class="code-description">
+                由于 JavaScript 中浮点数计算的精度问题，直接比较两个浮点数是否相等可能会得到错误的结果。这个函数通过设置一个极小的误差范围来比较两个浮点数是否相等。
+            </div>
+            <pre><code class="javascript">/**
+ * @description 判断两个浮点数是否近似相等
+ * @param {number} a - 第一个数
+ * @param {number} b - 第二个数
+ * @param {number} [epsilon=Number.EPSILON] - 误差容忍度（默认使用JS内置最小精度）
+ * @returns {boolean} 是否近似相等
+ */
+function floatEqual(a, b, epsilon = Number.EPSILON) {
+  return Math.abs(a - b) < epsilon;
+}
+
+// 使用示例
+console.log(floatEqual(0.1 + 0.2, 0.3)); // 输出 true</code></pre>
+            <button class="copy-btn">复制代码</button>
+        </div>
+
+        <div class="code-section" id="hyphenToCamelCase">
+            <h2>连字符转驼峰</h2>
+            <div class="code-description">
+                将连字符形式的字符串（如 CSS 属性名）转换为驼峰形式，常用于处理 DOM 样式或 API 参数。
+            </div>
+            <pre><code class="javascript">//转化为驼峰命名
+var s1 = "get-element-by-id";
+var f = function (s) {
+  return s.replace(/-\w/g, function (x) {
+    return x.slice(1).toUpperCase();
+  });
+};</code></pre>
+            <button class="copy-btn">复制代码</button>
+        </div>
+
+        <div class="code-section" id="binarySearch">
+            <h2>二分查找</h2>
+            <div class="code-description">
+                二分查找算法用于在有序数组中查找特定元素，时间复杂度为 O(log n)，比线性查找 O(n) 更高效。
+            </div>
+            <pre><code class="javascript">/**
+ * @description 二分查找算法
+ * @param {number[]} arr - 已排序的输入数组（升序）
+ * @param {number} target - 目标值
+ * @return {number} 目标值的索引（未找到返回-1）
+ */
+function binarySearch(arr, target) {
+  // 初始化左右指针，定义搜索范围的边界
+  // 时间复杂度：O(1) - 常数时间的初始化操作
+  let left = 0; // 搜索范围的左边界，初始为数组第一个元素
+  let right = arr.length - 1; // 搜索范围的右边界，初始为数组最后一个元素
+
+  // 当左指针小于等于右指针时，搜索范围内还有元素，继续搜索
+  // 循环最多执行log₂n次，因为每次迭代都将搜索范围缩小一半
+  while (left <= right) {
+    // 计算中间位置，使用Math.floor确保得到整数索引
+    // 使用(left + right) / 2可能导致大数溢出，更安全的写法是：left + Math.floor((right - left) / 2)
+    const mid = Math.floor((left + right) / 2);
+
+    // 找到目标值，直接返回索引位置（最好情况：O(1)）
+    if (arr[mid] === target) return mid;
+
+    // 中间值小于目标值，说明目标在右半部分
+    // 将左边界移到中间位置的右侧，缩小搜索范围为右半部分
+    if (arr[mid] < target) {
+      left = mid + 1; // 排除了mid及左侧的所有元素
+    } else {
+      // 中间值大于目标值，说明目标在左半部分
+      // 将右边界移到中间位置的左侧，缩小搜索范围为左半部分
+      right = mid - 1; // 排除了mid及右侧的所有元素
+    }
+  }
+
+  // 搜索范围为空仍未找到目标值，返回-1表示不存在
+  return -1;
+}
+
+// 调用示例
+const sortedArr = [2, 5, 8, 12, 16, 23, 38, 56, 72, 91]; // 创建一个已排序的数组
+console.log(binarySearch(sortedArr, 23)); // 输出: 5，表示23在数组中的索引位置
+console.log(binarySearch(sortedArr, 10)); // 输出: -1，表示10不在数组中</code></pre>
+            <button class="copy-btn">复制代码</button>
+        </div>
+
+        <div class="code-section" id="bubbleSort">
+            <h2>冒泡排序</h2>
+            <div class="code-description">
+                冒泡排序是一种简单的排序算法，通过重复比较相邻元素并交换它们的位置，使较大的元素逐渐"冒泡"到数组末尾。
+            </div>
+            <pre><code class="javascript">/**
+ * @description 冒泡排序算法
+ * @param {number[]} arr - 输入数组
+ * @return {number[]} 排序后的数组
+ */
+function bubbleSort(arr) {
+  // 获取数组长度，用于控制循环次数
+  // 时间复杂度：O(1)，常数时间操作
+  const len = arr.length;
+
+  // 外层循环：控制排序轮数，最多需要n-1轮（n为数组长度）
+  // 时间复杂度：O(n)，最多执行n-1次
+  for (let i = 0; i < len - 1; i++) {
+    // 优化标志：记录本轮是否发生交换，用于提前终止
+    // 如果一轮中没有交换，说明数组已经有序
+    let swapped = false;
+
+    // 内层循环：比较并交换相邻元素
+    // 每轮比较次数递减，因为每轮结束后最大的元素已经到达正确位置
+    // 时间复杂度：O(n-i-1)，随着i增加而减少
+    for (let j = 0; j < len - 1 - i; j++) {
+      // 比较相邻元素，如果前一个大于后一个，则交换位置
+      // 这确保较大的元素逐渐"冒泡"到数组末尾
+      if (arr[j] > arr[j + 1]) {
+        // 使用ES6解构赋值语法交换元素，无需临时变量
+        // 时间复杂度：O(1)，常数时间操作
+        [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]]; // 交换相邻元素
+        swapped = true; // 标记本轮发生了交换
+      }
+    }
+
+    // 优化：如果本轮没有发生交换，说明数组已经有序，可以提前终止
+    // 最好情况下（已排序数组），时间复杂度降至O(n)
+    if (!swapped) break; // 提前终止：若本轮无交换则已排序完成
+  }
+
+  // 返回排序后的数组（原地排序，返回原数组的引用）
+  // 总体时间复杂度：O(n²)，因为有两层嵌套循环
+  // 空间复杂度：O(1)，只使用了少量额外变量
+  return arr;
+}
+
+// 调用示例
+const messyArr = [5, 3, 8, 4, 6]; // 创建一个未排序的数组
+console.log(bubbleSort(messyArr)); // 输出: [3, 4, 5, 6, 8]，展示排序后的结果</code></pre>
+            <button class="copy-btn">复制代码</button>
+        </div>
+    </div>
+
+    <div class="back-to-top" id="backToTop">↑</div>
+
+    <script>
+        // 导航功能
+        const navItems = document.querySelectorAll('.nav-item');
+        const codeSections = document.querySelectorAll('.code-section');
+        const searchInput = document.getElementById('searchInput');
+        const backToTop = document.getElementById('backToTop');
+        const toggleSidebar = document.getElementById('toggleSidebar');
+        const sidebar = document.getElementById('sidebar');
+
+        // 导航点击事件
+        navItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const targetId = item.getAttribute('data-target');
+                const targetSection = document.getElementById(targetId);
+
+                // 移除所有活动状态
+                navItems.forEach(nav => nav.classList.remove('active'));
+
+                // 添加活动状态到当前项
+                item.classList.add('active');
+
+                // 滚动到目标区域
+                if (targetSection) {
+                    window.scrollTo({
+                        top: targetSection.offsetTop - 20,
+                        behavior: 'smooth'
+                    });
+                }
+
+                // 在移动设备上，点击后关闭侧边栏
+                if (window.innerWidth <= 768) {
+                    sidebar.classList.remove('active');
+                }
+            });
+        });
+
+        // 搜索功能
+        searchInput.addEventListener('input', () => {
+            const searchTerm = searchInput.value.toLowerCase();
+
+            navItems.forEach(item => {
+                const text = item.textContent.toLowerCase();
+                if (text.includes(searchTerm)) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+
+        // 复制代码按钮
+        document.querySelectorAll('.copy-btn').forEach(button => {
+            button.addEventListener('click', () => {
+                const codeBlock = button.previousElementSibling.querySelector('code');
+                const textToCopy = codeBlock.textContent;
+
+                navigator.clipboard.writeText(textToCopy)
+                    .then(() => {
+                        const originalText = button.textContent;
+                        button.textContent = '已复制！';
+                        setTimeout(() => {
+                            button.textContent = originalText;
+                        }, 2000);
+                    })
+                    .catch(err => {
+                        console.error('复制失败:', err);
+                    });
+            });
+        });
+
+        // 返回顶部按钮
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 300) {
+                backToTop.classList.add('visible');
+            } else {
+                backToTop.classList.remove('visible');
+            }
+        });
+
+        backToTop.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+
+        // 移动设备侧边栏切换
+        if (window.innerWidth <= 768) {
+            toggleSidebar.style.display = 'block';
+
+            toggleSidebar.addEventListener('click', () => {
+                sidebar.classList.toggle('active');
+            });
+        }
+
+        // 初始化：高亮当前可见的代码段对应的导航项
+        function highlightVisibleSection() {
+            let currentSection = null;
+            let minDistance = Infinity;
+
+            codeSections.forEach(section => {
+                const rect = section.getBoundingClientRect();
+                const distance = Math.abs(rect.top);
+
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    currentSection = section;
+                }
+            });
+
+            if (currentSection) {
+                const currentId = currentSection.id;
+                navItems.forEach(item => {
+                    if (item.getAttribute('data-target') === currentId) {
+                        item.classList.add('active');
+                    } else {
+                        item.classList.remove('active');
+                    }
+                });
+            }
+        }
+
+        window.addEventListener('scroll', highlightVisibleSection);
+        highlightVisibleSection(); // 初始化调用
+    </script>
+</body>
+</html>

@@ -190,4 +190,134 @@ var f = function (s) {
   });
 };
 
+/**
+ * @description 二分查找算法
+ * @param {number[]} arr - 已排序的输入数组（升序）
+ * @param {number} target - 目标值
+ * @return {number} 目标值的索引（未找到返回-1）
+ */
+function binarySearch(arr, target) {
+  // 初始化左右指针，定义搜索范围的边界
+  // 时间复杂度：O(1) - 常数时间的初始化操作
+  let left = 0; // 搜索范围的左边界，初始为数组第一个元素
+  let right = arr.length - 1; // 搜索范围的右边界，初始为数组最后一个元素
+
+  // 当左指针小于等于右指针时，搜索范围内还有元素，继续搜索
+  // 循环最多执行log₂n次，因为每次迭代都将搜索范围缩小一半
+  while (left <= right) {
+    // 计算中间位置，使用Math.floor确保得到整数索引
+    // 使用(left + right) / 2可能导致大数溢出，更安全的写法是：left + Math.floor((right - left) / 2)
+    const mid = Math.floor((left + right) / 2);
+
+    // 找到目标值，直接返回索引位置（最好情况：O(1)）
+    if (arr[mid] === target) return mid;
+
+    // 中间值小于目标值，说明目标在右半部分
+    // 将左边界移到中间位置的右侧，缩小搜索范围为右半部分
+    if (arr[mid] < target) {
+      left = mid + 1; // 排除了mid及左侧的所有元素
+    } else {
+      // 中间值大于目标值，说明目标在左半部分
+      // 将右边界移到中间位置的左侧，缩小搜索范围为左半部分
+      right = mid - 1; // 排除了mid及右侧的所有元素
+    }
+  }
+
+  // 搜索范围为空仍未找到目标值，返回-1表示不存在
+  return -1;
+}
+
+// 调用示例
+const sortedArr = [2, 5, 8, 12, 16, 23, 38, 56, 72, 91]; // 创建一个已排序的数组
+console.log(binarySearch(sortedArr, 23)); // 输出: 5，表示23在数组中的索引位置
+console.log(binarySearch(sortedArr, 10)); // 输出: -1，表示10不在数组中
+
+/**
+ * @description 二分查找算法
+ * @param {number[]} arr - 已排序的输入数组（升序）
+ * @param {number} target - 目标值
+ * @return {number} 目标值的索引（未找到返回-1）
+ */
+function binarySearch(arr, target) {
+  // 初始化左右指针，定义搜索范围的边界
+  // 时间复杂度：O(1) - 常数时间的初始化操作
+  let left = 0; // 搜索范围的左边界，初始为数组第一个元素
+  let right = arr.length - 1; // 搜索范围的右边界，初始为数组最后一个元素
+
+  // 当左指针小于等于右指针时，搜索范围内还有元素，继续搜索
+  // 循环最多执行log₂n次，因为每次迭代都将搜索范围缩小一半
+  while (left <= right) {
+    // 计算中间位置，使用Math.floor确保得到整数索引
+    // 使用(left + right) / 2可能导致大数溢出，更安全的写法是：left + Math.floor((right - left) / 2)
+    const mid = Math.floor((left + right) / 2);
+
+    // 找到目标值，直接返回索引位置（最好情况：O(1)）
+    if (arr[mid] === target) return mid;
+
+    // 中间值小于目标值，说明目标在右半部分
+    // 将左边界移到中间位置的右侧，缩小搜索范围为右半部分
+    if (arr[mid] < target) {
+      left = mid + 1; // 排除了mid及左侧的所有元素
+    } else {
+      // 中间值大于目标值，说明目标在左半部分
+      // 将右边界移到中间位置的左侧，缩小搜索范围为左半部分
+      right = mid - 1; // 排除了mid及右侧的所有元素
+    }
+  }
+
+  // 搜索范围为空仍未找到目标值，返回-1表示不存在
+  return -1;
+}
+
+// 调用示例
+const sortedArr2 = [2, 5, 8, 12, 16, 23, 38, 56, 72, 91]; // 创建一个已排序的数组
+console.log(binarySearch(sortedArr2, 23)); // 输出: 5，表示23在数组中的索引位置
+console.log(binarySearch(sortedArr2, 10)); // 输出: -1，表示10不在数组中
+
+/**
+ * @description 冒泡排序算法
+ * @param {number[]} arr - 输入数组
+ * @return {number[]} 排序后的数组
+ */
+function bubbleSort(arr) {
+  // 获取数组长度，用于控制循环次数
+  // 时间复杂度：O(1)，常数时间操作
+  const len = arr.length;
+
+  // 外层循环：控制排序轮数，最多需要n-1轮（n为数组长度）
+  // 时间复杂度：O(n)，最多执行n-1次
+  for (let i = 0; i < len - 1; i++) {
+    // 优化标志：记录本轮是否发生交换，用于提前终止
+    // 如果一轮中没有交换，说明数组已经有序
+    let swapped = false;
+
+    // 内层循环：比较并交换相邻元素
+    // 每轮比较次数递减，因为每轮结束后最大的元素已经到达正确位置
+    // 时间复杂度：O(n-i-1)，随着i增加而减少
+    for (let j = 0; j < len - 1 - i; j++) {
+      // 比较相邻元素，如果前一个大于后一个，则交换位置
+      // 这确保较大的元素逐渐"冒泡"到数组末尾
+      if (arr[j] > arr[j + 1]) {
+        // 使用ES6解构赋值语法交换元素，无需临时变量
+        // 时间复杂度：O(1)，常数时间操作
+        [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]]; // 交换相邻元素
+        swapped = true; // 标记本轮发生了交换
+      }
+    }
+
+    // 优化：如果本轮没有发生交换，说明数组已经有序，可以提前终止
+    // 最好情况下（已排序数组），时间复杂度降至O(n)
+    if (!swapped) break; // 提前终止：若本轮无交换则已排序完成
+  }
+
+  // 返回排序后的数组（原地排序，返回原数组的引用）
+  // 总体时间复杂度：O(n²)，因为有两层嵌套循环
+  // 空间复杂度：O(1)，只使用了少量额外变量
+  return arr;
+}
+
+// 调用示例
+const messyArr = [5, 3, 8, 4, 6]; // 创建一个未排序的数组
+console.log(bubbleSort(messyArr)); // 输出: [3, 4, 5, 6, 8]，展示排序后的结果
+
 // https://juejin.cn/post/7353456468094599205?searchId=202505271123555EE696FDB0964BA59F47#heading-28

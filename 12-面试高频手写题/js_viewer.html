@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>前端面试宝典 - JS代码查看器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .sidebar {
+            width: 280px;
+            background-color: #f8f9fa;
+            border-right: 1px solid #e9ecef;
+            padding: 20px 0;
+            overflow-y: auto;
+            height: 100%;
+        }
+        .sidebar-header {
+            padding: 0 20px 15px;
+            border-bottom: 1px solid #e9ecef;
+            margin-bottom: 15px;
+        }
+        .sidebar-header h1 {
+            font-size: 1.2rem;
+            color: #495057;
+        }
+        .nav-list {
+            list-style: none;
+        }
+        .nav-item {
+            padding: 8px 20px;
+            cursor: pointer;
+            color: #495057;
+            transition: all 0.2s;
+        }
+        .nav-item:hover {
+            background-color: #e9ecef;
+            color: #228be6;
+        }
+        .nav-item.active {
+            background-color: #e7f5ff;
+            color: #228be6;
+            border-left: 3px solid #228be6;
+        }
+        .content {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+            height: 100%;
+        }
+        .code-section {
+            margin-bottom: 40px;
+            scroll-margin-top: 30px;
+        }
+        .code-section h2 {
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e9ecef;
+            color: #343a40;
+        }
+        .code-section .description {
+            margin-bottom: 15px;
+            color: #495057;
+        }
+        pre {
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            padding: 15px;
+            overflow-x: auto;
+            margin-bottom: 15px;
+            border: 1px solid #e9ecef;
+        }
+        code {
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        .comment {
+            color: #868e96;
+        }
+        .keyword {
+            color: #5c940d;
+        }
+        .string {
+            color: #e67700;
+        }
+        .function {
+            color: #1971c2;
+        }
+        .number {
+            color: #c92a2a;
+        }
+        .back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background-color: #228be6;
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.3s;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        .back-to-top.visible {
+            opacity: 1;
+        }
+        .search-box {
+            padding: 0 20px 15px;
+            margin-bottom: 15px;
+        }
+        .search-box input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+        .search-box input:focus {
+            outline: none;
+            border-color: #228be6;
+            box-shadow: 0 0 0 3px rgba(34, 139, 230, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h1>前端面试宝典 - JS代码查看器</h1>
+        </div>
+        <div class="search-box">
+            <input type="text" id="search" placeholder="搜索代码片段..." />
+        </div>
+        <ul class="nav-list" id="navList">
+            <!-- 导航项将通过JS动态生成 -->
+        </ul>
+    </div>
+    <div class="content" id="content">
+        <!-- 代码内容将通过JS动态生成 -->
+    </div>
+    <div class="back-to-top" id="backToTop">↑</div>
+
+    <script>
+        // 代码片段数据
+        const codeSnippets = [
+            {
+                id: 'requestAnimationFrame',
+                title: 'requestAnimationFrame 优化动画',
+                description: '使用 requestAnimationFrame 优化动画，包含停止条件，提高动画性能和流畅度。',
+                code: `/**
+ * @description 使用 requestAnimationFrame 优化动画（含停止条件）
+ */
+let position = 0;
+const targetPosition = 300; // 目标位置（300px）
+let animationId;
+
+function animate() {
+  position += 5;
+  element.style.transform = \`translateX(\${position}px)\`;
+
+  // 达到目标位置时停止动画
+  if (position < targetPosition) {
+    animationId = requestAnimationFrame(animate);
+  } else {
+    cancelAnimationFrame(animationId); // 取消下一帧请求
+    console.log("动画已停止，最终位置：", position, "px");
+  }
+}
+
+// 启动动画
+animationId = requestAnimationFrame(animate);`
+            },
+            {
+                id: 'promiseMyAll',
+                title: 'Promise.MyAll 实现',
+                description: '自定义实现Promise.all方法，处理多个Promise并保持原始顺序。',
+                code: `/**
+ * @description Promise.MyAll方法的完整调用示例
+ * 展示如何使用自定义的MyAll方法处理多个Promise
+ */
+
+// 首先，让我们回顾一下MyAll的实现
+Promise.MyAll = function (promises) {
+  // 存储所有 Promise 的结果
+  let arr = [],
+    // 计数器,记录已完成的 Promise 数量
+    count = 0;
+
+  // 返回一个新的 Promise
+  return new Promise((resolve, reject) => {
+    // 处理空数组的情况
+    if (promises.length === 0) {
+      resolve([]);
+      return;
+    }
+
+    // 遍历传入的 promises 数组
+    promises.forEach((item, i) => {
+      // 将每个项转为 Promise 对象并执行
+      Promise.resolve(item).then(
+        (res) => {
+          // 按照原始顺序存储结果
+          arr[i] = res;
+          // 完成计数加1
+          count += 1;
+          // 当所有 Promise 都完成时,返回结果数组
+          if (count === promises.length) resolve(arr);
+        },
+        // 任何一个 Promise 失败时直接 reject
+        reject
+      );
+    });
+  });
+};
+
+// ==================== 调用示例 ====================
+
+/**
+ * 示例1: 处理全部成功的Promise
+ */
+console.log("\n===== 示例1: 全部成功的Promise =====");
+
+// 创建多种类型的Promise
+const promise1 = Promise.resolve(1); // 立即解决的Promise
+const promise2 = new Promise((resolve) => setTimeout(() => resolve(2), 1000)); // 延迟解决的Promise
+const promise3 = 3; // 非Promise值(会被自动转换为Promise)
+const promise4 = new Promise((resolve) => setTimeout(() => resolve(4), 500)); // 另一个延迟解决的Promise
+
+// 使用自定义的MyAll方法
+console.log("开始执行MyAll...");
+const startTimeMyAll = Date.now();
+
+Promise.MyAll([promise1, promise2, promise3, promise4])
+  .then((results) => {
+    const endTimeMyAll = Date.now();
+    console.log("MyAll结果:", results);
+    console.log("MyAll执行时间:", endTimeMyAll - startTimeMyAll, "ms");
+    console.log("MyAll结果类型:", Object.prototype.toString.call(results));
+    console.log(
+      "MyAll保持了原始顺序，即使promise2(1000ms)比promise4(500ms)晚完成"
+    );
+  })
+  .catch((error) => {
+    console.error("MyAll错误:", error);
+  });`
+            },
+            {
+                id: 'curry',
+                title: '柯里化函数',
+                description: '通用柯里化函数实现，将多参数函数转换为一系列单参数函数。',
+                code: `/**
+ * @description 通用柯里化函数
+ * @param {Function} fn - 要柯里化的原始函数
+ * @return {Function} 柯里化后的函数
+ */
+function curry(fn) {
+  // 收集参数的闭包变量
+  const collectArgs = (...args) => {
+    // 如果已收集参数数量满足原始函数要求，执行原始函数
+    if (args.length >= fn.length) {
+      return fn(...args);
+    }
+    // 否则返回新函数继续收集参数
+    return (...nextArgs) => collectArgs(...args, ...nextArgs);
+  };
+  return collectArgs;
+}`
+            },
+            {
+                id: 'mySetInterval',
+                title: '手写 mySetInterval',
+                description: '使用setTimeout递归实现setInterval功能，避免回调执行时间过长导致的问题。',
+                code: `// 手写mySetInterval
+function mySetInterval(callback, delay) {
+  // 初始调用
+  callback(); // 递归调用 setTimeout 来模拟 setInterval
+  const intervalId = setTimeout(() => {
+    // 清除前一个 setTimeout，防止在回调函数执行时间较长时产生累积的延迟
+    clearTimeout(intervalId); // 递归调用 mySetInterval
+    mySetInterval(callback, delay); // 执行回调函数
+  }, delay);
+}
+// 使用示例
+mySetInterval(() => console.log("Hello, world!"), 1000);
+
+//mySetInterval 中的递归通过 setTimeout 转换为 异步递归 ，每次递归调用的触发点是事件循环的宏任务队列，而非当前调用栈的延续。因此，调用栈不会累积，自然不会触发栈溢出。`
+            },
+            {
+                id: 'lengthOfLongestSubstring',
+                title: '最长不重复子串',
+                description: '查找字符串中不含重复字符的最长子串长度，使用滑动窗口算法。',
+                code: `//要找到字符串中出现的不重复字符的最长长度
+
+function lengthOfLongestSubstring(s) {
+  let start = 0; // 窗口起始位置
+  let maxLength = 0; // 最长不重复子串的长度
+  let seen = new Set(); // 用于存储窗口内的字符
+  for (let end = 0; end < s.length; end++) {
+    // 如果当前字符已经在窗口内，则移动窗口的起始位置
+    while (seen.has(s[end])) {
+      seen.delete(s[start]);
+      start++;
+    } // 将当前字符添加到窗口内
+    seen.add(s[end]); // 更新最长不重复子串的长度
+    maxLength = Math.max(maxLength, end - start + 1);
+  }
+  return maxLength;
+}
+// 示例
+const s = "abcabcbb";
+console.log(lengthOfLongestSubstring(s)); // 输出 3`
+            },
+            {
+                id: 'abortAxios',
+                title: '取消 Axios 请求',
+                description: '使用AbortController取消正在进行的Axios请求。',
+                code: `//取消axios请求
+const controller = new AbortController();
+axios.get("/foo/bar", { signal: controller.signal }).then(function (response) {
+  //...
+});
+controller.abort();`
+            },
+            {
+                id: 'thousandSeparator',
+                title: '千分位分隔符',
+                description: '使用正则表达式将数字转换为千分位格式（如1000000 → 1,000,000）。',
+                code: `// 千分位分隔符正则表达式（将长数字字符串转换为每三位用逗号分隔的格式，如 "1000000" → "1,000,000"）
+var str = "100000000000",
+  // 正则解释：
+  // - (?=(\B\d{3})+$)：正向先行断言，匹配后面能接「非单词边界+3位数字」且最终到达字符串结尾的位置
+  //   - \B：非单词边界（避免在数字开头前添加逗号）
+  //   - \d{3}：匹配3位数字
+  //   - (+)：前面的组合（\B\d{3}）至少出现1次（处理多组三位数字）
+  //   - $：匹配字符串结尾（确保从右往左分割）
+  // - g：全局匹配模式（替换所有符合条件的位置）
+  reg = /(?=(\B\d{3})+$)/g;
+str.replace(reg, ",");
+str.replace(reg, ",");`
+            },
+            {
+                id: 'floatEqual',
+                title: '浮点数相等比较',
+                description: '解决JavaScript浮点数精度问题，判断两个浮点数是否近似相等。',
+                code: `// 实现一个函数，0.1+0.2=0.3
+/**
+ * @description 判断两个浮点数是否近似相等
+ * @param {number} a - 第一个数
+ * @param {number} b - 第二个数
+ * @param {number} [epsilon=Number.EPSILON] - 误差容忍度（默认使用JS内置最小精度）
+ * @returns {boolean} 是否近似相等
+ */
+function floatEqual(a, b, epsilon = Number.EPSILON) {
+  return Math.abs(a - b) < epsilon;
+}
+
+// 使用示例
+console.log(floatEqual(0.1 + 0.2, 0.3)); // 输出 true`
+            },
+            {
+                id: 'toCamelCase',
+                title: '转换为驼峰命名',
+                description: '将连字符分隔的字符串转换为驼峰命名格式。',
+                code: `//转化为驼峰命名
+var s1 = "get-element-by-id";
+var f = function (s) {
+  return s.replace(/-\w/g, function (x) {
+    return x.slice(1).toUpperCase();
+  });
+};`
+            },
+            {
+                id: 'binarySearch',
+                title: '二分查找算法',
+                description: '在有序数组中高效查找目标值，时间复杂度O(log n)。',
+                code: `/**
+ * @description 二分查找算法
+ * @param {number[]} arr - 已排序的输入数组（升序）
+ * @param {number} target - 目标值
+ * @return {number} 目标值的索引（未找到返回-1）
+ */
+function binarySearch(arr, target) {
+  // 初始化左右指针，定义搜索范围的边界
+  // 时间复杂度：O(1) - 常数时间的初始化操作
+  let left = 0; // 搜索范围的左边界，初始为数组第一个元素
+  let right = arr.length - 1; // 搜索范围的右边界，初始为数组最后一个元素
+
+  // 当左指针小于等于右指针时，搜索范围内还有元素，继续搜索
+  // 循环最多执行log₂n次，因为每次迭代都将搜索范围缩小一半
+  while (left <= right) {
+    // 计算中间位置，使用Math.floor确保得到整数索引
+    // 使用(left + right) / 2可能导致大数溢出，更安全的写法是：left + Math.floor((right - left) / 2)
+    const mid = Math.floor((left + right) / 2);
+
+    // 找到目标值，直接返回索引位置（最好情况：O(1)）
+    if (arr[mid] === target) return mid;
+
+    // 中间值小于目标值，说明目标在右半部分
+    // 将左边界移到中间位置的右侧，缩小搜索范围为右半部分
+    if (arr[mid] < target) {
+      left = mid + 1; // 排除了mid及左侧的所有元素
+    } else {
+      // 中间值大于目标值，说明目标在左半部分
+      // 将右边界移到中间位置的左侧，缩小搜索范围为左半部分
+      right = mid - 1; // 排除了mid及右侧的所有元素
+    }
+  }
+
+  // 搜索范围为空仍未找到目标值，返回-1表示不存在
+  return -1;
+}
+
+// 调用示例
+const sortedArr = [2, 5, 8, 12, 16, 23, 38, 56, 72, 91]; // 创建一个已排序的数组
+console.log(binarySearch(sortedArr, 23)); // 输出: 5，表示23在数组中的索引位置
+console.log(binarySearch(sortedArr, 10)); // 输出: -1，表示10不在数组中`
+            },
+            {
+                id: 'bubbleSort',
+                title: '冒泡排序算法',
+                description: '经典排序算法，通过比较相邻元素并交换位置实现排序，包含优化。',
+                code: `/**
+ * @description 冒泡排序算法
+ * @param {number[]} arr - 输入数组
+ * @return {number[]} 排序后的数组
+ */
+function bubbleSort(arr) {
+  // 获取数组长度，用于控制循环次数
+  // 时间复杂度：O(1)，常数时间操作
+  const len = arr.length;
+
+  // 外层循环：控制排序轮数，最多需要n-1轮（n为数组长度）
+  // 时间复杂度：O(n)，最多执行n-1次
+  for (let i = 0; i < len - 1; i++) {
+    // 优化标志：记录本轮是否发生交换，用于提前终止
+    // 如果一轮中没有交换，说明数组已经有序
+    let swapped = false;
+
+    // 内层循环：比较并交换相邻元素
+    // 每轮比较次数递减，因为每轮结束后最大的元素已经到达正确位置
+    // 时间复杂度：O(n-i-1)，随着i增加而减少
+    for (let j = 0; j < len - 1 - i; j++) {
+      // 比较相邻元素，如果前一个大于后一个，则交换位置
+      // 这确保较大的元素逐渐"冒泡"到数组末尾
+      if (arr[j] > arr[j + 1]) {
+        // 使用ES6解构赋值语法交换元素，无需临时变量
+        // 时间复杂度：O(1)，常数时间操作
+        [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]]; // 交换相邻元素
+        swapped = true; // 标记本轮发生了交换
+      }
+    }
+
+    // 优化：如果本轮没有发生交换，说明数组已经有序，可以提前终止
+    // 最好情况下（已排序数组），时间复杂度降至O(n)
+    if (!swapped) break; // 提前终止：若本轮无交换则已排序完成
+  }
+
+  // 返回排序后的数组（原地排序，返回原数组的引用）
+  // 总体时间复杂度：O(n²)，因为有两层嵌套循环
+  // 空间复杂度：O(1)，只使用了少量额外变量
+  return arr;
+}
+
+// 调用示例
+const messyArr = [5, 3, 8, 4, 6]; // 创建一个未排序的数组
+console.log(bubbleSort(messyArr)); // 输出: [3, 4, 5, 6, 8]，展示排序后的结果`
+            }
+        ];
+
+        // 生成导航和内容
+        function generateContent() {
+            const navList = document.getElementById('navList');
+            const content = document.getElementById('content');
+
+            // 清空现有内容
+            navList.innerHTML = '';
+            content.innerHTML = '';
+
+            // 遍历代码片段生成导航和内容
+            codeSnippets.forEach(snippet => {
+                // 创建导航项
+                const navItem = document.createElement('li');
+                navItem.className = 'nav-item';
+                navItem.textContent = snippet.title;
+                navItem.setAttribute('data-id', snippet.id);
+                navItem.addEventListener('click', () => {
+                    // 移除所有active类
+                    document.querySelectorAll('.nav-item').forEach(item => {
+                        item.classList.remove('active');
+                    });
+                    // 添加active类到当前项
+                    navItem.classList.add('active');
+                    // 滚动到对应部分
+                    document.getElementById(snippet.id).scrollIntoView({ behavior: 'smooth' });
+                });
+                navList.appendChild(navItem);
+
+                // 创建内容部分
+                const section = document.createElement('div');
+                section.className = 'code-section';
+                section.id = snippet.id;
+
+                const title = document.createElement('h2');
+                title.textContent = snippet.title;
+                section.appendChild(title);
+
+                if (snippet.description) {
+                    const description = document.createElement('p');
+                    description.className = 'description';
+                    description.textContent = snippet.description;
+                    section.appendChild(description);
+                }
+
+                const pre = document.createElement('pre');
+                const code = document.createElement('code');
+                code.className = 'javascript';
+                code.textContent = snippet.code;
+                pre.appendChild(code);
+                section.appendChild(pre);
+
+                content.appendChild(section);
+            });
+        }
+
+        // 初始化页面
+        generateContent();
+
+        // 搜索功能
+        const searchInput = document.getElementById('search');
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const navItems = document.querySelectorAll('.nav-item');
+
+            navItems.forEach(item => {
+                const id = item.getAttribute('data-id');
+                const snippet = codeSnippets.find(s => s.id === id);
+
+                if (snippet.title.toLowerCase().includes(searchTerm) ||
+                    snippet.description.toLowerCase().includes(searchTerm) ||
+                    snippet.code.toLowerCase().includes(searchTerm)) {
+                    item.style.display = '';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+
+        // 返回顶部按钮
+        const backToTop = document.getElementById('backToTop');
+        const content = document.getElementById('content');
+
+        content.addEventListener('scroll', function() {
+            if (content.scrollTop > 300) {
+                backToTop.classList.add('visible');
+            } else {
+                backToTop.classList.remove('visible');
+            }
+        });
+
+        backToTop.addEventListener('click', function() {
+            content.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    </script>
+</body>
+</html>
