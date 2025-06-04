@@ -405,3 +405,368 @@ Function.prototype.myBind = function (context, ...args) {
     return self.myCall(context, ...args, ...newArgs);
   };
 };
+/**
+ * @description 自定义实现instanceof运算符，检测构造函数的prototype是否存在于对象的原型链中
+ * @param {Object|Function} obj - 要检测的目标对象（注意：基本类型直接返回false）
+ * @param {Function} constructor - 用于检测的构造函数
+ * @return {boolean} 目标对象是否为构造函数的实例
+ */
+function myInstanceof(obj, constructor) {
+  // 处理基本类型：基本类型没有原型链，直接返回false（null也在此处处理）
+  if ((typeof obj !== "object" && typeof obj !== "function") || obj === null) {
+    return false;
+  }
+  // 获取目标对象的原型（等同于obj.__proto__，但推荐使用标准方法）
+  let proto = Object.getPrototypeOf(obj);
+  // 遍历原型链，直到原型为null（原型链终点）
+  while (proto !== null) {
+    // 检查当前原型是否等于构造函数的prototype属性
+    if (proto === constructor.prototype) {
+      return true; // 找到匹配，返回true
+    }
+    // 继续向上查找原型链
+    proto = Object.getPrototypeOf(proto);
+  }
+  // 遍历完整个原型链未找到匹配，返回false
+  return false;
+}
+
+// 使用示例
+function Animal() {}
+const cat = new Animal();
+console.log(myInstanceof(cat, Animal)); // 输出: true
+console.log(myInstanceof(cat, Object)); // 输出: true
+console.log(myInstanceof(123, Number)); // 输出: false（基本类型直接返回false）
+
+/**
+ * @description 自定义实现instanceof运算符，检测构造函数的prototype是否存在于对象的原型链中
+ * @param {Object|Function} obj - 要检测的目标对象（注意：基本类型直接返回false）
+ * @param {Function} constructor - 用于检测的构造函数
+ * @return {boolean} 目标对象是否为构造函数的实例
+ */
+function myInstanceof(obj, constructor) {
+  // 处理基本类型：基本类型没有原型链，直接返回false（null也在此处处理）
+  if ((typeof obj !== "object" && typeof obj !== "function") || obj === null) {
+    return false;
+  }
+  // 获取目标对象的原型（等同于obj.__proto__，但推荐使用标准方法）
+  let proto = Object.getPrototypeOf(obj);
+  // 遍历原型链，直到原型为null（原型链终点）
+  while (proto !== null) {
+    // 检查当前原型是否等于构造函数的prototype属性
+    if (proto === constructor.prototype) {
+      return true; // 找到匹配，返回true
+    }
+    // 继续向上查找原型链
+    proto = Object.getPrototypeOf(proto);
+  }
+  // 遍历完整个原型链未找到匹配，返回false
+  return false;
+}
+
+// 使用示例
+function Animal() {}
+const cat1 = new Animal();
+console.log(myInstanceof(cat1, Animal)); // 输出: true
+console.log(myInstanceof(cat1, Object)); // 输出: true
+console.log(myInstanceof(123, Number)); // 输出: false（基本类型直接返回false）
+
+/**
+ * 深拷贝一个对象
+ *
+ * @param {any} obj 需要深拷贝的对象
+ * @returns {any} 深拷贝后的对象
+ */
+function deepClone(obj) {
+  // 如果传入的对象不是对象或者为null，则直接返回该对象
+  if (typeof obj !== "object" || obj === null) {
+    return obj;
+  }
+
+  let clone;
+  // 如果传入的对象是数组
+  if (Array.isArray(obj)) {
+    clone = [];
+    // 遍历数组中的每个元素，递归调用deepClone进行深拷贝
+    for (let i = 0; i < obj.length; i++) {
+      clone[i] = deepClone(obj[i]);
+    }
+  } else {
+    // 如果传入的对象不是数组，则初始化为空对象
+    clone = {};
+    // 遍历对象的每个属性，递归调用deepClone进行深拷贝
+    for (let key in obj) {
+      if (obj.hasOwnProperty(key)) {
+        clone[key] = deepClone(obj[key]);
+      }
+    }
+  }
+
+  return clone;
+}
+
+/**
+ * 超简单版本：控制固定数量异步任务的并发执行
+ * @param {number} limit - 最大并发数
+ */
+function simpleLimit(limit) {
+  // 等待执行的任务队列
+  const queue = [];
+  // 当前正在执行的任务数量
+  let activeCount = 0;
+
+  // 执行队列中的下一个任务
+  const runNext = () => {
+    if (queue.length === 0) return;
+
+    // 如果正在执行的任务数量小于限制，则执行下一个任务
+    if (activeCount < limit) {
+      // 从队列中取出一个任务
+      const { fn, resolve, reject } = queue.shift();
+      activeCount++;
+
+      Promise.resolve(fn())
+        .then(resolve)
+        .catch(reject)
+        .finally(() => {
+          activeCount--;
+          runNext(); // 任务完成后，尝试执行下一个任务
+        });
+    }
+  };
+
+  // 返回一个函数，用于添加任务
+  return (fn) => {
+    return new Promise((resolve, reject) => {
+      queue.push({ fn, resolve, reject });
+      runNext();
+    });
+  };
+}
+
+// 使用示例
+const runTask = simpleLimit(2); // 最多同时执行2个任务
+
+// 创建5个模拟的异步任务
+const createTask = (id, delay) => () => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      console.log(`任务${id}完成，耗时${delay}ms`);
+      resolve(`任务${id}的结果`);
+    }, delay);
+  });
+};
+
+// 执行任务并获取结果
+runTask(createTask(1, 1000)).then((result) => console.log(result));
+runTask(createTask(2, 2000)).then((result) => console.log(result));
+runTask(createTask(3, 1500)).then((result) => console.log(result));
+runTask(createTask(4, 800)).then((result) => console.log(result));
+
+/**
+ * 图片懒加载类
+ * @class LazyLoad
+ */
+class LazyLoad {
+  /**
+   * 创建懒加载实例
+   * @param {Object} options - 配置选项
+   * @param {string} options.selector - 懒加载图片的CSS选择器
+   * @param {string} options.dataSrc - 存储真实图片地址的data属性名
+   * @param {number} options.threshold - IntersectionObserver的阈值
+   * @param {number} options.throttleDelay - 节流延迟时间（毫秒）
+   */
+  constructor(options = {}) {
+    this.options = {
+      selector: ".lazy-image",
+      dataSrc: "data-src",
+      threshold: 0.1,
+      throttleDelay: 200,
+      ...options,
+    };
+
+    this.images = [];
+    this.observer = null;
+    this.initialized = false;
+
+    // 绑定方法的this
+    this.throttledLoad = this.throttle(
+      this.loadImages.bind(this),
+      this.options.throttleDelay
+    );
+  }
+
+  /**
+   * 初始化懒加载
+   */
+  init() {
+    if (this.initialized) return;
+
+    this.images = Array.from(document.querySelectorAll(this.options.selector));
+
+    if ("IntersectionObserver" in window) {
+      this.initIntersectionObserver();
+    } else {
+      this.initLegacyLazyLoad();
+    }
+
+    this.initialized = true;
+  }
+
+  /**
+   * 使用IntersectionObserver初始化
+   */
+  initIntersectionObserver() {
+    this.observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            this.loadImage(entry.target);
+            this.observer.unobserve(entry.target);
+          }
+        });
+      },
+      {
+        threshold: this.options.threshold,
+      }
+    );
+
+    this.images.forEach((image) => {
+      if (image.hasAttribute(this.options.dataSrc)) {
+        this.observer.observe(image);
+      }
+    });
+  }
+
+  /**
+   * 初始化传统的滚动监听方式
+   */
+  initLegacyLazyLoad() {
+    // 初始检查
+    this.loadImages();
+
+    // 添加滚动事件监听
+    window.addEventListener("scroll", this.throttledLoad);
+    window.addEventListener("resize", this.throttledLoad);
+    window.addEventListener("orientationchange", this.throttledLoad);
+  }
+
+  /**
+   * 加载所有在可视区域内的图片
+   */
+  loadImages() {
+    this.images = this.images.filter((image) => {
+      if (!image.hasAttribute(this.options.dataSrc)) {
+        return false;
+      }
+
+      if (this.isInViewport(image)) {
+        this.loadImage(image);
+        return false;
+      }
+
+      return true;
+    });
+
+    // 如果所有图片都已加载，移除事件监听
+    if (this.images.length === 0) {
+      this.destroy();
+    }
+  }
+
+  /**
+   * 加载单张图片
+   * @param {HTMLImageElement} image - 要加载的图片元素
+   */
+  loadImage(image) {
+    const src = image.getAttribute(this.options.dataSrc);
+    if (!src) return;
+
+    // 设置加载事件
+    image.onload = () => {
+      image.removeAttribute(this.options.dataSrc);
+      image.classList.add("lazy-loaded");
+    };
+
+    // 设置错误处理
+    image.onerror = () => {
+      console.error(`Failed to load image: ${src}`);
+      image.removeAttribute(this.options.dataSrc);
+    };
+
+    // 触发图片加载
+    image.src = src;
+  }
+
+  /**
+   * 检查元素是否在可视区域内
+   * @param {HTMLElement} element - 要检查的元素
+   * @returns {boolean} 是否在可视区域内
+   */
+  isInViewport(element) {
+    const rect = element.getBoundingClientRect();
+    return (
+      rect.top <=
+        (window.innerHeight || document.documentElement.clientHeight) &&
+      rect.bottom >= 0 &&
+      rect.left <=
+        (window.innerWidth || document.documentElement.clientWidth) &&
+      rect.right >= 0
+    );
+  }
+
+  /**
+   * 节流函数
+   * @param {Function} func - 要节流的函数
+   * @param {number} delay - 延迟时间（毫秒）
+   * @returns {Function} 节流后的函数
+   */
+  throttle(func, delay) {
+    let lastCall = 0;
+    return function (...args) {
+      const now = Date.now();
+      if (now - lastCall >= delay) {
+        lastCall = now;
+        func.apply(this, args);
+      }
+    };
+  }
+
+  /**
+   * 重新扫描页面中的懒加载图片
+   * 用于动态添加的内容
+   */
+  rescan() {
+    const newImages = Array.from(
+      document.querySelectorAll(this.options.selector)
+    ).filter(
+      (image) =>
+        !this.images.includes(image) && image.hasAttribute(this.options.dataSrc)
+    );
+
+    if (newImages.length > 0) {
+      this.images = [...this.images, ...newImages];
+
+      if (this.observer) {
+        newImages.forEach((image) => this.observer.observe(image));
+      } else {
+        this.loadImages();
+      }
+    }
+  }
+
+  /**
+   * 销毁懒加载实例，移除所有事件监听
+   */
+  destroy() {
+    if (this.observer) {
+      this.observer.disconnect();
+    } else {
+      window.removeEventListener("scroll", this.throttledLoad);
+      window.removeEventListener("resize", this.throttledLoad);
+      window.removeEventListener("orientationchange", this.throttledLoad);
+    }
+
+    this.initialized = false;
+  }
+}
