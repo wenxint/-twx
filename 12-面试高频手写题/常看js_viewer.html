@@ -713,6 +713,7 @@ Function.prototype.myCall = function(context, ...args) {
   const fnSymbol = Symbol('fn');
 
   // 将当前函数赋值给 context 的临时属性
+  // this 指向当前函数（即调用 myCall 的函数）
   context[fnSymbol] = this;
 
   // 调用函数并获取结果

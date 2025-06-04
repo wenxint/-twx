@@ -370,6 +370,7 @@ Function.prototype.myCall = function (context, ...args) {
   // 创建唯一Symbol作为临时属性名，避免覆盖对象原有属性
   const fn = Symbol("fn");
   // 将当前函数（调用myCall的函数）挂载到context的临时属性上
+  // this 指向当前函数（即调用 myCall 的函数）
   context[fn] = this;
   // 执行临时属性（即原函数），传入剩余参数，此时函数内的this指向context
   const result = context[fn](...args);
@@ -785,3 +786,13 @@ const intersection = new Set([...a].filter((x) => b.has(x))); // Set(2) {2, 3}
 
 // 差集 (a - b)
 const difference = new Set([...a].filter((x) => !b.has(x))); // Set(1) {1}
+
+
+// 判断当前页面是否在 iframe 中
+const isInIframe = window.self !== window.top;
+
+if (isInIframe) {
+  console.log('当前页面被嵌入在 iframe 中');
+} else {
+  console.log('当前页面是顶级窗口');
+}
