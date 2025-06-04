@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>JavaScript 代码查看器</title>
+    <!-- Prism.js CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/line-numbers/prism-line-numbers.min.css" rel="stylesheet" />
     <style>
         * {
             margin: 0;
@@ -175,63 +178,102 @@
                 cursor: pointer;
             }
         }
-        /* 语法高亮样式 */
-        .hljs-comment,
-        .hljs-quote {
-            color: #8e908c;
-            font-style: italic;
+        /* Prism.js 代码高亮样式调整 */
+        pre[class*="language-"] {
+            background: #f5f5f5;
+            border: 1px solid #e1e1e1;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            overflow: auto;
+            position: relative;
+            line-height: 1.5;
         }
-        .hljs-keyword,
-        .hljs-selector-tag {
-            color: #0086b3;
-            font-weight: bold;
+
+        code[class*="language-"] {
+            font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+            font-size: 13px;
+            line-height: 1.5;
         }
-        .hljs-string,
-        .hljs-doctag,
-        .hljs-template-variable {
-            color: #7ec699;
+
+        /* 行号相关样式 */
+        .line-numbers {
+            position: relative;
+            padding-left: 3.8em !important;
+            counter-reset: linenumber;
         }
-        .hljs-title,
-        .hljs-section,
-        .hljs-selector-id {
-            color: #dd4a68;
-            font-weight: bold;
+
+        .line-numbers > code {
+            position: relative;
+            white-space: inherit;
         }
-        .hljs-variable,
-        .hljs-template-variable {
-            color: #e90;
+
+        .line-numbers .line-numbers-rows {
+            position: absolute;
+            pointer-events: none;
+            top: 0;
+            font-size: 100%;
+            left: -3.8em;
+            width: 3em;
+            letter-spacing: -1px;
+            border-right: 1px solid #999;
+            user-select: none;
+            z-index: 1;
         }
-        .hljs-subst {
-            color: #333;
+
+        .line-numbers-rows > span {
+            display: block;
+            counter-increment: linenumber;
+            height: 1.5em;
+            line-height: 1.5em;
         }
-        .hljs-type,
-        .hljs-built_in,
-        .hljs-builtin-name,
-        .hljs-symbol,
-        .hljs-selector-attr,
-        .hljs-link {
-            color: #c76b29;
+
+        .line-numbers-rows > span:before {
+            content: counter(linenumber);
+            color: #999;
+            display: block;
+            padding-right: 0.8em;
+            text-align: right;
+            font-size: 13px;
         }
-        .hljs-number,
-        .hljs-attribute {
-            color: #c76b29;
+
+        /* 确保代码块在各种情况下都能正确显示 */
+        pre.line-numbers {
+            position: relative;
+            padding-left: 3.8em !important;
+            counter-reset: linenumber;
         }
-        .hljs-literal {
-            color: #0086b3;
+
+        pre.line-numbers > code {
+            position: relative;
+            white-space: inherit;
         }
-        .hljs-regexp,
-        .hljs-deletion {
-            color: #e90;
+
+        /* 强制显示行号的备用样式 */
+        pre[class*="language-"].line-numbers {
+            padding-left: 3.8em !important;
         }
-        .hljs-addition,
-        .hljs-meta {
-            color: #7ec699;
+
+        /* 当Prism.js未加载时的备用行号样式 */
+        .manual-line-numbers {
+            position: relative;
+            padding-left: 3.8em !important;
         }
-        .hljs-emphasis {
-            font-style: italic;
-        }
-        .hljs-strong {
-            font-weight: bold;
+
+        .manual-line-numbers .line-numbers-rows {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3em;
+            padding-right: 0.8em;
+            text-align: right;
+            color: #999;
+            font-size: 13px;
+            border-right: 1px solid #ddd;
+            background-color: #f9f9f9;
+            user-select: none;
+            pointer-events: none;
+            line-height: 1.5em;
         }
     </style>
 </head>
@@ -258,6 +300,10 @@
             <li class="nav-item" data-target="bubbleSort">冒泡排序</li>
             <li class="nav-item" data-target="quickSort">快速排序</li>
             <li class="nav-item" data-target="myCallApplyBind">手写 call/apply/bind</li>
+            <li class="nav-item" data-target="myInstanceof">手写 instanceof</li>
+            <li class="nav-item" data-target="deepClone">深拷贝对象</li>
+            <li class="nav-item" data-target="simpleLimit">异步并发控制</li>
+            <li class="nav-item" data-target="lazyLoad">图片懒加载</li>
         </ul>
     </div>
 
@@ -269,7 +315,7 @@
             <div class="code-description">
                 使用 requestAnimationFrame 实现平滑动画，相比 setTimeout 和 setInterval 具有更好的性能和更流畅的动画效果。
             </div>
-            <pre><code class="javascript">// 使用 requestAnimationFrame 优化动画
+            <pre class="line-numbers"><code class="language-javascript">// 使用 requestAnimationFrame 优化动画
 let position = 0;
 const targetPosition = 300; // 目标位置（300px）
 let animationId;
@@ -297,7 +343,7 @@ animationId = requestAnimationFrame(animate);</code></pre>
             <div class="code-description">
                 手动实现 Promise.all 方法，接收一个 Promise 数组，返回一个新的 Promise，当所有 Promise 都成功时返回结果数组，任一 Promise 失败则返回失败原因。
             </div>
-            <pre><code class="javascript">// 首先，让我们回顾一下MyAll的实现
+            <pre class="line-numbers"><code class="language-javascript">// 首先，让我们回顾一下MyAll的实现
 Promise.MyAll = function (promises) {
   // 存储所有 Promise 的结果
   let arr = [],
@@ -369,7 +415,7 @@ Promise.MyAll([promise1, promise2, promise3, promise4])
             <div class="code-description">
                 实现函数柯里化，将接受多个参数的函数转换为接受单个参数的函数序列，每个函数返回一个新函数，直到收集所有参数后执行原函数。
             </div>
-            <pre><code class="javascript">/**
+            <pre class="line-numbers"><code class="language-javascript">/**
  * @description 通用柯里化函数
  * @param {Function} fn - 要柯里化的原始函数
  * @return {Function} 柯里化后的函数
@@ -394,7 +440,7 @@ function curry(fn) {
             <div class="code-description">
                 使用 setTimeout 实现 setInterval 的功能，可以避免 setInterval 的一些问题，如回调函数执行时间超过间隔时间导致的连续执行。
             </div>
-            <pre><code class="javascript">// 手写mySetInterval
+            <pre class="line-numbers"><code class="language-javascript">// 手写mySetInterval
 function mySetInterval(callback, delay) {
   // 初始调用
   callback(); // 递归调用 setTimeout 来模拟 setInterval
@@ -416,7 +462,7 @@ mySetInterval(() => console.log("Hello, world!"), 1000);
             <div class="code-description">
                 查找字符串中最长的不含重复字符的子串，使用滑动窗口算法实现，时间复杂度为 O(n)。
             </div>
-            <pre><code class="javascript">function lengthOfLongestSubstring(s) {
+            <pre class="line-numbers"><code class="language-javascript">function lengthOfLongestSubstring(s) {
   let start = 0; // 窗口起始位置
   let maxLength = 0; // 最长不重复子串的长度
   let seen = new Set(); // 用于存储窗口内的字符
@@ -438,401 +484,974 @@ console.log(lengthOfLongestSubstring(s)); // 输出 3</code></pre>
         </div>
 
         <div class="code-section" id="axiosCancel">
-            <h2>Axios 请求取消</h2>
+            <h2>axios 取消请求</h2>
             <div class="code-description">
-                使用 AbortController 取消 Axios 请求，适用于用户快速切换页面或搜索条件变化时取消正在进行的请求。
+                实现类似 axios 的请求取消功能，可以在请求发出后主动取消，避免不必要的网络请求和处理。
             </div>
-            <pre><code class="javascript">const controller = new AbortController();
-axios.get("/foo/bar", { signal: controller.signal }).then(function (response) {
-  //...
-});
-controller.abort();</code></pre>
+            <pre class="line-numbers"><code class="language-javascript">// 创建一个 CancelToken 类来处理取消逻辑
+class CancelToken {
+  constructor() {
+    this.promise = new Promise((resolve) => {
+      this.cancel = resolve;
+    });
+  }
+}
+
+// 创建一个工厂函数来生成 CancelToken
+CancelToken.source = function () {
+  const source = new CancelToken();
+  return {
+    token: source,
+    cancel: source.cancel,
+  };
+};
+
+// 简化版的 axios 请求函数
+function request(url, config = {}) {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("GET", url);
+
+    // 如果配置了 cancelToken，则监听取消事件
+    if (config.cancelToken) {
+      config.cancelToken.promise.then(() => {
+        xhr.abort();
+        reject(new Error("Request cancelled"));
+      });
+    }
+
+    xhr.onload = () => resolve(xhr.response);
+    xhr.onerror = () => reject(new Error("Network error"));
+    xhr.send();
+  });
+}
+
+// 使用示例
+const source = CancelToken.source();
+
+request("https://api.example.com/data", {
+  cancelToken: source.token,
+})
+  .then((response) => console.log(response))
+  .catch((error) => console.log(error.message));
+
+// 3秒后取消请求
+setTimeout(() => {
+  source.cancel();
+}, 3000);</code></pre>
             <button class="copy-btn">复制代码</button>
         </div>
 
         <div class="code-section" id="thousandSeparator">
-            <h2>千分位分隔符</h2>
+            <h2>数字千分位分隔符</h2>
             <div class="code-description">
-                使用正则表达式为数字添加千分位分隔符，使大数字更易读。
+                为数字添加千分位分隔符，支持整数和小数，提高数字的可读性。
             </div>
-            <pre><code class="javascript">// 千分位分隔符正则表达式（将长数字字符串转换为每三位用逗号分隔的格式，如 "1000000" → "1,000,000"）
-var str = "100000000000",
-  // 正则解释：
-  // - (?=(\B\d{3})+$)：正向先行断言，匹配后面能接「非单词边界+3位数字」且最终到达字符串结尾的位置
-  //   - \B：非单词边界（避免在数字开头前添加逗号）
-  //   - \d{3}：匹配3位数字
-  //   - (+)：前面的组合（\B\d{3}）至少出现1次（处理多组三位数字）
-  //   - $：匹配字符串结尾（确保从右往左分割）
-  // - g：全局匹配模式（替换所有符合条件的位置）
-  reg = /(?=(\B\d{3})+$)/g;
-str.replace(reg, ",");</code></pre>
+            <pre class="line-numbers"><code class="language-javascript">function thousandSeparator(num) {
+  // 将数字转换为字符串
+  const str = num.toString();
+
+  // 检查是否有小数点
+  const parts = str.split('.');
+
+  // 对整数部分添加千分位分隔符
+  parts[0] = parts[0].replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,');
+
+  // 重新组合整数和小数部分
+  return parts.join('.');
+}
+
+// 使用示例
+console.log(thousandSeparator(1234567)); // "1,234,567"
+console.log(thousandSeparator(1234567.89)); // "1,234,567.89"
+console.log(thousandSeparator(1000)); // "1,000"</code></pre>
             <button class="copy-btn">复制代码</button>
         </div>
 
         <div class="code-section" id="floatEqual">
-            <h2>浮点数比较</h2>
+            <h2>浮点数相等比较</h2>
             <div class="code-description">
-                由于 JavaScript 中浮点数计算的精度问题，直接比较两个浮点数是否相等可能会得到错误的结果。这个函数通过设置一个极小的误差范围来比较两个浮点数是否相等。
+                由于浮点数精度问题，直接使用 === 比较可能得到错误结果。这个函数提供了准确的浮点数比较方法。
             </div>
-            <pre><code class="javascript">/**
- * @description 判断两个浮点数是否近似相等
- * @param {number} a - 第一个数
- * @param {number} b - 第二个数
- * @param {number} [epsilon=Number.EPSILON] - 误差容忍度（默认使用JS内置最小精度）
- * @returns {boolean} 是否近似相等
- */
-function floatEqual(a, b, epsilon = Number.EPSILON) {
+            <pre class="line-numbers"><code class="language-javascript">function floatEqual(a, b, epsilon = Number.EPSILON) {
   return Math.abs(a - b) < epsilon;
 }
 
 // 使用示例
-console.log(floatEqual(0.1 + 0.2, 0.3)); // 输出 true</code></pre>
+console.log(0.1 + 0.2 === 0.3); // false
+console.log(floatEqual(0.1 + 0.2, 0.3)); // true
+
+// 自定义精度
+console.log(floatEqual(0.1 + 0.2, 0.3, 1e-10)); // true</code></pre>
             <button class="copy-btn">复制代码</button>
         </div>
 
         <div class="code-section" id="hyphenToCamelCase">
-            <h2>连字符转驼峰</h2>
+            <h2>短横线转驼峰命名</h2>
             <div class="code-description">
-                将连字符形式的字符串（如 CSS 属性名）转换为驼峰形式，常用于处理 DOM 样式或 API 参数。
+                将短横线命名（kebab-case）转换为驼峰命名（camelCase），常用于 CSS 属性名转换为 JavaScript 中的样式属性名。
             </div>
-            <pre><code class="javascript">//转化为驼峰命名
-var s1 = "get-element-by-id";
-var f = function (s) {
-  return s.replace(/-\w/g, function (x) {
-    return x.slice(1).toUpperCase();
-  });
-};</code></pre>
+            <pre class="line-numbers"><code class="language-javascript">function hyphenToCamelCase(str) {
+  return str.replace(/-(\w)/g, (match, letter) => letter.toUpperCase());
+}
+
+// 使用示例
+console.log(hyphenToCamelCase('background-color')); // "backgroundColor"
+console.log(hyphenToCamelCase('font-size')); // "fontSize"
+console.log(hyphenToCamelCase('border-top-width')); // "borderTopWidth"</code></pre>
             <button class="copy-btn">复制代码</button>
         </div>
 
         <div class="code-section" id="binarySearch">
             <h2>二分查找</h2>
             <div class="code-description">
-                二分查找算法用于在有序数组中查找特定元素，时间复杂度为 O(log n)，比线性查找 O(n) 更高效。
+                在有序数组中查找目标值的高效算法，时间复杂度为 O(log n)。
             </div>
-            <pre><code class="javascript">/**
- * @description 二分查找算法
- * @param {number[]} arr - 已排序的输入数组（升序）
- * @param {number} target - 目标值
- * @return {number} 目标值的索引（未找到返回-1）
- */
-function binarySearch(arr, target) {
-  // 初始化左右指针，定义搜索范围的边界
-  // 时间复杂度：O(1) - 常数时间的初始化操作
-  let left = 0; // 搜索范围的左边界，初始为数组第一个元素
-  let right = arr.length - 1; // 搜索范围的右边界，初始为数组最后一个元素
+            <pre class="line-numbers"><code class="language-javascript">function binarySearch(arr, target) {
+  let left = 0;
+  let right = arr.length - 1;
 
-  // 当左指针小于等于右指针时，搜索范围内还有元素，继续搜索
-  // 循环最多执行log₂n次，因为每次迭代都将搜索范围缩小一半
   while (left <= right) {
-    // 计算中间位置，使用Math.floor确保得到整数索引
-    // 使用(left + right) / 2可能导致大数溢出，更安全的写法是：left + Math.floor((right - left) / 2)
     const mid = Math.floor((left + right) / 2);
 
-    // 找到目标值，直接返回索引位置（最好情况：O(1)）
-    if (arr[mid] === target) return mid;
-
-    // 中间值小于目标值，说明目标在右半部分
-    // 将左边界移到中间位置的右侧，缩小搜索范围为右半部分
-    if (arr[mid] < target) {
-      left = mid + 1; // 排除了mid及左侧的所有元素
+    if (arr[mid] === target) {
+      return mid; // 找到目标值，返回索引
+    } else if (arr[mid] < target) {
+      left = mid + 1; // 目标值在右半部分
     } else {
-      // 中间值大于目标值，说明目标在左半部分
-      // 将右边界移到中间位置的左侧，缩小搜索范围为左半部分
-      right = mid - 1; // 排除了mid及右侧的所有元素
+      right = mid - 1; // 目标值在左半部分
     }
   }
 
-  // 搜索范围为空仍未找到目标值，返回-1表示不存在
-  return -1;
+  return -1; // 未找到目标值
 }
 
-// 调用示例
-const sortedArr = [2, 5, 8, 12, 16, 23, 38, 56, 72, 91]; // 创建一个已排序的数组
-console.log(binarySearch(sortedArr, 23)); // 输出: 5，表示23在数组中的索引位置
-console.log(binarySearch(sortedArr, 10)); // 输出: -1，表示10不在数组中</code></pre>
+// 使用示例
+const sortedArray = [1, 3, 5, 7, 9, 11, 13, 15];
+console.log(binarySearch(sortedArray, 7)); // 3
+console.log(binarySearch(sortedArray, 4)); // -1</code></pre>
             <button class="copy-btn">复制代码</button>
         </div>
 
         <div class="code-section" id="bubbleSort">
             <h2>冒泡排序</h2>
             <div class="code-description">
-                冒泡排序是一种简单的排序算法，通过重复比较相邻元素并交换它们的位置，使较大的元素逐渐"冒泡"到数组末尾。
+                简单的排序算法，通过重复遍历要排序的列表，比较相邻元素并交换它们的位置。时间复杂度为 O(n²)。
             </div>
-            <pre><code class="javascript">/**
- * @description 冒泡排序算法
- * @param {number[]} arr - 输入数组
- * @return {number[]} 排序后的数组
- */
-function bubbleSort(arr) {
-  // 获取数组长度，用于控制循环次数
-  // 时间复杂度：O(1)，常数时间操作
-  const len = arr.length;
+            <pre class="line-numbers"><code class="language-javascript">function bubbleSort(arr) {
+  const n = arr.length;
 
-  // 外层循环：控制排序轮数，最多需要n-1轮（n为数组长度）
-  // 时间复杂度：O(n)，最多执行n-1次
-  for (let i = 0; i < len - 1; i++) {
-    // 优化标志：记录本轮是否发生交换，用于提前终止
-    // 如果一轮中没有交换，说明数组已经有序
+  for (let i = 0; i < n - 1; i++) {
     let swapped = false;
 
-    // 内层循环：比较并交换相邻元素
-    // 每轮比较次数递减，因为每轮结束后最大的元素已经到达正确位置
-    // 时间复杂度：O(n-i-1)，随着i增加而减少
-    for (let j = 0; j < len - 1 - i; j++) {
-      // 比较相邻元素，如果前一个大于后一个，则交换位置
-      // 这确保较大的元素逐渐"冒泡"到数组末尾
+    for (let j = 0; j < n - i - 1; j++) {
       if (arr[j] > arr[j + 1]) {
-        // 使用ES6解构赋值语法交换元素，无需临时变量
-        // 时间复杂度：O(1)，常数时间操作
-        [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]]; // 交换相邻元素
-        swapped = true; // 标记本轮发生了交换
+        // 交换元素
+        [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
+        swapped = true;
       }
     }
 
-    // 优化：如果本轮没有发生交换，说明数组已经有序，可以提前终止
-    // 最好情况下（已排序数组），时间复杂度降至O(n)
-    if (!swapped) break; // 提前终止：若本轮无交换则已排序完成
+    // 如果没有交换发生，说明数组已经有序
+    if (!swapped) break;
   }
 
-  // 返回排序后的数组（原地排序，返回原数组的引用）
-  // 总体时间复杂度：O(n²)，因为有两层嵌套循环
-  // 空间复杂度：O(1)，只使用了少量额外变量
   return arr;
 }
 
-// 调用示例
-const messyArr = [5, 3, 8, 4, 6]; // 创建一个未排序的数组
-console.log(bubbleSort(messyArr)); // 输出: [3, 4, 5, 6, 8]，展示排序后的结果</code></pre>
+// 使用示例
+const numbers = [64, 34, 25, 12, 22, 11, 90];
+console.log(bubbleSort([...numbers])); // [11, 12, 22, 25, 34, 64, 90]</code></pre>
             <button class="copy-btn">复制代码</button>
         </div>
 
         <div class="code-section" id="quickSort">
             <h2>快速排序</h2>
             <div class="code-description">
-                快速排序是一种高效的排序算法，采用分治策略，通过选择基准值将数组分为小于、等于和大于基准值的三部分，然后递归排序子数组。
+                高效的排序算法，采用分治策略，选择一个基准元素，将数组分为两部分进行递归排序。平均时间复杂度为 O(n log n)。
             </div>
-            <pre><code class="javascript">/**
- * @description 快速排序算法
- * @param {number[]} arr - 输入数组
- * @return {number[]} 排序后的数组
- */
-function quickSort(arr) {
-  // 基准情况：如果数组长度小于等于1，已经是排序状态，直接返回
-  // 这是递归终止条件，确保算法最终会结束
-  if (arr.length <= 1) return arr; // 基准情况：长度≤1直接返回
-
-  // 选择中间元素作为基准值（pivot）
-  // 选择策略影响算法效率，中间元素通常比首尾元素更平衡
-  // 更好的做法是随机选择基准值，以避免最坏情况
-  const pivot = arr[Math.floor(arr.length / 2)]; // 选择中间元素作为基准值
-
-  // 创建三个数组，分别存储小于、等于和大于基准值的元素
-  // 空间复杂度：O(n)，需要额外空间存储这些数组
-  const left = []; // 存储所有小于基准值的元素
-  const middle = []; // 存储所有等于基准值的元素
-  const right = []; // 存储所有大于基准值的元素
-
-  // 遍历原数组，将每个元素放入对应的分区
-  // 时间复杂度：O(n)，需要遍历数组中的每个元素一次
-  for (const num of arr) {
-    // 根据元素与基准值的比较结果，将其放入对应数组
-    // 每次比较和push操作的时间复杂度都是O(1)
-    if (num < pivot) left.push(num); // 小于基准值，放入left数组
-    else if (num === pivot) middle.push(num); // 等于基准值，放入middle数组
-    else right.push(num); // 大于基准值，放入right数组
+            <pre class="line-numbers"><code class="language-javascript">function quickSort(arr) {
+  if (arr.length <= 1) {
+    return arr;
   }
 
-  // 递归地对left和right数组进行排序，并与middle数组合并
-  // 这是分治算法的核心：将问题分解为更小的子问题，解决后合并结果
-  // 时间复杂度：T(n) = 2T(n/2) + O(n)，根据主定理，解为O(n log n)
-  // 最坏情况（如已排序数组）：T(n) = T(n-1) + O(n)，解为O(n²)
-  return [...quickSort(left), ...middle, ...quickSort(right)];
+  const pivot = arr[Math.floor(arr.length / 2)];
+  const left = [];
+  const right = [];
+  const equal = [];
+
+  for (let element of arr) {
+    if (element < pivot) {
+      left.push(element);
+    } else if (element > pivot) {
+      right.push(element);
+    } else {
+      equal.push(element);
+    }
+  }
+
+  return quickSort(left).concat(equal, quickSort(right));
 }
 
-// 调用示例
-const unsortedArr = [34, 12, 45, 6, 89, 23]; // 创建一个未排序的数组
-console.log(quickSort(unsortedArr)); // 输出: [6, 12, 23, 34, 45, 89]，展示排序后的结果</code></pre>
+// 使用示例
+const numbers = [64, 34, 25, 12, 22, 11, 90];
+console.log(quickSort(numbers)); // [11, 12, 22, 25, 34, 64, 90]</code></pre>
             <button class="copy-btn">复制代码</button>
         </div>
 
         <div class="code-section" id="myCallApplyBind">
-            <h2>手写 call/apply/bind</h2>
+            <h2>手写 call、apply、bind</h2>
             <div class="code-description">
-                手动实现 JavaScript 中的 call、apply 和 bind 方法，这些方法用于改变函数执行时的 this 指向。
+                手动实现 JavaScript 中的 call、apply、bind 方法，用于改变函数执行时的 this 指向。
             </div>
-            <pre><code class="javascript">// 手写call方法：修改函数执行时的this指向并立即执行
-Function.prototype.myCall = function (context, ...args) {
-  // 处理上下文：若未传入context则默认使用window（浏览器环境），null/undefined时也指向window
-  context = context || window;
-  // 创建唯一Symbol作为临时属性名，避免覆盖对象原有属性
-  const fn = Symbol("fn");
-  // 将当前函数（调用myCall的函数）挂载到context的临时属性上
-  context[fn] = this;
-  // 执行临时属性（即原函数），传入剩余参数，此时函数内的this指向context
-  const result = context[fn](...args);
-  // 删除临时属性，避免污染原context对象
-  delete context[fn];
-  // 返回函数执行结果
-  return result;
-};
+            <pre class="line-numbers"><code class="language-javascript">// 手写 call 方法
+Function.prototype.myCall = function(context, ...args) {
+  // 如果 context 为 null 或 undefined，则指向全局对象
+  context = context || globalThis;
 
-// 手写apply方法：与call类似，但参数通过数组传递
-Function.prototype.myApply = function (context, args) {
-  // 处理上下文：同call逻辑
-  context = context || window;
-  // 创建唯一Symbol作为临时属性名
-  const fn = Symbol("fn");
-  // 将当前函数挂载到context的临时属性上
-  context[fn] = this;
-  // 执行函数：若有参数数组则展开传递，否则直接执行
-  const result = args ? context[fn](...args) : context[fn]();
+  // 创建一个唯一的属性名，避免覆盖原有属性
+  const fnSymbol = Symbol('fn');
+
+  // 将当前函数赋值给 context 的临时属性
+  context[fnSymbol] = this;
+
+  // 调用函数并获取结果
+  const result = context[fnSymbol](...args);
+
   // 删除临时属性
-  delete context[fn];
-  // 返回执行结果
+  delete context[fnSymbol];
+
   return result;
 };
 
-// 手写bind方法：返回一个绑定this的新函数
-Function.prototype.myBind = function (context, ...args) {
-  // 保存原函数引用（调用bind的函数）
+// 手写 apply 方法
+Function.prototype.myApply = function(context, argsArray) {
+  // 如果 context 为 null 或 undefined，则指向全局对象
+  context = context || globalThis;
+
+  // 创建一个唯一的属性名
+  const fnSymbol = Symbol('fn');
+
+  // 将当前函数赋值给 context 的临时属性
+  context[fnSymbol] = this;
+
+  // 调用函数并获取结果
+  const result = argsArray ? context[fnSymbol](...argsArray) : context[fnSymbol]();
+
+  // 删除临时属性
+  delete context[fnSymbol];
+
+  return result;
+};
+
+// 手写 bind 方法
+Function.prototype.myBind = function(context, ...bindArgs) {
   const self = this;
-  // 返回新函数，支持后续传递新参数
-  return function (...newArgs) {
-    // 调用自定义的myCall方法，合并初始参数和新参数
-    return self.myCall(context, ...args, ...newArgs);
+
+  // 返回一个新函数
+  return function boundFunction(...callArgs) {
+    // 判断是否通过 new 操作符调用
+    if (new.target) {
+      // 作为构造函数调用
+      return new self(...bindArgs, ...callArgs);
+    } else {
+      // 作为普通函数调用
+      return self.apply(context, [...bindArgs, ...callArgs]);
+    }
   };
-};</code></pre>
+};
+
+// 使用示例
+const obj = { name: 'Alice' };
+
+function greet(greeting, punctuation) {
+  return `${greeting}, ${this.name}${punctuation}`;
+}
+
+// 测试 myCall
+console.log(greet.myCall(obj, 'Hello', '!')); // "Hello, Alice!"
+
+// 测试 myApply
+console.log(greet.myApply(obj, ['Hi', '.'])); // "Hi, Alice."
+
+// 测试 myBind
+const boundGreet = greet.myBind(obj, 'Hey');
+console.log(boundGreet('?')); // "Hey, Alice?"</code></pre>
+            <button class="copy-btn">复制代码</button>
+        </div>
+
+        <div class="code-section" id="myInstanceof">
+            <h2>手写 instanceof</h2>
+            <div class="code-description">
+                自定义实现 instanceof 运算符，检测构造函数的 prototype 是否存在于对象的原型链中。通过遍历原型链来判断对象是否为特定构造函数的实例。
+            </div>
+            <pre class="line-numbers"><code class="language-javascript">/**
+ * @description 自定义实现instanceof运算符，检测构造函数的prototype是否存在于对象的原型链中
+ * @param {Object|Function} obj - 要检测的目标对象（注意：基本类型直接返回false）
+ * @param {Function} constructor - 用于检测的构造函数
+ * @return {boolean} 目标对象是否为构造函数的实例
+ */
+function myInstanceof(obj, constructor) {
+  // 处理基本类型：基本类型没有原型链，直接返回false（null也在此处处理）
+  if ((typeof obj !== "object" && typeof obj !== "function") || obj === null) {
+    return false;
+  }
+  // 获取目标对象的原型（等同于obj.__proto__，但推荐使用标准方法）
+  let proto = Object.getPrototypeOf(obj);
+  // 遍历原型链，直到原型为null（原型链终点）
+  while (proto !== null) {
+    // 检查当前原型是否等于构造函数的prototype属性
+    if (proto === constructor.prototype) {
+      return true; // 找到匹配，返回true
+    }
+    // 继续向上查找原型链
+    proto = Object.getPrototypeOf(proto);
+  }
+  // 遍历完整个原型链未找到匹配，返回false
+  return false;
+}
+
+// 使用示例
+function Animal() {}
+const cat = new Animal();
+console.log(myInstanceof(cat, Animal)); // 输出: true
+console.log(myInstanceof(cat, Object)); // 输出: true
+console.log(myInstanceof(123, Number)); // 输出: false（基本类型直接返回false）</code></pre>
+            <button class="copy-btn">复制代码</button>
+        </div>
+
+        <div class="code-section" id="deepClone">
+            <h2>深拷贝对象</h2>
+            <div class="code-description">
+                实现对象的深拷贝功能，递归处理对象和数组的每个属性，创建完全独立的副本。解决浅拷贝时嵌套对象仍然共享引用的问题。
+            </div>
+            <pre class="line-numbers"><code class="language-javascript">/**
+ * 深拷贝一个对象
+ *
+ * @param {any} obj 需要深拷贝的对象
+ * @returns {any} 深拷贝后的对象
+ */
+function deepClone(obj) {
+  // 如果传入的对象不是对象或者为null，则直接返回该对象
+  if (typeof obj !== "object" || obj === null) {
+    return obj;
+  }
+
+  let clone;
+  // 如果传入的对象是数组
+  if (Array.isArray(obj)) {
+    clone = [];
+    // 遍历数组中的每个元素，递归调用deepClone进行深拷贝
+    for (let i = 0; i < obj.length; i++) {
+      clone[i] = deepClone(obj[i]);
+    }
+  } else {
+    // 如果传入的对象不是数组，则初始化为空对象
+    clone = {};
+    // 遍历对象的每个属性，递归调用deepClone进行深拷贝
+    for (let key in obj) {
+      if (obj.hasOwnProperty(key)) {
+        clone[key] = deepClone(obj[key]);
+      }
+    }
+  }
+
+  return clone;
+}
+
+// 使用示例
+const originalObj = {
+  name: "张三",
+  age: 25,
+  hobbies: ["读书", "游戏"],
+  address: {
+    city: "北京",
+    district: "朝阳区"
+  }
+};
+
+const clonedObj = deepClone(originalObj);
+clonedObj.hobbies.push("运动");
+clonedObj.address.city = "上海";
+
+console.log("原对象:", originalObj);
+// 原对象: { name: "张三", age: 25, hobbies: ["读书", "游戏"], address: { city: "北京", district: "朝阳区" } }
+
+console.log("克隆对象:", clonedObj);
+// 克隆对象: { name: "张三", age: 25, hobbies: ["读书", "游戏", "运动"], address: { city: "上海", district: "朝阳区" } }</code></pre>
+            <button class="copy-btn">复制代码</button>
+        </div>
+
+        <div class="code-section" id="simpleLimit">
+            <h2>异步并发控制</h2>
+            <div class="code-description">
+                实现一个简单的异步任务并发控制器，限制同时执行的异步任务数量。通过队列管理待执行任务，动态调度任务执行，避免系统资源过载。
+            </div>
+            <pre class="line-numbers"><code class="language-javascript">/**
+ * 超简单版本：控制固定数量异步任务的并发执行
+ * @param {number} limit - 最大并发数
+ */
+function simpleLimit(limit) {
+  // 等待执行的任务队列
+  const queue = [];
+  // 当前正在执行的任务数量
+  let activeCount = 0;
+
+  // 执行队列中的下一个任务
+  const runNext = () => {
+    if (queue.length === 0) return;
+
+    // 如果正在执行的任务数量小于限制，则执行下一个任务
+    if (activeCount < limit) {
+      // 从队列中取出一个任务
+      const { fn, resolve, reject } = queue.shift();
+      activeCount++;
+
+      Promise.resolve(fn())
+        .then(resolve)
+        .catch(reject)
+        .finally(() => {
+          activeCount--;
+          runNext(); // 任务完成后，尝试执行下一个任务
+        });
+    }
+  };
+
+  // 返回一个函数，用于添加任务
+  return (fn) => {
+    return new Promise((resolve, reject) => {
+      queue.push({ fn, resolve, reject });
+      runNext();
+    });
+  };
+}
+
+// 使用示例
+const runTask = simpleLimit(2); // 最多同时执行2个任务
+
+// 创建5个模拟的异步任务
+const createTask = (id, delay) => () => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      console.log(`任务${id}完成，耗时${delay}ms`);
+      resolve(`任务${id}的结果`);
+    }, delay);
+  });
+};
+
+// 执行任务并获取结果
+runTask(createTask(1, 1000)).then((result) => console.log(result));
+runTask(createTask(2, 2000)).then((result) => console.log(result));
+runTask(createTask(3, 1500)).then((result) => console.log(result));
+runTask(createTask(4, 800)).then((result) => console.log(result));
+
+// 输出顺序示例：
+// 任务4完成，耗时800ms
+// 任务4的结果
+// 任务1完成，耗时1000ms
+// 任务1的结果
+// 任务3完成，耗时1500ms
+// 任务3的结果
+// 任务2完成，耗时2000ms
+// 任务2的结果</code></pre>
+            <button class="copy-btn">复制代码</button>
+        </div>
+
+        <div class="code-section" id="lazyLoad">
+            <h2>图片懒加载</h2>
+            <div class="code-description">
+                实现一个功能完整的图片懒加载类，支持 IntersectionObserver API 和传统的滚动监听方式。提供节流优化、动态扫描、错误处理等功能，有效提升页面性能。
+            </div>
+            <pre class="line-numbers"><code class="language-javascript">/**
+ * 图片懒加载类
+ * @class LazyLoad
+ */
+class LazyLoad {
+  /**
+   * 创建懒加载实例
+   * @param {Object} options - 配置选项
+   * @param {string} options.selector - 懒加载图片的CSS选择器
+   * @param {string} options.dataSrc - 存储真实图片地址的data属性名
+   * @param {number} options.threshold - IntersectionObserver的阈值
+   * @param {number} options.throttleDelay - 节流延迟时间（毫秒）
+   */
+  constructor(options = {}) {
+    this.options = {
+      selector: ".lazy-image",
+      dataSrc: "data-src",
+      threshold: 0.1,
+      throttleDelay: 200,
+      ...options,
+    };
+
+    this.images = [];
+    this.observer = null;
+    this.initialized = false;
+
+    // 绑定方法的this
+    this.throttledLoad = this.throttle(
+      this.loadImages.bind(this),
+      this.options.throttleDelay
+    );
+  }
+
+  /**
+   * 初始化懒加载
+   */
+  init() {
+    if (this.initialized) return;
+
+    this.images = Array.from(document.querySelectorAll(this.options.selector));
+
+    if ("IntersectionObserver" in window) {
+      this.initIntersectionObserver();
+    } else {
+      this.initLegacyLazyLoad();
+    }
+
+    this.initialized = true;
+  }
+
+  /**
+   * 使用IntersectionObserver初始化
+   */
+  initIntersectionObserver() {
+    this.observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            this.loadImage(entry.target);
+            this.observer.unobserve(entry.target);
+          }
+        });
+      },
+      {
+        threshold: this.options.threshold,
+      }
+    );
+
+    this.images.forEach((image) => {
+      if (image.hasAttribute(this.options.dataSrc)) {
+        this.observer.observe(image);
+      }
+    });
+  }
+
+  /**
+   * 初始化传统的滚动监听方式
+   */
+  initLegacyLazyLoad() {
+    // 初始检查
+    this.loadImages();
+
+    // 添加滚动事件监听
+    window.addEventListener("scroll", this.throttledLoad);
+    window.addEventListener("resize", this.throttledLoad);
+    window.addEventListener("orientationchange", this.throttledLoad);
+  }
+
+  /**
+   * 加载所有在可视区域内的图片
+   */
+  loadImages() {
+    this.images = this.images.filter((image) => {
+      if (!image.hasAttribute(this.options.dataSrc)) {
+        return false;
+      }
+
+      if (this.isInViewport(image)) {
+        this.loadImage(image);
+        return false;
+      }
+
+      return true;
+    });
+
+    // 如果所有图片都已加载，移除事件监听
+    if (this.images.length === 0) {
+      this.destroy();
+    }
+  }
+
+  /**
+   * 加载单张图片
+   * @param {HTMLImageElement} image - 要加载的图片元素
+   */
+  loadImage(image) {
+    const src = image.getAttribute(this.options.dataSrc);
+    if (!src) return;
+
+    // 设置加载事件
+    image.onload = () => {
+      image.removeAttribute(this.options.dataSrc);
+      image.classList.add("lazy-loaded");
+    };
+
+    // 设置错误处理
+    image.onerror = () => {
+      console.error(`Failed to load image: ${src}`);
+      image.removeAttribute(this.options.dataSrc);
+    };
+
+    // 触发图片加载
+    image.src = src;
+  }
+
+  /**
+   * 检查元素是否在可视区域内
+   * @param {HTMLElement} element - 要检查的元素
+   * @returns {boolean} 是否在可视区域内
+   */
+  isInViewport(element) {
+    const rect = element.getBoundingClientRect();
+    return (
+      rect.top <=
+        (window.innerHeight || document.documentElement.clientHeight) &&
+      rect.bottom >= 0 &&
+      rect.left <=
+        (window.innerWidth || document.documentElement.clientWidth) &&
+      rect.right >= 0
+    );
+  }
+
+  /**
+   * 节流函数
+   * @param {Function} func - 要节流的函数
+   * @param {number} delay - 延迟时间（毫秒）
+   * @returns {Function} 节流后的函数
+   */
+  throttle(func, delay) {
+    let lastCall = 0;
+    return function (...args) {
+      const now = Date.now();
+      if (now - lastCall >= delay) {
+        lastCall = now;
+        func.apply(this, args);
+      }
+    };
+  }
+
+  /**
+   * 重新扫描页面中的懒加载图片
+   * 用于动态添加的内容
+   */
+  rescan() {
+    const newImages = Array.from(
+      document.querySelectorAll(this.options.selector)
+    ).filter(
+      (image) =>
+        !this.images.includes(image) && image.hasAttribute(this.options.dataSrc)
+    );
+
+    if (newImages.length > 0) {
+      this.images = [...this.images, ...newImages];
+
+      if (this.observer) {
+        newImages.forEach((image) => this.observer.observe(image));
+      } else {
+        this.loadImages();
+      }
+    }
+  }
+
+  /**
+   * 销毁懒加载实例，移除所有事件监听
+   */
+  destroy() {
+    if (this.observer) {
+      this.observer.disconnect();
+    } else {
+      window.removeEventListener("scroll", this.throttledLoad);
+      window.removeEventListener("resize", this.throttledLoad);
+      window.removeEventListener("orientationchange", this.throttledLoad);
+    }
+
+    this.initialized = false;
+  }
+}
+
+// 使用示例
+const lazyLoader = new LazyLoad({
+  selector: '.lazy-image',
+  dataSrc: 'data-src',
+  threshold: 0.1,
+  throttleDelay: 200
+});
+
+// 初始化懒加载
+lazyLoader.init();
+
+// HTML示例：
+// <img class="lazy-image" data-src="real-image.jpg" src="placeholder.jpg" alt="描述">
+// <img class="lazy-image" data-src="another-image.jpg" src="placeholder.jpg" alt="描述"></code></pre>
             <button class="copy-btn">复制代码</button>
         </div>
     </div>
 
     <div class="back-to-top" id="backToTop">↑</div>
 
+    <!-- Prism.js JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-javascript.min.js"></script>
+
     <script>
-        // 导航功能
-        const navItems = document.querySelectorAll('.nav-item');
-        const codeSections = document.querySelectorAll('.code-section');
-        const searchInput = document.getElementById('searchInput');
-        const backToTop = document.getElementById('backToTop');
-        const toggleSidebar = document.getElementById('toggleSidebar');
-        const sidebar = document.getElementById('sidebar');
+        // 初始化代码
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM加载完成，开始初始化...');
 
-        // 导航点击事件
-        navItems.forEach(item => {
-            item.addEventListener('click', () => {
-                const targetId = item.getAttribute('data-target');
-                const targetSection = document.getElementById(targetId);
+            // 等待Prism.js加载完成
+            function waitForPrism() {
+                return new Promise((resolve) => {
+                    let checkCount = 0;
+                    const maxChecks = 50; // 最多检查50次（5秒）
 
-                // 移除所有活动状态
-                navItems.forEach(nav => nav.classList.remove('active'));
+                    function check() {
+                        checkCount++;
+                        console.log(`检查Prism.js状态 (${checkCount}/${maxChecks})...`);
 
-                // 添加活动状态到当前项
-                item.classList.add('active');
+                        if (typeof Prism !== 'undefined' &&
+                            Prism.plugins &&
+                            Prism.plugins.lineNumbers) {
+                            console.log('Prism.js及行号插件已加载');
+                            resolve(true);
+                        } else if (checkCount >= maxChecks) {
+                            console.warn('Prism.js加载超时，使用备用方案');
+                            resolve(false);
+                        } else {
+                            setTimeout(check, 100);
+                        }
+                    }
 
-                // 滚动到目标区域
-                if (targetSection) {
+                    check();
+                });
+            }
+
+            // 强制生成行号的函数
+            function forceGenerateLineNumbers(pre) {
+                try {
+                    console.log('为代码块生成行号:', pre);
+
+                    // 确保有line-numbers类
+                    if (!pre.classList.contains('line-numbers')) {
+                        pre.classList.add('line-numbers');
+                    }
+
+                    // 移除现有的行号
+                    const existingRows = pre.querySelector('.line-numbers-rows');
+                    if (existingRows) {
+                        existingRows.remove();
+                    }
+
+                    // 获取代码内容
+                    const code = pre.querySelector('code');
+                    if (!code) return;
+
+                    const codeContent = code.textContent || code.innerText;
+                    const lines = codeContent.split('\n');
+
+                    // 移除最后的空行
+                    if (lines[lines.length - 1] === '') {
+                        lines.pop();
+                    }
+
+                    // 创建行号容器
+                    const lineNumbersRows = document.createElement('span');
+                    lineNumbersRows.className = 'line-numbers-rows';
+                    lineNumbersRows.setAttribute('aria-hidden', 'true');
+
+                    // 生成行号
+                    for (let i = 0; i < lines.length; i++) {
+                        const span = document.createElement('span');
+                        lineNumbersRows.appendChild(span);
+                    }
+
+                    // 插入行号
+                    pre.appendChild(lineNumbersRows);
+                    console.log(`成功生成 ${lines.length} 行号`);
+                } catch (error) {
+                    console.error('生成行号时出错:', error);
+                }
+            }
+
+            // 初始化Prism
+            async function initializePrism() {
+                try {
+                    console.log('开始初始化Prism.js...');
+
+                    // 等待Prism加载
+                    const prismLoaded = await waitForPrism();
+
+                    // 查找所有代码块
+                    const preElements = document.querySelectorAll('pre');
+                    console.log(`找到 ${preElements.length} 个代码块`);
+
+                    preElements.forEach((pre, index) => {
+                        console.log(`处理代码块 ${index + 1}/${preElements.length}`);
+
+                        // 确保有正确的类名
+                        if (!pre.classList.contains('line-numbers')) {
+                            pre.classList.add('line-numbers');
+                        }
+
+                        const code = pre.querySelector('code');
+                        if (code && !code.className.includes('language-')) {
+                            code.className += ' language-javascript';
+                        }
+                    });
+
+                    if (prismLoaded) {
+                        try {
+                            // 使用Prism高亮
+                            console.log('使用Prism.js进行代码高亮...');
+                            Prism.highlightAll();
+
+                            // 触发行号生成
+                            if (Prism.plugins && Prism.plugins.lineNumbers) {
+                                Prism.plugins.lineNumbers.resize();
+                            }
+
+                            // 延迟检查行号是否正确生成
+                            setTimeout(() => {
+                                preElements.forEach((pre, index) => {
+                                    const lineNumbersRows = pre.querySelector('.line-numbers-rows');
+                                    if (!lineNumbersRows || lineNumbersRows.children.length === 0) {
+                                        console.log(`代码块 ${index + 1} 缺少行号，强制生成...`);
+                                        forceGenerateLineNumbers(pre);
+                                    }
+                                });
+                            }, 500);
+
+                        } catch (error) {
+                            console.error('Prism高亮失败:', error);
+                            throw error;
+                        }
+                    } else {
+                        throw new Error('Prism.js未能正确加载');
+                    }
+
+                } catch (error) {
+                    console.error('Prism初始化失败，使用备用方案:', error);
+
+                    // 备用方案：强制为所有代码块生成行号
+                    const preElements = document.querySelectorAll('pre');
+                    preElements.forEach((pre, index) => {
+                        console.log(`备用方案：为代码块 ${index + 1} 生成行号`);
+                        forceGenerateLineNumbers(pre);
+                    });
+                }
+            }
+
+            // 开始初始化
+            initializePrism();
+
+            // 窗口大小改变时重新计算行号
+            let resizeTimer;
+            window.addEventListener('resize', function() {
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(() => {
+                    console.log('窗口大小改变，重新计算行号...');
+                    if (typeof Prism !== 'undefined' &&
+                        Prism.plugins &&
+                        Prism.plugins.lineNumbers) {
+                        Prism.plugins.lineNumbers.resize();
+                    }
+                }, 300);
+            });
+
+            // 导航功能
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    const targetId = this.getAttribute('data-target');
+                    const targetSection = document.getElementById(targetId);
+                    if (targetSection) {
+                        // 更新活跃状态
+                        navItems.forEach(nav => nav.classList.remove('active'));
+                        this.classList.add('active');
+
+                        // 滚动到目标位置
+                        window.scrollTo({
+                            top: targetSection.offsetTop - 20,
+                            behavior: 'instant'
+                        });
+                    }
+                });
+            });
+
+            // 搜索功能
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.addEventListener('input', function() {
+                    const searchTerm = this.value.toLowerCase();
+                    navItems.forEach(item => {
+                        const text = item.textContent.toLowerCase();
+                        const parent = item.parentElement;
+                        if (text.includes(searchTerm)) {
+                            parent.style.display = 'block';
+                        } else {
+                            parent.style.display = 'none';
+                        }
+                    });
+                });
+            }
+
+            // 复制代码功能
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('copy-btn')) {
+                    const codeBlock = e.target.nextElementSibling;
+                    const code = codeBlock.querySelector('code');
+                    if (code) {
+                        const text = code.textContent;
+                        navigator.clipboard.writeText(text).then(() => {
+                            e.target.textContent = '已复制!';
+                            setTimeout(() => {
+                                e.target.textContent = '复制代码';
+                            }, 2000);
+                        }).catch(err => {
+                            console.error('复制失败:', err);
+                        });
+                    }
+                }
+            });
+
+            // 返回顶部功能
+            const backToTop = document.getElementById('backToTop');
+            if (backToTop) {
+                window.addEventListener('scroll', function() {
+                    if (window.pageYOffset > 300) {
+                        backToTop.style.display = 'block';
+                    } else {
+                        backToTop.style.display = 'none';
+                    }
+                });
+
+                backToTop.addEventListener('click', function() {
                     window.scrollTo({
-                        top: targetSection.offsetTop - 20,
+                        top: 0,
                         behavior: 'smooth'
                     });
-                }
-
-                // 在移动设备上，点击后关闭侧边栏
-                if (window.innerWidth <= 768) {
-                    sidebar.classList.remove('active');
-                }
-            });
-        });
-
-        // 搜索功能
-        searchInput.addEventListener('input', () => {
-            const searchTerm = searchInput.value.toLowerCase();
-
-            navItems.forEach(item => {
-                const text = item.textContent.toLowerCase();
-                if (text.includes(searchTerm)) {
-                    item.style.display = 'block';
-                } else {
-                    item.style.display = 'none';
-                }
-            });
-        });
-
-        // 复制代码按钮
-        document.querySelectorAll('.copy-btn').forEach(button => {
-            button.addEventListener('click', () => {
-                const codeBlock = button.previousElementSibling.querySelector('code');
-                const textToCopy = codeBlock.textContent;
-
-                navigator.clipboard.writeText(textToCopy)
-                    .then(() => {
-                        const originalText = button.textContent;
-                        button.textContent = '已复制！';
-                        setTimeout(() => {
-                            button.textContent = originalText;
-                        }, 2000);
-                    })
-                    .catch(err => {
-                        console.error('复制失败:', err);
-                    });
-            });
-        });
-
-        // 返回顶部按钮
-        window.addEventListener('scroll', () => {
-            if (window.scrollY > 300) {
-                backToTop.classList.add('visible');
-            } else {
-                backToTop.classList.remove('visible');
+                });
             }
-        });
 
-        backToTop.addEventListener('click', () => {
-            window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
-            });
-        });
+            // 移动端侧边栏切换
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const sidebar = document.querySelector('.sidebar');
+            if (sidebarToggle && sidebar) {
+                sidebarToggle.addEventListener('click', function() {
+                    sidebar.classList.toggle('show');
+                });
 
-        // 移动设备侧边栏切换
-        if (window.innerWidth <= 768) {
-            toggleSidebar.style.display = 'block';
-
-            toggleSidebar.addEventListener('click', () => {
-                sidebar.classList.toggle('active');
-            });
-        }
-
-        // 初始化：高亮当前可见的代码段对应的导航项
-        function highlightVisibleSection() {
-            let currentSection = null;
-            let minDistance = Infinity;
-
-            codeSections.forEach(section => {
-                const rect = section.getBoundingClientRect();
-                const distance = Math.abs(rect.top);
-
-                if (distance < minDistance) {
-                    minDistance = distance;
-                    currentSection = section;
-                }
-            });
-
-            if (currentSection) {
-                const currentId = currentSection.id;
-                navItems.forEach(item => {
-                    if (item.getAttribute('data-target') === currentId) {
-                        item.classList.add('active');
-                    } else {
-                        item.classList.remove('active');
+                // 点击内容区域关闭侧边栏
+                document.addEventListener('click', function(e) {
+                    if (!sidebar.contains(e.target) && !sidebarToggle.contains(e.target)) {
+                        sidebar.classList.remove('show');
                     }
                 });
             }
-        }
 
-        window.addEventListener('scroll', highlightVisibleSection);
-        highlightVisibleSection(); // 初始化调用
+            console.log('页面初始化完成！');
+        });
     </script>
 </body>
 </html>
