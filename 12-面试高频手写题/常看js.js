@@ -770,3 +770,18 @@ class LazyLoad {
     this.initialized = false;
   }
 }
+/**
+ * set集合操作交集、并集和差集
+ */
+
+const a = new Set([1, 2, 3]);
+const b = new Set([2, 3, 4]);
+
+// 并集
+const union = new Set([...a, ...b]); // Set(4) {1, 2, 3, 4}
+
+// 交集
+const intersection = new Set([...a].filter((x) => b.has(x))); // Set(2) {2, 3}
+
+// 差集 (a - b)
+const difference = new Set([...a].filter((x) => !b.has(x))); // Set(1) {1}
