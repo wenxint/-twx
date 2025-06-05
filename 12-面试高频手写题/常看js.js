@@ -831,3 +831,149 @@ Array.prototype.myReduce = function (callback, initialValue) {
   // 4. 返回最终的累积值
   return accumulator;
 };
+
+/**
+ * @description 带记忆功能的斐波那契数列实现
+ * @param {number} n - 需要计算的斐波那契数列位置
+ * @return {number} 斐波那契数列第n项的值
+ */
+function fibonacciMemoized() {
+  // 创建缓存对象
+  const cache = {};
+
+  // 内部递归函数
+  function fib(n) {
+    // 检查缓存中是否已有计算结果
+    if (n in cache) {
+      return cache[n];
+    }
+
+    // 基本情况
+    if (n <= 1) {
+      return n;
+    }
+
+    // 计算结果并存入缓存
+    cache[n] = fib(n - 1) + fib(n - 2);
+    return cache[n];
+  }
+
+  // 返回内部函数
+  return fib;
+}
+
+const fib = fibonacciMemoized();
+console.log(fib(40)); // 输出: 102334155 (计算非常快)
+
+//深度优先遍历和广度优先遍历的实现代码
+
+/**
+ * @description 树节点构造函数
+ * @param {any} value - 节点值
+ */
+function TreeNode(value) {
+  this.value = value;
+  this.children = [];
+}
+
+/**
+ * @description 深度优先遍历（DFS）
+ * @param {TreeNode} node - 树节点
+ * @param {function} callback - 处理节点的回调函数
+ */
+function depthFirstTraversal(node, callback) {
+  // 基本情况：节点为null
+  if (!node) return;
+
+  // 处理当前节点
+  callback(node.value);
+
+  // 递归遍历所有子节点
+  for (const child of node.children) {
+    depthFirstTraversal(child, callback);
+  }
+}
+
+/**
+ * @description 广度优先遍历（BFS，使用队列，非递归实现）
+ * @param {TreeNode} root - 根节点
+ * @param {function} callback - 处理节点的回调函数
+ */
+function breadthFirstTraversal(root, callback) {
+  if (!root) return;
+
+  const queue = [root];
+
+  while (queue.length > 0) {
+    const node = queue.shift();
+    callback(node.value); // 执行回调处理当前节点
+    for (const child of node.children) {
+      queue.push(child);
+    }
+  }
+}
+
+// 创建一个示例树
+const root = new TreeNode("A");
+const nodeB = new TreeNode("B");
+const nodeC = new TreeNode("C");
+const nodeD = new TreeNode("D");
+const nodeE = new TreeNode("E");
+const nodeF = new TreeNode("F");
+
+root.children.push(nodeB, nodeC);
+nodeB.children.push(nodeD, nodeE);
+nodeC.children.push(nodeF);
+// A
+// /
+// B   C
+// / \
+// D  E   F
+// 测试遍历
+console.log("DFS遍历结果:");
+depthFirstTraversal(root, (value) => console.log(value));
+// 输出: A B D E C F
+
+console.log("BFS遍历结果:");
+breadthFirstTraversal(root, (value) => console.log(value));
+// 输出: A B C D E F
+
+//  组织架构树形数据转换为树形结构
+
+const data = [
+  { id: "01", name: "张大大", pid: "", job: "项目经理" },
+  { id: "02", name: "小亮", pid: "01", job: "产品leader" },
+  { id: "03", name: "小美", pid: "01", job: "UIleader" },
+  { id: "04", name: "老马", pid: "01", job: "技术leader" },
+  { id: "05", name: "老王", pid: "01", job: "测试leader" },
+  { id: "06", name: "老李", pid: "01", job: "运维leader" },
+  { id: "07", name: "小丽", pid: "02", job: "产品经理" },
+  { id: "08", name: "大光", pid: "02", job: "产品经理" },
+  { id: "09", name: "小高", pid: "03", job: "UI设计师" },
+  { id: "10", name: "小刘", pid: "04", job: "前端工程师" },
+  { id: "11", name: "小华", pid: "04", job: "后端工程师" },
+  { id: "12", name: "小李", pid: "04", job: "后端工程师" },
+  { id: "13", name: "小赵", pid: "05", job: "测试工程师" },
+  { id: "14", name: "小强", pid: "05", job: "测试工程师" },
+  { id: "15", name: "小涛", pid: "06", job: "运维工程师" },
+];
+
+function toTree(arr, parentId) {
+  function loop(parentId) {
+    let res = [];
+    for (let i = 0; i < arr.length; i++) {
+      let item = arr[i];
+
+      if (item.pid !== parentId) {
+        continue;
+      }
+
+      item.children = loop(item.id);
+      res.push(item);
+    }
+    return res;
+  }
+  return loop(parentId);
+}
+
+const result = toTree(data, "");
