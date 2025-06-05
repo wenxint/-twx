@@ -959,21 +959,61 @@ const data = [
 ];
 
 function toTree(arr, parentId) {
+  // 定义一个递归函数 loop，用于构建树结构
   function loop(parentId) {
+    // 初始化结果数组
     let res = [];
+    // 遍历数组 arr
     for (let i = 0; i < arr.length; i++) {
       let item = arr[i];
 
+      // 如果当前项的父级 ID 不等于传入的 parentId，则跳过
       if (item.pid !== parentId) {
         continue;
       }
 
+      // 递归调用 loop 函数，将当前项的 ID 作为父级 ID 传入，获取子节点
       item.children = loop(item.id);
+      // 将当前项添加到结果数组中
       res.push(item);
     }
+    // 返回结果数组
     return res;
   }
+  // 调用递归函数 loop，并返回结果
   return loop(parentId);
+}
+
+function toTree(arr) {
+  // 1. 建立 id 到节点的映射（避免重复遍历）
+  // 建立节点映射
+  const nodeMap = new Map();
+  arr.forEach((item) => {
+    // 用 id 作为 key 存储节点，并初始化 children 为空数组
+    nodeMap.set(item.id, { ...item, children: [] }); // 用 id 作为 key 存储节点
+  });
+
+  // 2. 构建树
+  // 初始化树数组
+  const tree = [];
+  arr.forEach((item) => {
+    // 判断是否为根节点
+    if (item.pid === null || item.pid === undefined) {
+      // 如果是根节点，直接加入树
+      // 将根节点加入树数组
+      tree.push(nodeMap.get(item.id));
+    } else {
+      // 如果不是根节点，找到父节点并添加到其 children 中
+      // 获取父节点
+      const parent = nodeMap.get(item.pid);
+      if (parent) {
+        // 将当前节点添加到父节点的 children 数组中
+        parent.children.push(nodeMap.get(item.id));
+      }
+    }
+  });
+
+  return tree;
 }
 
 const result = toTree(data, "");
