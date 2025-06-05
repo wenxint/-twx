@@ -787,12 +787,47 @@ const intersection = new Set([...a].filter((x) => b.has(x))); // Set(2) {2, 3}
 // 差集 (a - b)
 const difference = new Set([...a].filter((x) => !b.has(x))); // Set(1) {1}
 
-
 // 判断当前页面是否在 iframe 中
 const isInIframe = window.self !== window.top;
 
 if (isInIframe) {
-  console.log('当前页面被嵌入在 iframe 中');
+  console.log("当前页面被嵌入在 iframe 中");
 } else {
-  console.log('当前页面是顶级窗口');
+  console.log("当前页面是顶级窗口");
 }
+/**
+ * 手写reduce函数实现
+ */
+Array.prototype.myReduce = function (callback, initialValue) {
+  // 1. 检查回调函数是否为函数
+  if (typeof callback !== "function") {
+    throw new TypeError(callback + " is not a function");
+  }
+
+  const array = this; // 当前数组
+  const length = array.length;
+  let accumulator;
+  let startIndex;
+
+  // 2. 处理初始值
+  if (arguments.length >= 2) {
+    // 如果提供了初始值，从第 0 个元素开始
+    accumulator = initialValue;
+    startIndex = 0;
+  } else {
+    // 如果没有提供初始值，使用第一个元素作为初始值，并从第 1 个元素开始
+    if (length === 0) {
+      throw new TypeError("Reduce of empty array with no initial value");
+    }
+    accumulator = array[0];
+    startIndex = 1;
+  }
+
+  // 3. 遍历数组，执行累加器函数
+  for (let i = startIndex; i < length; i++) {
+    accumulator = callback(accumulator, array[i], i, array);
+  }
+
+  // 4. 返回最终的累积值
+  return accumulator;
+};
