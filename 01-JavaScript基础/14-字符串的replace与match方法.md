@@ -8,26 +8,61 @@ JavaScript的`String`原型提供了`replace`和`match`两个核心方法，分�
 
 ### 1. String.prototype.replace()
 
-**作用**：替换字符串中的匹配项，可以是普通字符串或正则表达式匹配的内容。
+**作用**：替换字符串中的匹配项，支持普通字符串匹配或正则表达式匹配，是文本处理中最灵活的替换工具。
 
 **语法**：
 ```javascript
 str.replace(regexp|substr, newSubstr|function)
 ```
 
-- **参数1**：可以是正则表达式（`RegExp`）或要替换的子字符串（`String`）。
-- **参数2**：可以是替换的新字符串（`String`）或用于生成替换内容的函数（`Function`）。
+#### 参数详解
+- **参数1（匹配模式）**：
+  - 类型1：正则表达式（`RegExp`）。可携带标志位（如`g`全局匹配、`i`忽略大小写、`m`多行模式、`s`点匹配换行等）。
+  - 类型2：普通字符串（`String`）。仅匹配第一个出现的子串（除非使用`replaceAll`方法）。
+
+- **参数2（替换内容）**：
+  - 类型1：替换字符串（`String`）。支持特殊占位符（如`$&`表示匹配的子串，`$n`表示第n个捕获组，`$$`表示`$`符号等）。
+  - 类型2：替换函数（`Function`）。函数参数依次为：匹配的子串、捕获组（多个）、匹配的偏移量、原字符串，返回替换后的字符串。
+
+**示例（正则标志位）**：
+```javascript
+// 忽略大小写（i标志）并全局替换（g标志）
+const str = 'Hello, HELLO!';
+const replaced = str.replace(/hello/gi, 'Hi');
+console.log(replaced); // 输出: 'Hi, Hi!'
+```
 
 ### 2. String.prototype.match()
 
-**作用**：检索字符串中匹配正则表达式的结果，返回匹配的数组或`null`。
+**作用**：根据正则表达式检索字符串中的匹配结果，返回包含匹配信息的数组或`null`（无匹配时）。
 
 **语法**：
 ```javascript
 str.match(regexp)
 ```
 
-- **参数**：正则表达式对象（`RegExp`）。若传入非正则表达式，会隐式转换为`RegExp`。
+#### 参数与返回值
+- **参数**：正则表达式对象（`RegExp`）。若传入非正则表达式（如字符串），会隐式转换为`RegExp`（等价于`new RegExp(str)`）。
+- **返回值**：
+  - 若正则无`g`标志：返回数组（包含完整匹配、捕获组），并携带`index`（匹配位置）和`input`（原字符串）属性。
+  - 若正则有`g`标志：仅返回所有匹配子串的数组（不含捕获组和额外属性）。
+  - 无匹配时返回`null`。
+
+**示例（无g标志）**：
+```javascript
+const str = '版本：v1.0, v2.5';
+const regex = /v(\d+)\.(\d+)/; // 无g标志
+const result = str.match(regex);
+console.log(result);
+// 输出: ['v1.0', '1', '0', index: 3, input: '版本：v1.0, v2.5']
+```
+
+**示例（有g标志）**：
+```javascript
+const regexG = /v(\d+)\.(\d+)/g; // 有g标志
+const resultG = str.match(regexG);
+console.log(resultG); // 输出: ['v1.0', 'v2.5']
+```
 
 ## 核心特性
 

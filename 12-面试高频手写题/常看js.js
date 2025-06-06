@@ -1017,3 +1017,82 @@ function toTree(arr) {
 }
 
 const result = toTree(data, "");
+
+//敏感信息脱敏（replace）
+function maskPhone(phone) {
+  return phone.replace(/(\d{3})\d{4}(\d{4})/, "$1****$2");
+}
+console.log(maskPhone("13812345678")); // 输出: '138****5678'
+
+//URL参数解析（matchAll 或 replace）
+function parseQueryString(url) {
+  const queryString = url.split("?")[1];
+  if (!queryString) return {};
+
+  const params = {};
+  // 使用 matchAll
+  // const paramRegex = /([^&=]+)=([^&]*)/g;
+  // for (const match of queryString.matchAll(paramRegex)) {
+  //   params[decodeURIComponent(match[1])] = decodeURIComponent(match[2]);
+  // }
+
+  // 或者使用 replace 的函数回调
+  queryString.replace(/([^&=]+)=([^&]*)/g, (match, key, value) => {
+    params[decodeURIComponent(key)] = decodeURIComponent(value);
+    return ""; // 返回空字符串，因为我们只关心副作用（填充params对象）
+  });
+
+  return params;
+}
+
+console.log(
+  parseQueryString("https://example.com?name=Alice&age=30&city=New%20York")
+);
+// 输出: { name: 'Alice', age: '30', city: 'New York' }
+function parseUrlParams(url) {
+  const params = {};
+  // 提取查询部分（? 后的内容）
+  const queryString = url.split("?")[1] || "";
+  // 分割键值对（处理 # 后的哈希，避免干扰）
+  const pairs = queryString.split("#")[0].split("&");
+
+  for (const pair of pairs) {
+    if (!pair) continue; // 跳过空字符串（如 URL 末尾的 &）
+    let [key, value] = pair.split("=");
+    // 处理无值的参数（如 key 或 key=）
+    value = value === undefined ? "" : value;
+    // 解码 URI 编码（处理中文、特殊符号）
+    key = decodeURIComponent(key.replace(/\+/g, " ")); // 替换 + 为空格（表单提交习惯）
+    value = decodeURIComponent(value.replace(/\+/g, " "));
+    // 多个相同键的情况（如 ?a=1&a=2），存储为数组
+    if (params.hasOwnProperty(key)) {
+      params[key] = [].concat(params[key], value);
+    } else {
+      params[key] = value;
+    }
+  }
+  return params;
+}
+
+// 当前页面 URL（或任意 URL 字符串）
+const url = new URL(
+  "https://example.com/page?name=%E5%B0%8F%E6%98%8E&age=20&hobby=reading&hobby=music"
+);
+
+// 1. 直接获取参数对象（需手动处理多值）
+const params = Object.fromEntries(url.searchParams.entries());
+console.log(params);
+// 输出：{ name: '小明', age: '20', hobby: 'reading' }（注意：hobby 只取第一个）
+
+// 2. 获取单个参数（推荐）
+const name = url.searchParams.get("name"); // '小明'
+const age = url.searchParams.get("age"); // '20'
+
+// 3. 获取多个值（如 hobby）
+const hobbies = url.searchParams.getAll("hobby"); // ['reading', 'music']
+
+// 4. 检查参数是否存在
+const hasHobby = url.searchParams.has("hobby"); // true
+
+// 5. 处理无值的参数（如 ?key）
+const isEmpty = url.searchParams.get("key"); // null（若参数存在但无值，返回空字符串）
