@@ -43,18 +43,19 @@ new Vue({
      * 计算过滤后的代码片段列表
      */
     computedFilteredItems() {
-      if (!this.searchQuery.trim()) {
-        return this.codeSnippets;
-      }
+      // if (!this.searchQuery.trim()) {
+      //   return this.codeSnippets;
+      // }
 
-      const query = this.searchQuery.toLowerCase();
-      return this.codeSnippets.filter(
-        (item) =>
-          item.title.toLowerCase().includes(query) ||
-          item.description.toLowerCase().includes(query) ||
-          item.id.toLowerCase().includes(query) ||
-          item.code.toLowerCase().includes(query)
-      );
+      // const query = this.searchQuery.toLowerCase();
+      // return this.codeSnippets.filter(
+      //   (item) =>
+      //     item.title.toLowerCase().includes(query) ||
+      //     item.description.toLowerCase().includes(query) ||
+      //     item.id.toLowerCase().includes(query) ||
+      //     item.code.toLowerCase().includes(query)
+      // );
+      return this.codeSnippets;
     },
 
     /**
@@ -157,20 +158,18 @@ new Vue({
         // 遍历所有导航项
         navItems.forEach((item) => {
           const targetId = item.dataset.target;
-          const codeSection = document.getElementById(`code-${targetId}`);
+          // const codeSection = document.getElementById(`code-${targetId}`);
 
-          if (codeSection) {
-            // 如果导航项文本包含搜索文本，显示对应的代码片段
-            if (
-              item.textContent.toLowerCase().includes(searchText) ||
-              searchText === ""
-            ) {
-              codeSection.style.display = "block";
-              item.style.display = "block";
-            } else {
-              codeSection.style.display = "none";
-              item.style.display = "none";
-            }
+          // 如果导航项文本包含搜索文本，显示对应的代码片段
+          if (
+            item.textContent.toLowerCase().includes(searchText) ||
+            searchText === ""
+          ) {
+            // codeSection.style.display = "block";
+            item.style.display = "block";
+          } else {
+            // codeSection.style.display = "none";
+            item.style.display = "none";
           }
         });
       }, 200);
@@ -238,6 +237,7 @@ new Vue({
      * 高亮所有代码块
      */
     highlightAllCode() {
+      console.log(Prism);
       if (typeof Prism !== "undefined") {
         // 使用requestAnimationFrame提升性能
         requestAnimationFrame(() => {
