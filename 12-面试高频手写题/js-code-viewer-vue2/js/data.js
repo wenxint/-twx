@@ -1,87 +1,66 @@
+/**
+ * 前端高频手写题代码数据
+ * 基于常看js.js内容完整生成
+ */
 window.CODE_DATA = [
   {
     id: "requestAnimationFrame",
-    title: "requestAnimationFrame 动画优化",
-    description: "使用 requestAnimationFrame 实现平滑动画，相比 setTimeout 和 setInterval 具有更好的性能和更流畅的动画效果。",
+    title: "requestAnimationFrame 动画",
+    description: "使用 requestAnimationFrame 实现平滑动画",
     code: `/**
- * @description 使用 requestAnimationFrame 优化动画（含停止条件）
+ * 使用 requestAnimationFrame 实现平滑动画
+ *
+ * requestAnimationFrame 是浏览器专门为动画设计的 API：
+ * - 帧率与显示器刷新率同步，通常是 60fps
+ * - 页面不可见时自动暂停，节省资源
+ * - 比 setTimeout 性能更好，避免掉帧
  */
-let position = 0;
-const targetPosition = 300; // 目标位置（300px）
-let animationId;
 
+// 基础动画示例：元素移动
 function animate() {
-  position += 5;
-  element.style.transform = \`translateX(\${position}px)\`;
+  const element = document.getElementById('movingBox');
+  let position = 0;
+  const speed = 2; // 每帧移动2px
+  const maxPosition = 400; // 最大移动距离
 
-  // 达到目标位置时停止动画
-  if (position < targetPosition) {
-    animationId = requestAnimationFrame(animate);
-  } else {
-    cancelAnimationFrame(animationId); // 取消下一帧请求
-    console.log("动画已停止，最终位置：", position, "px");
+  function step() {
+    // 更新位置
+    position += speed;
+    element.style.left = position + 'px';
+
+    // 检查是否达到终点
+    if (position < maxPosition) {
+      // 继续下一帧
+      requestAnimationFrame(step);
+    }
   }
+
+  // 开始动画
+  requestAnimationFrame(step);
 }
 
-// 启动动画
-animationId = requestAnimationFrame(animate);`
-  },
-  {
-    id: "promiseMyAll",
-    title: "Promise.MyAll 实现",
-    description: "手动实现 Promise.all 方法，接收一个 Promise 数组，返回一个新的 Promise，当所有 Promise 都成功时返回结果数组，任一 Promise 失败则返回失败原因。",
-    code: `/**
- * @description Promise.MyAll方法的完整调用示例
- */
-Promise.MyAll = function (promises) {
-  let arr = [], count = 0;
-  return new Promise((resolve, reject) => {
-    if (promises.length === 0) {
-      resolve([]);
-      return;
-    }
-    promises.forEach((item, i) => {
-      Promise.resolve(item).then(
-        (res) => {
-          arr[i] = res;
-          count += 1;
-          if (count === promises.length) resolve(arr);
-        },
-        reject
-      );
-    });
-  });
-};
-
-// 使用示例
-const promise1 = Promise.resolve(1);
-const promise2 = new Promise((resolve) => setTimeout(() => resolve(2), 1000));
-const promise3 = 3;
-
-Promise.MyAll([promise1, promise2, promise3])
-  .then((results) => {
-    console.log("MyAll结果:", results); // [1, 2, 3]
-  })
-  .catch((error) => {
-    console.error("MyAll错误:", error);
-  });`
+// 启动动画（需要HTML中有id为'movingBox'的元素）
+// animate();`
   },
   {
     id: "curry",
     title: "函数柯里化",
-    description: "实现函数柯里化，将接受多个参数的函数转换为接受单个参数的函数序列，每个函数返回一个新函数，直到收集所有参数后执行原函数。",
+    description: "实现函数柯里化功能",
     code: `/**
- * @description 通用柯里化函数
- * @param {Function} fn - 要柯里化的原始函数
- * @return {Function} 柯里化后的函数
+ * 函数柯里化实现
+ * 柯里化是将多参数函数转换为单参数函数序列的技术
  */
 function curry(fn) {
+  // 收集参数的内部函数
   const collectArgs = (...args) => {
+    // 如果已收集的参数达到原函数的参数个数，则执行原函数
     if (args.length >= fn.length) {
       return fn(...args);
     }
-    return (...nextArgs) => collectArgs(...args, ...nextArgs);
+    // 否则返回新函数，继续收集参数
+    return (...newArgs) => collectArgs(...args, ...newArgs);
   };
+
   return collectArgs;
 }
 
@@ -91,511 +70,507 @@ function add(a, b, c) {
 }
 
 const curriedAdd = curry(add);
-
 console.log(curriedAdd(1)(2)(3)); // 输出: 6
 console.log(curriedAdd(1, 2)(3)); // 输出: 6
-console.log(curriedAdd(1)(2, 3)); // 输出: 6
 console.log(curriedAdd(1, 2, 3)); // 输出: 6`
   },
   {
     id: "mySetInterval",
-    title: "自定义 setInterval",
-    description: "使用 setTimeout 实现 setInterval 的功能，可以避免 setInterval 的一些问题，如回调函数执行时间超过间隔时间导致的连续执行。",
+    title: "用 setTimeout 实现 setInterval",
+    description: "使用 setTimeout 模拟 setInterval 功能",
     code: `/**
- * @description 自定义实现 setInterval
- * @param {Function} callback - 每次间隔执行的回调函数
- * @param {number} delay - 间隔时间（毫秒）
+ * 用 setTimeout 实现 setInterval
  */
 function mySetInterval(callback, delay) {
   let timerId;
 
-  const interval = () => {
-    callback();
-    timerId = setTimeout(interval, delay);
-  };
+  function interval() {
+    timerId = setTimeout(() => {
+      callback();
+      interval(); // 递归调用，形成循环
+    }, delay);
+  }
 
-  timerId = setTimeout(interval, delay);
+  interval(); // 开始第一次调用
 
+  // 返回清除函数
   return () => clearTimeout(timerId);
 }
 
 // 使用示例
-console.log("mySetInterval 开始...");
-const stopInterval = mySetInterval(() => {
-  console.log("Hello from mySetInterval!");
+const clear = mySetInterval(() => {
+  console.log('定时执行');
 }, 1000);
 
-// 5秒后停止定时器
-setTimeout(() => {
-  stopInterval();
-  console.log("mySetInterval 已停止。");
-}, 5500);`
+// 5秒后停止
+setTimeout(clear, 5000);`
   },
   {
     id: "lengthOfLongestSubstring",
-    title: "最长不重复子串",
-    description: "查找字符串中最长的不含重复字符的子串，使用滑动窗口算法实现，时间复杂度为 O(n)。",
+    title: "无重复字符的最长子串",
+    description: "求字符串中无重复字符的最长子串长度",
     code: `/**
- * @description 查找字符串中出现的不重复字符的最长长度
- * @param {string} s - 输入字符串
- * @returns {number} 最长不重复子串的长度
+ * 无重复字符的最长子串
+ * 使用滑动窗口算法
  */
 function lengthOfLongestSubstring(s) {
-  let start = 0;
-  let maxLength = 0;
-  let seen = new Set();
+  if (!s) return 0;
 
-  for (let end = 0; end < s.length; end++) {
-    while (seen.has(s[end])) {
-      seen.delete(s[start]);
-      start++;
+  let maxLength = 0;
+  let left = 0; // 窗口左边界
+  const charSet = new Set(); // 存储当前窗口中的字符
+
+  for (let right = 0; right < s.length; right++) {
+    const char = s[right];
+
+    // 如果字符已存在，收缩左边界
+    while (charSet.has(char)) {
+      charSet.delete(s[left]);
+      left++;
     }
-    seen.add(s[end]);
-    maxLength = Math.max(maxLength, end - start + 1);
+
+    // 添加当前字符
+    charSet.add(char);
+
+    // 更新最大长度
+    maxLength = Math.max(maxLength, right - left + 1);
   }
+
   return maxLength;
 }
 
-// 示例
-const s = "abcabcbb";
-console.log(\`字符串 "\${s}" 的最长不重复子串长度为: \${lengthOfLongestSubstring(s)}\`); // 输出: 3
-
-const s2 = "bbbbb";
-console.log(\`字符串 "\${s2}" 的最长不重复子串长度为: \${lengthOfLongestSubstring(s2)}\`); // 输出: 1`
-  },
-  {
-    id: "axiosCancel",
-    title: "Axios 请求取消",
-    description: "使用 AbortController 取消 Axios 请求，避免不必要的网络请求和内存泄漏。",
-    code: `/**
- * @description 取消 Axios 请求
- */
-const controller = new AbortController();
-
-axios.get("/foo/bar", {
-  signal: controller.signal
-}).then(function (response) {
-  console.log("请求成功:", response.data);
-}).catch(function (error) {
-  if (error.name === 'AbortError') {
-    console.log("请求已取消");
-  } else {
-    console.error("请求失败:", error);
-  }
-});
-
-// 取消请求
-controller.abort();`
-  },
-  {
-    id: "thousandSeparator",
-    title: "千分位分隔符",
-    description: "使用正则表达式为数字添加千分位分隔符，将长数字字符串转换为每三位用逗号分隔的格式。",
-    code: `/**
- * @description 千分位分隔符正则表达式
- * 将长数字字符串转换为每三位用逗号分隔的格式，如 "1000000" → "1,000,000"
- */
-var str = "100000000000";
-
-// 正则解释：
-// - (?=(\B\d{3})+$)：正向先行断言，匹配后面能接「非单词边界+3位数字」且最终到达字符串结尾的位置
-//   - \B：非单词边界（避免在数字开头前添加逗号）
-//   - \d{3}：匹配3位数字
-//   - (+)：前面的组合（\B\d{3}）至少出现1次（处理多组三位数字）
-//   - $：匹配字符串结尾（确保从右往左分割）
-// - g：全局匹配模式（替换所有符合条件的位置）
-var reg = /(?=(\B\d{3})+$)/g;
-
-console.log(str.replace(reg, ",")); // 输出: "100,000,000,000"`
+// 测试用例
+console.log(lengthOfLongestSubstring("abcabcbb")); // 输出: 3 ("abc")
+console.log(lengthOfLongestSubstring("bbbbb"));    // 输出: 1 ("b")
+console.log(lengthOfLongestSubstring("pwwkew"));   // 输出: 3 ("wke")`
   },
   {
     id: "floatEqual",
     title: "浮点数相等比较",
-    description: "实现一个函数来判断两个浮点数是否近似相等，解决 JavaScript 浮点数运算精度问题，如 0.1+0.2≠0.3。",
+    description: "安全比较两个浮点数是否相等",
     code: `/**
- * @description 判断两个浮点数是否近似相等
- * @param {number} a - 第一个数
- * @param {number} b - 第二个数
- * @param {number} [epsilon=Number.EPSILON] - 误差容忍度（默认使用JS内置最小精度）
- * @returns {boolean} 是否近似相等
+ * 浮点数相等比较
+ * 由于JavaScript浮点数精度问题，不能直接用 === 比较
  */
 function floatEqual(a, b, epsilon = Number.EPSILON) {
   return Math.abs(a - b) < epsilon;
 }
 
-// 使用示例
-console.log(0.1 + 0.2 === 0.3); // 输出 false
-console.log(floatEqual(0.1 + 0.2, 0.3)); // 输出 true
+// 演示JavaScript浮点数精度问题
+console.log(0.1 + 0.2 === 0.3); // 输出: false
+console.log(0.1 + 0.2); // 输出: 0.30000000000000004
 
-// 自定义精度
-console.log(floatEqual(0.1 + 0.2, 0.3, 0.0001)); // 输出 true`
-  },
-  {
-    id: "kebabToCamel",
-    title: "转化为驼峰命名",
-    description: "将 kebab-case（短横线分隔）字符串转换为 camelCase（驼峰）命名格式。",
-    code: `/**
- * @description 转化为驼峰命名
- * @param {string} s - kebab-case 字符串
- * @returns {string} camelCase 字符串
- */
-var s1 = "get-element-by-id";
+// 使用我们的函数
+console.log(floatEqual(0.1 + 0.2, 0.3)); // 输出: true
 
-var f = function (s) {
-  return s.replace(/-\w/g, function (x) {
-    return x.slice(1).toUpperCase();
-  });
-};
-
-console.log(f(s1)); // 输出: "getElementById"
-
-// 另一种写法（箭头函数）
-const kebabToCamel = (str) => {
-  return str.replace(/-([a-z])/g, (match, letter) => letter.toUpperCase());
-};
-
-console.log(kebabToCamel("get-element-by-id")); // 输出: "getElementById"`
+// 更多示例
+console.log(floatEqual(1.0000001, 1.0000002, 0.0001)); // 输出: true
+console.log(floatEqual(1.1, 1.2, 0.05)); // 输出: false`
   },
   {
     id: "binarySearch",
     title: "二分查找",
-    description: "在有序数组中查找目标值的高效算法，时间复杂度为 O(log n)。",
+    description: "在有序数组中进行二分查找",
     code: `/**
- * @description 二分查找算法
- * @param {number[]} arr - 已排序的输入数组（升序）
- * @param {number} target - 目标值
- * @return {number} 目标值的索引（未找到返回-1）
+ * 二分查找算法
+ * 在有序数组中查找目标值的位置
+ * 时间复杂度: O(log n)
  */
 function binarySearch(arr, target) {
   let left = 0;
   let right = arr.length - 1;
 
   while (left <= right) {
-    const mid = Math.floor((left + right) / 2);
+    // 防止整数溢出的中点计算方式
+    const mid = Math.floor(left + (right - left) / 2);
 
-    if (arr[mid] === target) return mid;
-
-    if (arr[mid] < target) {
-      left = mid + 1;
+    if (arr[mid] === target) {
+      return mid; // 找到目标，返回索引
+    } else if (arr[mid] < target) {
+      left = mid + 1; // 在右半部分查找
     } else {
-      right = mid - 1;
+      right = mid - 1; // 在左半部分查找
     }
   }
 
-  return -1;
+  return -1; // 未找到目标
 }
 
-// 调用示例
-const sortedArr = [2, 5, 8, 12, 16, 23, 38, 56, 72, 91];
-console.log(\`在数组中查找 23: \${binarySearch(sortedArr, 23)}\`); // 输出: 5
-console.log(\`在数组中查找 10: \${binarySearch(sortedArr, 10)}\`); // 输出: -1`
+// 测试用例
+const sortedArray = [1, 3, 5, 7, 9, 11, 13, 15, 17, 19];
+console.log(binarySearch(sortedArray, 7));  // 输出: 3
+console.log(binarySearch(sortedArray, 6));  // 输出: -1 (未找到)
+console.log(binarySearch(sortedArray, 1));  // 输出: 0
+console.log(binarySearch(sortedArray, 19)); // 输出: 9`
   },
   {
     id: "bubbleSort",
     title: "冒泡排序",
-    description: "最基础的排序算法之一，通过相邻元素的比较和交换来排序，时间复杂度 O(n²)。",
+    description: "冒泡排序算法实现",
     code: `/**
- * @description 冒泡排序算法
- * @param {number[]} arr - 输入数组
- * @return {number[]} 排序后的数组
+ * 冒泡排序算法
+ * 重复地遍历数组，比较相邻元素并交换，直到没有交换发生
+ * 时间复杂度: O(n²)，空间复杂度: O(1)
  */
 function bubbleSort(arr) {
-  const len = arr.length;
+  const n = arr.length;
+  // 复制数组，避免修改原数组
+  const result = [...arr];
 
-  for (let i = 0; i < len - 1; i++) {
-    let swapped = false;
+  // 外层循环：控制排序的轮数
+  for (let i = 0; i < n - 1; i++) {
+    let swapped = false; // 优化标志，检测是否发生交换
 
-    for (let j = 0; j < len - 1 - i; j++) {
-      if (arr[j] > arr[j + 1]) {
-        [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
+    // 内层循环：每轮比较相邻元素
+    for (let j = 0; j < n - 1 - i; j++) {
+      // 如果前一个元素大于后一个元素，则交换
+      if (result[j] > result[j + 1]) {
+        // 交换元素
+        [result[j], result[j + 1]] = [result[j + 1], result[j]];
         swapped = true;
       }
     }
 
-    // 优化：如果本轮没有发生交换，说明数组已经有序
-    if (!swapped) break;
+    // 如果这一轮没有发生交换，说明数组已经有序
+    if (!swapped) {
+      break;
+    }
   }
 
-  return arr;
+  return result;
 }
 
-// 调用示例
-const messyArr = [5, 3, 8, 4, 6];
-console.log(bubbleSort(messyArr)); // 输出: [3, 4, 5, 6, 8]`
+// 测试用例
+const unsortedArray = [64, 34, 25, 12, 22, 11, 90];
+console.log("原数组:", unsortedArray);
+console.log("排序后:", bubbleSort(unsortedArray));
+// 输出: [11, 12, 22, 25, 34, 64, 90]`
   },
   {
     id: "quickSort",
     title: "快速排序",
-    description: "高效的分治排序算法，平均时间复杂度 O(n log n)，在大多数情况下性能优于其他排序算法。",
+    description: "快速排序算法实现",
     code: `/**
- * @description 快速排序算法
- * @param {number[]} arr - 输入数组
- * @return {number[]} 排序后的数组
+ * 快速排序算法
+ * 使用分治思想，选择基准元素，将数组分为小于和大于基准的两部分
+ * 平均时间复杂度: O(n log n)，最坏情况: O(n²)
  */
 function quickSort(arr) {
-  if (arr.length <= 1) return arr;
-
-  const pivot = arr[Math.floor(arr.length / 2)];
-  const left = [];
-  const middle = [];
-  const right = [];
-
-  for (const num of arr) {
-    if (num < pivot) left.push(num);
-    else if (num === pivot) middle.push(num);
-    else right.push(num);
+  // 基本情况：长度小于等于1的数组已经有序
+  if (arr.length <= 1) {
+    return arr;
   }
 
-  return [...quickSort(left), ...middle, ...quickSort(right)];
+  // 选择基准元素（这里选择中间元素）
+  const pivotIndex = Math.floor(arr.length / 2);
+  const pivot = arr[pivotIndex];
+
+  // 分割数组
+  const left = [];  // 小于基准的元素
+  const right = []; // 大于基准的元素
+  const equal = []; // 等于基准的元素
+
+  for (let i = 0; i < arr.length; i++) {
+    if (arr[i] < pivot) {
+      left.push(arr[i]);
+    } else if (arr[i] > pivot) {
+      right.push(arr[i]);
+    } else {
+      equal.push(arr[i]);
+    }
+  }
+
+  // 递归排序左右两部分，并合并结果
+  return [...quickSort(left), ...equal, ...quickSort(right)];
 }
 
-// 调用示例
-const unsortedArr = [34, 12, 45, 6, 89, 23];
-console.log(quickSort(unsortedArr)); // 输出: [6, 12, 23, 34, 45, 89]`
+// 测试用例
+const unsortedArray = [64, 34, 25, 12, 22, 11, 90, 5];
+console.log("原数组:", unsortedArray);
+console.log("快排结果:", quickSort(unsortedArray));
+// 输出: [5, 11, 12, 22, 25, 34, 64, 90]`
   },
   {
-    id: "callApplyBind",
-    title: "手写 call、apply、bind",
-    description: "手动实现 JavaScript 中的 call、apply 和 bind 方法，用于改变函数执行时的 this 指向。",
+    id: "myCall",
+    title: "手写 call 方法",
+    description: "自定义实现 Function.prototype.call",
     code: `/**
- * @description 手写 call、apply、bind 方法
+ * @description 自定义实现call方法，改变函数的this指向并立即执行
+ * @param {Object} context - 要绑定的this上下文对象
+ * @param {...any} args - 要传递给函数的参数
+ * @return {any} 函数执行的返回值
  */
-
-// 手写call方法：修改函数执行时的this指向并立即执行
 Function.prototype.myCall = function (context, ...args) {
-  context = context || window;
-  const fn = Symbol("fn");
-  context[fn] = this;
-  const result = context[fn](...args);
-  delete context[fn];
+  // 处理context为null或undefined的情况，默认指向全局对象
+  context = context || globalThis;
+
+  // 创建一个唯一的属性名，避免覆盖原有属性
+  const fnKey = Symbol('tempFunction');
+
+  // 将当前函数作为context的临时属性
+  context[fnKey] = this;
+
+  // 调用函数并获取返回值
+  const result = context[fnKey](...args);
+
+  // 删除临时属性，保持context的纯净
+  delete context[fnKey];
+
+  // 返回函数执行结果
   return result;
 };
 
-// 手写apply方法：与call类似，但参数通过数组传递
-Function.prototype.myApply = function (context, args) {
-  context = context || window;
-  const fn = Symbol("fn");
-  context[fn] = this;
-  const result = args ? context[fn](...args) : context[fn]();
-  delete context[fn];
+// 使用示例
+function greet(greeting, punctuation) {
+  return \`\${greeting}, I'm \${this.name}\${punctuation}\`;
+}
+
+const person = { name: 'Alice' };
+console.log(greet.myCall(person, 'Hello', '!')); // 输出: "Hello, I'm Alice!"`
+  },
+  {
+    id: "myApply",
+    title: "手写 apply 方法",
+    description: "自定义实现 Function.prototype.apply",
+    code: `/**
+ * @description 自定义实现apply方法，改变函数的this指向并立即执行
+ * @param {Object} context - 要绑定的this上下文对象
+ * @param {Array} argsArray - 要传递给函数的参数数组
+ * @return {any} 函数执行的返回值
+ */
+Function.prototype.myApply = function (context, argsArray) {
+  // 处理context为null或undefined的情况
+  context = context || globalThis;
+
+  // 处理参数数组为null或undefined的情况
+  argsArray = argsArray || [];
+
+  // 创建唯一的属性名
+  const fnKey = Symbol('tempFunction');
+
+  // 将当前函数绑定到context上
+  context[fnKey] = this;
+
+  // 调用函数并传入参数数组
+  const result = context[fnKey](...argsArray);
+
+  // 清理临时属性
+  delete context[fnKey];
+
   return result;
 };
 
-// 手写bind方法：返回一个绑定this的新函数
+// 使用示例
+function calculate(operation, a, b) {
+  return \`\${this.name} calculated: \${a} \${operation} \${b} = \${operation === '+' ? a + b : a - b}\`;
+}
+
+const calculator = { name: 'Calculator' };
+console.log(calculate.myApply(calculator, ['+', 10, 5])); // 输出: "Calculator calculated: 10 + 5 = 15"`
+  },
+  {
+    id: "myBind",
+    title: "手写 bind 方法",
+    description: "自定义实现 Function.prototype.bind",
+    code: `/**
+ * @description 自定义实现bind方法，创建一个新函数，将this绑定到指定对象
+ * @param {Object} context - 要绑定的this上下文对象
+ * @param {...any} args - 预设的参数
+ * @return {Function} 绑定后的新函数
+ */
 Function.prototype.myBind = function (context, ...args) {
+  // 保存原函数引用（调用bind的函数）
   const self = this;
+  // 返回新函数，支持后续传递新参数
   return function (...newArgs) {
+    // 调用自定义的myCall方法，合并初始参数和新参数
     return self.myCall(context, ...args, ...newArgs);
   };
 };
 
 // 使用示例
-const obj = { name: "Alice" };
-function greet(greeting, punctuation) {
-  return \`\${greeting}, \${this.name}\${punctuation}\`;
+function multiply(a, b, c) {
+  return \`\${this.name}: \${a} * \${b} * \${c} = \${a * b * c}\`;
 }
 
-console.log(greet.myCall(obj, "Hello", "!")); // "Hello, Alice!"
-console.log(greet.myApply(obj, ["Hi", "."])); // "Hi, Alice."
-
-const boundGreet = greet.myBind(obj, "Hey");
-console.log(boundGreet("?")); // "Hey, Alice?"`
+const math = { name: 'Math' };
+const boundMultiply = multiply.myBind(math, 2); // 预设第一个参数为2
+console.log(boundMultiply(3, 4)); // 输出: "Math: 2 * 3 * 4 = 24"`
   },
   {
     id: "myInstanceof",
-    title: "自定义 instanceof",
-    description: "手动实现 instanceof 运算符，检测构造函数的 prototype 是否存在于对象的原型链中。",
+    title: "手写 instanceof",
+    description: "自定义实现instanceof运算符",
     code: `/**
- * @description 自定义实现instanceof运算符
- * @param {Object|Function} obj - 要检测的目标对象
+ * @description 自定义实现instanceof运算符，检测构造函数的prototype是否存在于对象的原型链中
+ * @param {Object|Function} obj - 要检测的目标对象（注意：基本类型直接返回false）
  * @param {Function} constructor - 用于检测的构造函数
  * @return {boolean} 目标对象是否为构造函数的实例
  */
 function myInstanceof(obj, constructor) {
+  // 处理基本类型：基本类型没有原型链，直接返回false（null也在此处处理）
   if ((typeof obj !== "object" && typeof obj !== "function") || obj === null) {
     return false;
   }
-
+  // 获取目标对象的原型（等同于obj.__proto__，但推荐使用标准方法）
   let proto = Object.getPrototypeOf(obj);
-
+  // 遍历原型链，直到原型为null（原型链终点）
   while (proto !== null) {
+    // 检查当前原型是否等于构造函数的prototype属性
     if (proto === constructor.prototype) {
-      return true;
+      return true; // 找到匹配，返回true
     }
+    // 继续向上查找原型链
     proto = Object.getPrototypeOf(proto);
   }
-
+  // 遍历完整个原型链未找到匹配，返回false
   return false;
 }
 
 // 使用示例
 function Animal() {}
 const cat = new Animal();
-
 console.log(myInstanceof(cat, Animal)); // 输出: true
 console.log(myInstanceof(cat, Object)); // 输出: true
-console.log(myInstanceof(123, Number)); // 输出: false`
+console.log(myInstanceof(123, Number)); // 输出: false（基本类型直接返回false）`
   },
   {
     id: "deepClone",
-    title: "深拷贝对象",
-    description: "实现深拷贝函数，可以复制对象及其内部的所有属性和值，包括嵌套对象和数组，支持日期和正则表达式。",
+    title: "深拷贝",
+    description: "实现对象的深度拷贝",
     code: `/**
- * @description 深拷贝一个对象
- * @param {any} obj - 需要深拷贝的对象
+ * 深拷贝一个对象
+ *
+ * @param {any} obj 需要深拷贝的对象
  * @returns {any} 深拷贝后的对象
  */
 function deepClone(obj) {
-  if (typeof obj !== 'object' || obj === null) {
+  // 如果传入的对象不是对象或者为null，则直接返回该对象
+  if (typeof obj !== "object" || obj === null) {
     return obj;
   }
 
-  if (obj instanceof Date) {
-    return new Date(obj);
-  }
-
-  if (obj instanceof RegExp) {
-    return new RegExp(obj.source, obj.flags);
-  }
-
+  let clone;
+  // 如果传入的对象是数组
   if (Array.isArray(obj)) {
-    const newArr = [];
+    clone = [];
+    // 遍历数组中的每个元素，递归调用deepClone进行深拷贝
     for (let i = 0; i < obj.length; i++) {
-      newArr[i] = deepClone(obj[i]);
+      clone[i] = deepClone(obj[i]);
     }
-    return newArr;
+  } else {
+    // 如果传入的对象不是数组，则初始化为空对象
+    clone = {};
+    // 遍历对象的每个属性，递归调用deepClone进行深拷贝
+    for (let key in obj) {
+      if (obj.hasOwnProperty(key)) {
+        clone[key] = deepClone(obj[key]);
+      }
+    }
   }
 
-  const newObj = {};
-  for (let key in obj) {
-    if (Object.prototype.hasOwnProperty.call(obj, key)) {
-      newObj[key] = deepClone(obj[key]);
-    }
-  }
-  return newObj;
+  return clone;
 }
 
 // 使用示例
 const original = {
-  a: 1,
-  b: {
-    c: 2,
-    d: [3, 4],
-    e: { f: 5 }
-  },
-  g: /\\d+/gi,
-  h: new Date()
+  name: 'Alice',
+  age: 30,
+  hobbies: ['reading', 'swimming'],
+  address: {
+    city: 'New York',
+    country: 'USA'
+  }
 };
 
 const cloned = deepClone(original);
-console.log("original.b === cloned.b:", original.b === cloned.b); // false`
+cloned.hobbies.push('coding');
+cloned.address.city = 'Los Angeles';
+
+console.log('原对象:', original);
+// hobbies 仍然是 ['reading', 'swimming']，city 仍然是 'New York'
+console.log('克隆对象:', cloned);
+// hobbies 是 ['reading', 'swimming', 'coding']，city 是 'Los Angeles'`
   },
   {
-    id: "asyncLimit",
-    title: "异步并发控制",
-    description: "控制异步任务的并发数量，防止同时发起过多请求导致性能问题或服务器压力过大。",
-    code: `
-    /**
- * 控制异步请求并发数的简单函数式实现
- * @param {Array<Function>} tasks - 异步任务数组，每个任务都是返回Promise的函数
+    id: "simpleLimit",
+    title: "并发控制",
+    description: "控制固定数量异步任务的并发执行",
+    code: `/**
+ * 超简单版本：控制固定数量异步任务的并发执行
  * @param {number} limit - 最大并发数
- * @returns {Promise<Array>} - 所有任务的结果数组（按照添加顺序）
  */
-function limitConcurrency(tasks, limit) {
-  // 任务结果数组（保持与tasks相同顺序）
-  const results = new Array(tasks.length);
-  // 记录已完成的任务数量
-  let completedCount = 0;
+function simpleLimit(limit) {
+  // 等待执行的任务队列
+  const queue = [];
   // 当前正在执行的任务数量
-  let runningCount = 0;
-  // 下一个要执行的任务索引
-  let nextIndex = 0;
+  let activeCount = 0;
 
-  return new Promise((resolve) => {
-    // 定义执行下一批任务的函数
-    function runNextTasks() {
-      // 当所有任务都已完成时，返回结果
-      if (completedCount === tasks.length) {
-        resolve(results);
-        return;
-      }
+  // 执行队列中的下一个任务
+  const runNext = () => {
+    if (queue.length === 0) return;
 
-      // 尝试启动新任务，直到达到并发上限或任务都已分配
-      while (runningCount < limit && nextIndex < tasks.length) {
-        const taskIndex = nextIndex++;
-        const task = tasks[taskIndex];
+    // 如果正在执行的任务数量小于限制，则执行下一个任务
+    if (activeCount < limit) {
+      // 从队列中取出一个任务
+      const { fn, resolve, reject } = queue.shift();
+      activeCount++;
 
-        // 增加运行计数
-        runningCount++;
-
-        // 执行任务并处理结果
-        Promise.resolve(task())
-          .then(result => {
-            // 保存结果到对应位置
-            results[taskIndex] = result;
-            console.log(taskIndex,'taskIndextaskIndex');
-
-            completedCount++;
-            runningCount--;
-
-            // 尝试执行更多任务
-            runNextTasks();
-          })
-          .catch(error => {
-            // 错误处理：记录错误并继续
-            results[taskIndex] = { error };
-            completedCount++;
-            runningCount--;
-
-            // 尝试执行更多任务
-            runNextTasks();
-          });
-      }
+      Promise.resolve(fn())
+        .then(resolve)
+        .catch(reject)
+        .finally(() => {
+          activeCount--;
+          runNext(); // 任务完成后，尝试执行下一个任务
+        });
     }
+  };
 
-    // 开始执行任务
-    runNextTasks();
-  });
+  // 返回一个函数，用于添加任务
+  return (fn) => {
+    return new Promise((resolve, reject) => {
+      queue.push({ fn, resolve, reject });
+      runNext();
+    });
+  };
 }
 
-// 使用示例：控制5个setTimeout的并发执行
-const tasks = [
-  () => new Promise(resolve => setTimeout(() => {
-    console.log('任务1完成');
-    resolve('结果1');
-  }, 5000)),
-  () => new Promise(resolve => setTimeout(() => {
-    console.log('任务2完成');
-    resolve('结果2');
-  }, 1000)),
-  () => new Promise(resolve => setTimeout(() => {
-    console.log('任务3完成');
-    resolve('结果3');
-  }, 1000)),
-  () => new Promise(resolve => setTimeout(() => {
-    console.log('任务4完成');
-    resolve('结果4');
-  }, 1800)),
-  () => new Promise(resolve => setTimeout(() => {
-    console.log('任务5完成');
-    resolve('结果5');
-  }, 1200))
-];
+// 使用示例
+const runTask = simpleLimit(2); // 最多同时执行2个任务
 
-// 限制并发数为2
-limitConcurrency(tasks, 2).then(results => {
-  console.log('所有任务完成，结果：', results);
-});
-    `
+// 创建5个模拟的异步任务
+const createTask = (id, delay) => () => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      console.log(\`任务\${id}完成，耗时\${delay}ms\`);
+      resolve(\`任务\${id}的结果\`);
+    }, delay);
+  });
+};
+
+// 执行任务并获取结果
+runTask(createTask(1, 1000)).then((result) => console.log(result));
+runTask(createTask(2, 2000)).then((result) => console.log(result));
+runTask(createTask(3, 1500)).then((result) => console.log(result));
+runTask(createTask(4, 800)).then((result) => console.log(result));`
   },
   {
     id: "lazyLoad",
     title: "图片懒加载",
-    description: "实现图片懒加载功能，只有当图片进入可视区域时才开始加载，提高页面性能和用户体验。",
+    description: "图片懒加载类的实现",
     code: `/**
- * @description 图片懒加载类
+ * 图片懒加载类
+ * @class LazyLoad
  */
 class LazyLoad {
+  /**
+   * 创建懒加载实例
+   * @param {Object} options - 配置选项
+   * @param {string} options.selector - 懒加载图片的CSS选择器
+   * @param {string} options.dataSrc - 存储真实图片地址的data属性名
+   * @param {number} options.threshold - IntersectionObserver的阈值
+   * @param {number} options.throttleDelay - 节流延迟时间（毫秒）
+   */
   constructor(options = {}) {
     this.options = {
       selector: ".lazy-image",
@@ -609,12 +584,16 @@ class LazyLoad {
     this.observer = null;
     this.initialized = false;
 
+    // 绑定方法的this
     this.throttledLoad = this.throttle(
       this.loadImages.bind(this),
       this.options.throttleDelay
     );
   }
 
+  /**
+   * 初始化懒加载
+   */
   init() {
     if (this.initialized) return;
 
@@ -629,6 +608,9 @@ class LazyLoad {
     this.initialized = true;
   }
 
+  /**
+   * 使用IntersectionObserver初始化
+   */
   initIntersectionObserver() {
     this.observer = new IntersectionObserver(
       (entries) => {
@@ -639,7 +621,9 @@ class LazyLoad {
           }
         });
       },
-      { threshold: this.options.threshold }
+      {
+        threshold: this.options.threshold,
+      }
     );
 
     this.images.forEach((image) => {
@@ -649,22 +633,36 @@ class LazyLoad {
     });
   }
 
+  /**
+   * 加载单张图片
+   * @param {HTMLImageElement} image - 要加载的图片元素
+   */
   loadImage(image) {
     const src = image.getAttribute(this.options.dataSrc);
     if (!src) return;
 
+    // 设置加载事件
     image.onload = () => {
       image.removeAttribute(this.options.dataSrc);
       image.classList.add("lazy-loaded");
     };
 
+    // 设置错误处理
     image.onerror = () => {
       console.error(\`Failed to load image: \${src}\`);
+      image.removeAttribute(this.options.dataSrc);
     };
 
+    // 触发图片加载
     image.src = src;
   }
 
+  /**
+   * 节流函数
+   * @param {Function} func - 要节流的函数
+   * @param {number} delay - 延迟时间（毫秒）
+   * @returns {Function} 节流后的函数
+   */
   throttle(func, delay) {
     let lastCall = 0;
     return function (...args) {
@@ -683,99 +681,72 @@ const lazyLoader = new LazyLoad({
   dataSrc: 'data-src',
   threshold: 0.1
 });
-lazyLoader.init();`
+
+// 页面加载完成后初始化
+document.addEventListener('DOMContentLoaded', () => {
+  lazyLoader.init();
+});`
   },
   {
     id: "setOperations",
-    title: "Set 集合操作",
-    description: "使用 ES6 Set 数据结构实现集合的交集、并集和差集操作。",
+    title: "Set集合操作",
+    description: "Set集合的交集、并集和差集操作",
     code: `/**
- * @description Set集合操作：交集、并集和差集
+ * set集合操作交集、并集和差集
  */
 
 const a = new Set([1, 2, 3]);
 const b = new Set([2, 3, 4]);
 
-// 并集 (Union)
-const union = new Set([...a, ...b]);
-console.log("并集:", union); // Set(4) {1, 2, 3, 4}
+// 并集
+const union = new Set([...a, ...b]); // Set(4) {1, 2, 3, 4}
 
-// 交集 (Intersection)
-const intersection = new Set([...a].filter(x => b.has(x)));
-console.log("交集:", intersection); // Set(2) {2, 3}
+// 交集
+const intersection = new Set([...a].filter((x) => b.has(x))); // Set(2) {2, 3}
 
-// 差集 (Difference) - a 中有但 b 中没有的元素
-const difference = new Set([...a].filter(x => !b.has(x)));
-console.log("差集 (a-b):", difference); // Set(1) {1}
+// 差集 (a - b)
+const difference = new Set([...a].filter((x) => !b.has(x))); // Set(1) {1}
 
-// 对称差集 (Symmetric Difference) - 两个集合中不相交的元素
-const symmetricDifference = new Set([
-  ...[...a].filter(x => !b.has(x)),
-  ...[...b].filter(x => !a.has(x))
-]);
-console.log("对称差集:", symmetricDifference); // Set(2) {1, 4}`
-  },
-  {
-    id: "iframeDetection",
-    title: "iframe 检测",
-    description: "检测当前页面是否运行在 iframe 中，这在某些安全场景和功能判断中很有用。",
-    code: `/**
- * @description 判断当前页面是否在 iframe 中
- */
+console.log('集合a:', a);
+console.log('集合b:', b);
+console.log('并集:', union);
+console.log('交集:', intersection);
+console.log('差集 (a-b):', difference);
+
+// 判断当前页面是否在 iframe 中
 const isInIframe = window.self !== window.top;
 
 if (isInIframe) {
   console.log("当前页面被嵌入在 iframe 中");
-
-  // 可以进行相应的处理
-  document.body.style.backgroundColor = '#f0f0f0';
-
-  // 或者阻止在 iframe 中运行
-  // window.top.location = window.location;
 } else {
   console.log("当前页面是顶级窗口");
-}
-
-// 更详细的检测
-function getFrameInfo() {
-  return {
-    isInIframe: window.self !== window.top,
-    frameDepth: (() => {
-      let depth = 0;
-      let win = window;
-      while (win !== win.parent) {
-        depth++;
-        win = win.parent;
-      }
-      return depth;
-    })(),
-    parentOrigin: window.parent !== window ? document.referrer : null
-  };
-}
-
-console.log("Frame 信息:", getFrameInfo());`
+}`
   },
   {
     id: "myReduce",
-    title: "手写 Array.reduce",
-    description: "手动实现 Array.prototype.reduce 方法，支持累加器函数和初始值参数。",
+    title: "手写reduce函数",
+    description: "手写reduce函数实现",
     code: `/**
- * @description 手写reduce函数实现
+ * 手写reduce函数实现
  */
 Array.prototype.myReduce = function (callback, initialValue) {
+  // 1. 检查回调函数是否为函数
   if (typeof callback !== "function") {
     throw new TypeError(callback + " is not a function");
   }
 
-  const array = this;
+  const array = this; // 当前数组
   const length = array.length;
   let accumulator;
   let startIndex;
 
+  // 2. 处理初始值
   if (arguments.length >= 2) {
+    // 如果提供了初始值，从第 0 个元素开始
     accumulator = initialValue;
     startIndex = 0;
   } else {
+    // 如果没有提供初始值，使用第一个元素作为初始值，并从第 1 个元素开始
     if (length === 0) {
       throw new TypeError("Reduce of empty array with no initial value");
     }
@@ -783,10 +754,12 @@ Array.prototype.myReduce = function (callback, initialValue) {
     startIndex = 1;
   }
 
+  // 3. 遍历数组，执行累加器函数
   for (let i = startIndex; i < length; i++) {
     accumulator = callback(accumulator, array[i], i, array);
   }
 
+  // 4. 返回最终的累积值
   return accumulator;
 };
 
@@ -794,71 +767,67 @@ Array.prototype.myReduce = function (callback, initialValue) {
 const numbers = [1, 2, 3, 4, 5];
 
 // 求和
-const sum = numbers.myReduce((acc, curr) => acc + curr, 0);
-console.log("求和:", sum); // 15
+const sum = numbers.myReduce((acc, cur) => acc + cur, 0);
+console.log('求和结果:', sum); // 输出: 15
 
 // 求最大值
-const max = numbers.myReduce((acc, curr) => Math.max(acc, curr));
-console.log("最大值:", max); // 5
+const max = numbers.myReduce((acc, cur) => Math.max(acc, cur));
+console.log('最大值:', max); // 输出: 5
 
 // 数组转对象
 const fruits = ['apple', 'banana', 'orange'];
-const fruitCounts = fruits.myReduce((acc, fruit, index) => {
-  acc[fruit] = index + 1;
+const fruitObj = fruits.myReduce((acc, fruit, index) => {
+  acc[fruit] = index;
   return acc;
 }, {});
-console.log("数组转对象:", fruitCounts); // {apple: 1, banana: 2, orange: 3}`
+console.log('数组转对象:', fruitObj); // 输出: {apple: 0, banana: 1, orange: 2}`
   },
   {
     id: "fibonacciMemoized",
-    title: "带记忆的斐波那契数列",
-    description: "使用记忆化技术优化斐波那契数列的计算，避免重复计算，大幅提升性能。",
+    title: "斐波那契数列（记忆化）",
+    description: "带记忆功能的斐波那契数列实现",
     code: `/**
  * @description 带记忆功能的斐波那契数列实现
  * @param {number} n - 需要计算的斐波那契数列位置
  * @return {number} 斐波那契数列第n项的值
  */
 function fibonacciMemoized() {
+  // 创建缓存对象
   const cache = {};
 
+  // 内部递归函数
   function fib(n) {
+    // 检查缓存中是否已有计算结果
     if (n in cache) {
       return cache[n];
     }
 
+    // 基本情况
     if (n <= 1) {
       return n;
     }
 
+    // 计算结果并存入缓存
     cache[n] = fib(n - 1) + fib(n - 2);
     return cache[n];
   }
 
+  // 返回内部函数
   return fib;
 }
 
-// 使用示例
 const fib = fibonacciMemoized();
-
-console.time('计算斐波那契第40项');
-console.log("fib(40) =", fib(40)); // 102334155
-console.timeEnd('计算斐波那契第40项');
-
-console.time('再次计算斐波那契第40项');
-console.log("fib(40) =", fib(40)); // 从缓存获取，几乎瞬间完成
-console.timeEnd('再次计算斐波那契第40项');
-
-// 计算多个值
-for (let i = 1; i <= 10; i++) {
-  console.log(\`fib(\${i}) = \${fib(i)}\`);
-}`
+console.log(fib(40)); // 输出: 102334155 (计算非常快)`
   },
   {
     id: "treeTraversal",
-    title: "深度优先遍历和广度优先遍历",
-    description: "实现树的深度优先遍历（DFS）和广度优先遍历（BFS）算法，用于遍历树形数据结构。",
-    code: `/**
+    title: "深度优先和广度优先遍历",
+    description: "深度优先遍历和广度优先遍历的实现代码",
+    code: `//深度优先遍历和广度优先遍历的实现代码
+
+/**
  * @description 树节点构造函数
+ * @param {any} value - 节点值
  */
 function TreeNode(value) {
   this.value = value;
@@ -871,17 +840,20 @@ function TreeNode(value) {
  * @param {function} callback - 处理节点的回调函数
  */
 function depthFirstTraversal(node, callback) {
+  // 基本情况：节点为null
   if (!node) return;
 
+  // 处理当前节点
   callback(node.value);
 
+  // 递归遍历所有子节点
   for (const child of node.children) {
     depthFirstTraversal(child, callback);
   }
 }
 
 /**
- * @description 广度优先遍历（BFS）
+ * @description 广度优先遍历（BFS，使用队列，非递归实现）
  * @param {TreeNode} root - 根节点
  * @param {function} callback - 处理节点的回调函数
  */
@@ -892,15 +864,14 @@ function breadthFirstTraversal(root, callback) {
 
   while (queue.length > 0) {
     const node = queue.shift();
-    callback(node.value);
-
+    callback(node.value); // 执行回调处理当前节点
     for (const child of node.children) {
       queue.push(child);
     }
   }
 }
 
-// 创建示例树
+// 创建一个示例树
 const root = new TreeNode("A");
 const nodeB = new TreeNode("B");
 const nodeC = new TreeNode("C");
@@ -911,7 +882,11 @@ const nodeF = new TreeNode("F");
 root.children.push(nodeB, nodeC);
 nodeB.children.push(nodeD, nodeE);
 nodeC.children.push(nodeF);
-
+// A
+// / \\
+// B   C
+// / \\   |
+// D  E   F
 // 测试遍历
 console.log("DFS遍历结果:");
 depthFirstTraversal(root, (value) => console.log(value));
@@ -924,164 +899,379 @@ breadthFirstTraversal(root, (value) => console.log(value));
   {
     id: "arrayToTree",
     title: "数组转树形结构",
-    description: "将扁平的数组数据转换为树形结构，常用于组织架构、菜单系统等场景。",
-    code: `/**
- * @description 将扁平数组转换为树形结构
- * @param {Array} arr - 扁平数组
- * @returns {Array} 树形结构数组
- */
-function arrayToTree(arr) {
-  const nodeMap = new Map();
+    description: "组织架构树形数据转换为树形结构",
+    code: `//  组织架构树形数据转换为树形结构
 
-  // 建立节点映射
-  arr.forEach((item) => {
-    nodeMap.set(item.id, { ...item, children: [] });
-  });
-
-  const tree = [];
-
-  arr.forEach((item) => {
-    if (item.pid === null || item.pid === undefined || item.pid === "") {
-      // 根节点
-      tree.push(nodeMap.get(item.id));
-    } else {
-      // 子节点
-      const parent = nodeMap.get(item.pid);
-      if (parent) {
-        parent.children.push(nodeMap.get(item.id));
-      }
-    }
-  });
-
-  return tree;
-}
-
-// 使用示例
 const data = [
   { id: "01", name: "张大大", pid: "", job: "项目经理" },
   { id: "02", name: "小亮", pid: "01", job: "产品leader" },
   { id: "03", name: "小美", pid: "01", job: "UIleader" },
   { id: "04", name: "老马", pid: "01", job: "技术leader" },
   { id: "05", name: "老王", pid: "01", job: "测试leader" },
+  { id: "06", name: "老李", pid: "01", job: "运维leader" },
   { id: "07", name: "小丽", pid: "02", job: "产品经理" },
   { id: "08", name: "大光", pid: "02", job: "产品经理" },
   { id: "09", name: "小高", pid: "03", job: "UI设计师" },
   { id: "10", name: "小刘", pid: "04", job: "前端工程师" },
-  { id: "11", name: "小华", pid: "04", job: "后端工程师" }
+  { id: "11", name: "小华", pid: "04", job: "后端工程师" },
+  { id: "12", name: "小李", pid: "04", job: "后端工程师" },
+  { id: "13", name: "小赵", pid: "05", job: "测试工程师" },
+  { id: "14", name: "小强", pid: "05", job: "测试工程师" },
+  { id: "15", name: "小涛", pid: "06", job: "运维工程师" },
 ];
 
-const tree = arrayToTree(data);
-console.log("树形结构:", JSON.stringify(tree, null, 2));`
+function toTree(arr, parentId) {
+  // 定义一个递归函数 loop，用于构建树结构
+  function loop(parentId) {
+    // 初始化结果数组
+    let res = [];
+    // 遍历数组 arr
+    for (let i = 0; i < arr.length; i++) {
+      let item = arr[i];
+
+      // 如果当前项的父级 ID 不等于传入的 parentId，则跳过
+      if (item.pid !== parentId) {
+        continue;
+      }
+
+      // 递归调用 loop 函数，将当前项的 ID 作为父级 ID 传入，获取子节点
+      item.children = loop(item.id);
+      // 将当前项添加到结果数组中
+      res.push(item);
+    }
+    // 返回结果数组
+    return res;
+  }
+  // 调用递归函数 loop，并返回结果
+  return loop(parentId);
+}
+
+const result = toTree(data, "");
+console.log(JSON.stringify(result, null, 2));`
   },
   {
-    id: "sensitiveInfoMask",
-    title: "敏感信息脱敏",
-    description: "对手机号、身份证号等敏感信息进行脱敏处理，保护用户隐私。",
+    id: "restoreIpAddresses",
+    title: "有效IP地址生成",
+    description: "生成所有可能的有效IP地址",
     code: `/**
- * @description 敏感信息脱敏处理
+ * @description 生成所有可能的有效IP地址
+ * @param {string} s - 输入的纯数字字符串
+ * @return {string[]} 所有有效的IP地址数组
  */
+function restoreIpAddresses(s) {
+  const result = [];
+  const len = s.length;
 
-// 手机号脱敏（中间4位替换为****）
-function maskPhone(phone) {
-  return phone.replace(/(\d{3})\d{4}(\d{4})/, "$1****$2");
+  // 回溯函数：当前段数、当前路径、当前位置
+  const backtrack = (segCount, path, start) => {
+    // 终止条件：已分割4段且遍历完所有字符
+    if (segCount === 4) {
+      if (start === len) {
+        result.push(path.join("."));
+      }
+      return;
+    }
+
+    // 尝试取1-3位作为当前段
+    for (let end = start + 1; end <= Math.min(start + 3, len); end++) {
+      const segment = s.substring(start, end);
+      // 检查当前段是否有效
+      if (isValidSegment(segment)) {
+        path.push(segment);
+        backtrack(segCount + 1, path, end);
+        path.pop(); // 回溯
+      }
+    }
+  };
+
+  /**
+   * @description 检查段是否有效
+   * @param {string} segment - 当前分割段
+   * @return {boolean} 是否有效
+   */
+  const isValidSegment = (segment) => {
+    // 长度超过3或前导零（非单零）
+    if (segment.length > 3 || (segment.length > 1 && segment[0] === "0")) {
+      return false;
+    }
+    // 数值超过255
+    return parseInt(segment, 10) <= 255;
+  };
+
+  backtrack(0, [], 0);
+  return result;
 }
 
-// 身份证号脱敏（中间部分替换为****）
-function maskIdCard(idCard) {
-  return idCard.replace(/(\d{6})\d{8}(\d{4})/, "$1********$2");
+// 示例1
+console.log(restoreIpAddresses("25525511135")); // 输出: ["255.255.11.135","255.255.111.35"]
+
+// 示例2
+console.log(restoreIpAddresses("0000")); // 输出: ["0.0.0.0"]
+
+// 示例3
+console.log(restoreIpAddresses("101023")); // 输出: ["1.0.10.23","1.0.102.3","10.1.0.23","10.10.2.3","101.0.2.3"]`
+  },
+  {
+    id: "memoize",
+    title: "记忆化函数",
+    description: "记忆化函数的实现",
+    code: `/**
+ * @description 记忆化函数的实现
+ */
+// 1. 基础记忆化
+function memoize(fn) {
+  const cache = new Map();
+  return function (...args) {
+    const key = JSON.stringify(args);
+    if (cache.has(key)) {
+      return cache.get(key);
+    }
+    const result = fn.apply(this, args);
+    cache.set(key, result);
+    return result;
+  };
 }
 
-// 邮箱脱敏（用户名部分脱敏）
-function maskEmail(email) {
-  return email.replace(/(.{2}).+(.{2}@.+)/, "$1****$2");
-}
-
-// 银行卡号脱敏（保留前4位和后4位）
-function maskBankCard(cardNumber) {
-  return cardNumber.replace(/(\d{4})\d+(\d{4})/, "$1 **** **** $2");
-}
-
-// 姓名脱敏（保留姓氏）
-function maskName(name) {
-  if (name.length <= 1) return name;
-  if (name.length === 2) return name[0] + "*";
-  return name[0] + "*".repeat(name.length - 2) + name[name.length - 1];
-}
+// 2. 实际应用：斐波那契数列
+const fibonacci = memoize(function (n) {
+  if (n <= 1) return n;
+  return fibonacci(n - 1) + fibonacci(n - 2);
+});
 
 // 使用示例
-console.log("手机号脱敏:", maskPhone("13812345678")); // 138****5678
-console.log("身份证脱敏:", maskIdCard("110101199003071234")); // 110101********1234
-console.log("邮箱脱敏:", maskEmail("zhangsan@example.com")); // zh****an@example.com
-console.log("银行卡脱敏:", maskBankCard("6225881234567890")); // 6225 **** **** 7890
-console.log("姓名脱敏:", maskName("李小明")); // 李*明`
+console.log(fibonacci(40)); // 非常快
+console.log(fibonacci(50)); // 依然很快
+
+// 3. 记忆化的计算密集型函数
+const expensiveCalculation = memoize(function(x, y) {
+  console.log('执行复杂计算...'); // 只有第一次调用时才会打印
+  return Math.pow(x, y) + Math.sqrt(x * y);
+});
+
+console.log(expensiveCalculation(10, 3)); // 执行计算
+console.log(expensiveCalculation(10, 3)); // 从缓存返回`
   },
   {
-    id: "urlParser",
-    title: "URL 参数解析",
-    description: "解析 URL 中的查询参数，支持数组参数和 URL 编码解码。",
+    id: "arrayChunk",
+    title: "数组分块处理",
+    description: "将数组分解为指定大小的块",
     code: `/**
- * @description URL参数解析
+ * @description 将数组分解为指定大小的块
+ * @param {Array} array - 需要分块的数组
+ * @param {number} chunkSize - 每块的大小
+ * @return {Array} 分块后的二维数组
  */
+function arrayChunk(array, chunkSize) {
+  if (chunkSize <= 0) throw new Error('Chunk size must be greater than 0');
 
-// 方法1：使用正则表达式手动解析
-function parseUrlParams(url) {
-  const params = {};
-  const queryString = url.split("?")[1] || "";
-  const pairs = queryString.split("#")[0].split("&");
+  const result = [];
+  for (let i = 0; i < array.length; i += chunkSize) {
+    result.push(array.slice(i, i + chunkSize));
+  }
+  return result;
+}
 
-  for (const pair of pairs) {
-    if (!pair) continue;
+// 示例
+console.log(arrayChunk([1, 2, 3, 4, 5, 6, 7, 8], 3)); // 输出: [[1, 2, 3], [4, 5, 6], [7, 8]]
+console.log(arrayChunk(['a', 'b', 'c', 'd'], 2)); // 输出: [['a', 'b'], ['c', 'd']]`
+  },
+  {
+    id: "deepFlatten",
+    title: "深度扁平化数组",
+    description: "将嵌套数组完全扁平化",
+    code: `/**
+ * @description 将嵌套数组完全扁平化
+ * @param {Array} arr - 需要扁平化的数组
+ * @return {Array} 扁平化后的数组
+ */
+function deepFlatten(arr) {
+  const result = [];
 
-    let [key, value] = pair.split("=");
-    value = value === undefined ? "" : value;
-
-    key = decodeURIComponent(key.replace(/\+/g, " "));
-    value = decodeURIComponent(value.replace(/\+/g, " "));
-
-    // 处理多个相同键的情况
-    if (params.hasOwnProperty(key)) {
-      params[key] = [].concat(params[key], value);
+  for (let i = 0; i < arr.length; i++) {
+    if (Array.isArray(arr[i])) {
+      // 递归处理嵌套数组
+      result.push(...deepFlatten(arr[i]));
     } else {
-      params[key] = value;
+      result.push(arr[i]);
     }
   }
 
-  return params;
+  return result;
 }
 
-// 方法2：使用 URLSearchParams API（现代浏览器）
-function parseUrlParamsModern(url) {
-  const urlObj = new URL(url);
-  const params = {};
+// 测试
+const nestedArray = [1, [2, 3], [4, [5, 6]], [[7, 8], 9]];
+console.log(deepFlatten(nestedArray)); // 输出: [1, 2, 3, 4, 5, 6, 7, 8, 9]
 
-  for (const [key, value] of urlObj.searchParams.entries()) {
-    if (params.hasOwnProperty(key)) {
-      params[key] = [].concat(params[key], value);
-    } else {
-      params[key] = value;
+// 使用ES6的实现
+function deepFlattenES6(arr) {
+  return arr.reduce((acc, val) =>
+    Array.isArray(val) ? acc.concat(deepFlattenES6(val)) : acc.concat(val), []
+  );
+}`
+  },
+  {
+    id: "arrayUnique",
+    title: "数组去重",
+    description: "多种方式实现数组去重",
+    code: `/**
+ * @description 多种方式实现数组去重
+ */
+
+// 1. 使用Set（ES6）
+function uniqueWithSet(arr) {
+  return [...new Set(arr)];
+}
+
+// 2. 使用includes
+function uniqueWithIncludes(arr) {
+  const result = [];
+  for (let i = 0; i < arr.length; i++) {
+    if (!result.includes(arr[i])) {
+      result.push(arr[i]);
     }
   }
-
-  return params;
+  return result;
 }
 
-// 使用示例
-const testUrl = "https://example.com/page?name=%E5%B0%8F%E6%98%8E&age=20&hobby=reading&hobby=music&active";
-
-console.log("手动解析:", parseUrlParams(testUrl));
-// 输出: { name: '小明', age: '20', hobby: ['reading', 'music'], active: '' }
-
-console.log("现代API解析:", parseUrlParamsModern(testUrl));
-// 输出: { name: '小明', age: '20', hobby: ['reading', 'music'], active: '' }
-
-// 获取单个参数的便捷方法
-function getUrlParam(url, paramName) {
-  const urlObj = new URL(url);
-  return urlObj.searchParams.get(paramName);
+// 3. 使用Map（适用于对象数组去重）
+function uniqueWithMap(arr, key) {
+  const map = new Map();
+  return arr.filter(item => {
+    const keyValue = key ? item[key] : item;
+    if (!map.has(keyValue)) {
+      map.set(keyValue, true);
+      return true;
+    }
+    return false;
+  });
 }
 
-console.log("获取name参数:", getUrlParam(testUrl, "name")); // 小明`
+// 4. 复杂对象去重
+function uniqueObjects(arr, key) {
+  const seen = new Set();
+  return arr.filter(item => {
+    const k = item[key];
+    if (seen.has(k)) {
+      return false;
+    }
+    seen.add(k);
+    return true;
+  });
+}
+
+// 测试
+const numbers = [1, 2, 2, 3, 4, 4, 5];
+console.log(uniqueWithSet(numbers)); // [1, 2, 3, 4, 5]
+
+const users = [
+  { id: 1, name: 'Alice' },
+  { id: 2, name: 'Bob' },
+  { id: 1, name: 'Alice' },
+  { id: 3, name: 'Charlie' }
+];
+console.log(uniqueObjects(users, 'id')); // [{ id: 1, name: 'Alice' }, { id: 2, name: 'Bob' }, { id: 3, name: 'Charlie' }]`
+  },
+  {
+    id: "isPlainObject",
+    title: "判断纯对象",
+    description: "判断是否为纯对象（plain object）",
+    code: `/**
+ * @description 判断是否为纯对象（plain object）
+ * @param {any} obj - 需要判断的值
+ * @return {boolean} 是否为纯对象
+ */
+function isPlainObject(obj) {
+  // 如果不是对象或者是null，返回false
+  if (typeof obj !== 'object' || obj === null) {
+    return false;
+  }
+
+  // 如果原型为null，则是纯对象
+  if (Object.getPrototypeOf(obj) === null) {
+    return true;
+  }
+
+  // 检查原型链，直到找到Object.prototype
+  let proto = obj;
+  while (Object.getPrototypeOf(proto) !== null) {
+    proto = Object.getPrototypeOf(proto);
+  }
+
+  // 如果对象的原型链最终指向Object.prototype，则是纯对象
+  return Object.getPrototypeOf(obj) === proto;
+}
+
+// 测试用例
+console.log(isPlainObject({})); // true
+console.log(isPlainObject({ a: 1 })); // true
+console.log(isPlainObject(Object.create(null))); // true
+console.log(isPlainObject([])); // false
+console.log(isPlainObject(new Date())); // false
+console.log(isPlainObject(null)); // false
+console.log(isPlainObject('string')); // false
+
+class MyClass {}
+console.log(isPlainObject(new MyClass())); // false
+
+function MyFunction() {}
+console.log(isPlainObject(new MyFunction())); // false`
+  },
+  {
+    id: "formatNumber",
+    title: "数字格式化",
+    description: "数字格式化（千分位分隔）",
+    code: `/**
+ * @description 数字格式化（千分位分隔）
+ * @param {number|string} num - 需要格式化的数字
+ * @return {string} 格式化后的字符串
+ */
+function formatNumber(num) {
+  return num.toString().replace(/\\B(?=(\\d{3})+(?!\\d))/g, ',');
+}
+
+// 更完整的实现
+function formatNumberAdvanced(num, options = {}) {
+  const {
+    locale = 'en-US',
+    minimumFractionDigits = 0,
+    maximumFractionDigits = 2,
+    currency,
+    style = 'decimal'
+  } = options;
+
+  const number = typeof num === 'string' ? parseFloat(num) : num;
+
+  if (isNaN(number)) {
+    throw new Error('Invalid number');
+  }
+
+  const formatOptions = {
+    style,
+    minimumFractionDigits,
+    maximumFractionDigits
+  };
+
+  if (currency && style === 'currency') {
+    formatOptions.currency = currency;
+  }
+
+  return new Intl.NumberFormat(locale, formatOptions).format(number);
+}
+
+// 测试
+console.log(formatNumber(1234567)); // "1,234,567"
+console.log(formatNumber(1234567.89)); // "1,234,567.89"
+
+console.log(formatNumberAdvanced(1234567.89)); // "1,234,567.89"
+console.log(formatNumberAdvanced(1234567.89, {
+  style: 'currency',
+  currency: 'USD'
+})); // "$1,234,567.89"
+console.log(formatNumberAdvanced(1234567.89, {
+  locale: 'zh-CN',
+  style: 'currency',
+  currency: 'CNY'
+})); // "¥1,234,567.89"`
   }
 ];
-
-
