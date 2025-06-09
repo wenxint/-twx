@@ -301,8 +301,28 @@ element.addEventListener('click', handler, { capture: true });
 ```javascript
 element.addEventListener('click', function(event) {
   console.log(event.type); // "click"
-  console.log(event.target); // 事件触发的元素
-  console.log(event.currentTarget); // 事件处理程序所在的元素
+  console.log(event.target); // 事件触发的元素（原始目标节点）
+  console.log(event.currentTarget); // 事件处理程序所在的元素（当前绑定事件的节点）
+
+### e.target 与 e.currentTarget 的核心区别
+- **e.target**：触发事件的原始元素，即用户实际交互的元素（如点击按钮时，target是按钮本身）
+- **e.currentTarget**：绑定事件处理程序的元素（如事件绑定在父div上时，currentTarget是div）
+
+**典型场景示例**：
+```html
+<div id="parent">
+  <button id="child">点击我</button>
+</div>
+```
+```javascript
+// 事件绑定在父div上
+document.getElementById('parent').addEventListener('click', function(e) {
+  console.log('e.target:', e.target.id);       // 输出"child"（实际点击的按钮）
+  console.log('e.currentTarget:', e.currentTarget.id); // 输出"parent"（绑定事件的div）
+});
+```
+
+**关键总结**：target是事件的"起点"，currentTarget是事件的"终点"（绑定位置）。当事件处理程序直接绑定在目标元素上时，两者指向相同；当事件委托到父元素时，两者指向不同元素。
   console.log(event.clientX, event.clientY); // 鼠标事件的坐标
 });
 ```

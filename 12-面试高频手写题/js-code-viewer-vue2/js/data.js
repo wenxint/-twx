@@ -494,55 +494,99 @@ console.log("original.b === cloned.b:", original.b === cloned.b); // false`
     id: "asyncLimit",
     title: "异步并发控制",
     description: "控制异步任务的并发数量，防止同时发起过多请求导致性能问题或服务器压力过大。",
-    code: `/**
- * @description 简单版本：控制固定数量异步任务的并发执行
+    code: `
+    /**
+ * 控制异步请求并发数的简单函数式实现
+ * @param {Array<Function>} tasks - 异步任务数组，每个任务都是返回Promise的函数
  * @param {number} limit - 最大并发数
+ * @returns {Promise<Array>} - 所有任务的结果数组（按照添加顺序）
  */
-function simpleLimit(limit) {
-  const queue = [];
-  let activeCount = 0;
+function limitConcurrency(tasks, limit) {
+  // 任务结果数组（保持与tasks相同顺序）
+  const results = new Array(tasks.length);
+  // 记录已完成的任务数量
+  let completedCount = 0;
+  // 当前正在执行的任务数量
+  let runningCount = 0;
+  // 下一个要执行的任务索引
+  let nextIndex = 0;
 
-  const runNext = () => {
-    if (queue.length === 0) return;
+  return new Promise((resolve) => {
+    // 定义执行下一批任务的函数
+    function runNextTasks() {
+      // 当所有任务都已完成时，返回结果
+      if (completedCount === tasks.length) {
+        resolve(results);
+        return;
+      }
 
-    if (activeCount < limit) {
-      const { fn, resolve, reject } = queue.shift();
-      activeCount++;
+      // 尝试启动新任务，直到达到并发上限或任务都已分配
+      while (runningCount < limit && nextIndex < tasks.length) {
+        const taskIndex = nextIndex++;
+        const task = tasks[taskIndex];
 
-      Promise.resolve(fn())
-        .then(resolve)
-        .catch(reject)
-        .finally(() => {
-          activeCount--;
-          runNext();
-        });
+        // 增加运行计数
+        runningCount++;
+
+        // 执行任务并处理结果
+        Promise.resolve(task())
+          .then(result => {
+            // 保存结果到对应位置
+            results[taskIndex] = result;
+            console.log(taskIndex,'taskIndextaskIndex');
+
+            completedCount++;
+            runningCount--;
+
+            // 尝试执行更多任务
+            runNextTasks();
+          })
+          .catch(error => {
+            // 错误处理：记录错误并继续
+            results[taskIndex] = { error };
+            completedCount++;
+            runningCount--;
+
+            // 尝试执行更多任务
+            runNextTasks();
+          });
+      }
     }
-  };
 
-  return (fn) => {
-    return new Promise((resolve, reject) => {
-      queue.push({ fn, resolve, reject });
-      runNext();
-    });
-  };
+    // 开始执行任务
+    runNextTasks();
+  });
 }
 
-// 使用示例
-const runTask = simpleLimit(2); // 最多同时执行2个任务
+// 使用示例：控制5个setTimeout的并发执行
+const tasks = [
+  () => new Promise(resolve => setTimeout(() => {
+    console.log('任务1完成');
+    resolve('结果1');
+  }, 5000)),
+  () => new Promise(resolve => setTimeout(() => {
+    console.log('任务2完成');
+    resolve('结果2');
+  }, 1000)),
+  () => new Promise(resolve => setTimeout(() => {
+    console.log('任务3完成');
+    resolve('结果3');
+  }, 1000)),
+  () => new Promise(resolve => setTimeout(() => {
+    console.log('任务4完成');
+    resolve('结果4');
+  }, 1800)),
+  () => new Promise(resolve => setTimeout(() => {
+    console.log('任务5完成');
+    resolve('结果5');
+  }, 1200))
+];
 
-const createTask = (id, delay) => () => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      console.log(\`任务\${id}完成，耗时\${delay}ms\`);
-      resolve(\`任务\${id}的结果\`);
-    }, delay);
-  });
-};
-
-// 执行任务
-runTask(createTask(1, 1000)).then((result) => console.log(result));
-runTask(createTask(2, 2000)).then((result) => console.log(result));
-runTask(createTask(3, 1500)).then((result) => console.log(result));`
+// 限制并发数为2
+limitConcurrency(tasks, 2).then(results => {
+  console.log('所有任务完成，结果：', results);
+});
+    `
   },
   {
     id: "lazyLoad",
@@ -1039,3 +1083,5 @@ function getUrlParam(url, paramName) {
 console.log("获取name参数:", getUrlParam(testUrl, "name")); // 小明`
   }
 ];
+
+

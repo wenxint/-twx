@@ -1096,3 +1096,136 @@ const hasHobby = url.searchParams.has("hobby"); // true
 
 // 5. 处理无值的参数（如 ?key）
 const isEmpty = url.searchParams.get("key"); // null（若参数存在但无值，返回空字符串）
+
+
+
+
+
+
+
+
+/**
+ * @description 记忆化函数的实现
+ * @example
+
+ */
+// 1. 基础记忆化
+function memoize(fn) {
+  const cache = new Map();
+  return function (...args) {
+    const key = JSON.stringify(args);
+    if (cache.has(key)) {
+      return cache.get(key);
+    }
+    const result = fn.apply(this, args);
+    cache.set(key, result);
+    return result;
+  };
+}
+
+// 2. 实际应用：斐波那契数列
+const fibonacci = memoize(function (n) {
+  if (n <= 1) return n;
+  return fibonacci(n - 1) + fibonacci(n - 2);
+});
+
+// 有效 IP 地址 正好由四个整数（每个整数位于 0 到 255 之间组成，且不能含有前导 0），整数之间用 '.' 分隔。
+
+// 例如："0.1.2.201" 和 "192.168.1.1" 是 有效 IP 地址，但是 "0.011.255.245"、"192.168.1.312" 和 "192.168@1.1" 是 无效 IP 地址。
+// 给定一个只包含数字的字符串 s ，用以表示一个 IP 地址，返回所有可能的有效 IP 地址，这些地址可以通过在 s 中插入 '.' 来形成。你 不能 重新排序或删除 s 中的任何数字。你可以按 任何 顺序返回答案。
+
+// 示例 1：
+
+// 输入：s = "25525511135"
+// 输出：["255.255.11.135","255.255.111.35"]
+// 示例 2：
+
+// 输入：s = "0000"
+// 输出：["0.0.0.0"]
+// 示例 3：
+
+// 输入：s = "101023"
+// 输出：["1.0.10.23","1.0.102.3","10.1.0.23","10.10.2.3","101.0.2.3"]
+
+/**
+ * @description 生成所有可能的有效IP地址
+ * @param {string} s - 输入的纯数字字符串
+ * @return {string[]} 所有有效的IP地址数组
+ */
+function restoreIpAddresses(s) {
+  const result = [];
+  const len = s.length;
+
+  // 回溯函数：当前段数、当前路径、当前位置
+  const backtrack = (segCount, path, start) => {
+    // 终止条件：已分割4段且遍历完所有字符
+    if (segCount === 4) {
+      if (start === len) {
+        result.push(path.join("."));
+      }
+      return;
+    }
+
+    // 尝试取1-3位作为当前段
+    for (let end = start + 1; end <= Math.min(start + 3, len); end++) {
+      const segment = s.substring(start, end);
+      // 检查当前段是否有效
+      if (isValidSegment(segment)) {
+        path.push(segment);
+        backtrack(segCount + 1, path, end);
+        path.pop(); // 回溯
+      }
+    }
+  };
+
+  /**
+   * @description 检查段是否有效
+   * @param {string} segment - 当前分割段
+   * @return {boolean} 是否有效
+   */
+  const isValidSegment = (segment) => {
+    // 长度超过3或前导零（非单零）
+    if (segment.length > 3 || (segment.length > 1 && segment[0] === "0")) {
+      return false;
+    }
+    // 数值超过255
+    return parseInt(segment, 10) <= 255;
+  };
+
+  backtrack(0, [], 0);
+  return result;
+}
+
+// 示例1
+console.log(restoreIpAddresses("25525511135")); // 输出: ["255.255.11.135","255.255.111.35"]
+
+// 示例2
+console.log(restoreIpAddresses("0000")); // 输出: ["0.0.0.0"]
+
+// 示例3
+console.log(restoreIpAddresses("101023")); // 输出: ["1.0.10.23","1.0.102.3","10.1.0.23","10.10.2.3","101.0.2.3"]
+
+/**
+ * @description 记忆化函数的实现
+ * @example
+ *
+ */
+// 1. 基础记忆化
+function memoize(fn) {
+  const cache = new Map();
+  return function (...args) {
+    const key = JSON.stringify(args);
+    if (cache.has(key)) {
+      return cache.get(key);
+    }
+    const result = fn.apply(this, args);
+    cache.set(key, result);
+    return result;
+  };
+}
+
+// 2. 实际应用：斐波那契数列
+const fibonacci2 = memoize(function (n) {
+  if (n <= 1) return n;
+  return fibonacci(n - 1) + fibonacci(n - 2);
+});
