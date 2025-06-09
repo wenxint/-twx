@@ -40,7 +40,7 @@ function animate() {
 }
 
 // 启动动画（需要HTML中有id为'movingBox'的元素）
-// animate();`
+// animate();`,
   },
   {
     id: "curry",
@@ -72,7 +72,7 @@ function add(a, b, c) {
 const curriedAdd = curry(add);
 console.log(curriedAdd(1)(2)(3)); // 输出: 6
 console.log(curriedAdd(1, 2)(3)); // 输出: 6
-console.log(curriedAdd(1, 2, 3)); // 输出: 6`
+console.log(curriedAdd(1, 2, 3)); // 输出: 6`,
   },
   {
     id: "mySetInterval",
@@ -103,7 +103,7 @@ const clear = mySetInterval(() => {
 }, 1000);
 
 // 5秒后停止
-setTimeout(clear, 5000);`
+setTimeout(clear, 5000);`,
   },
   {
     id: "lengthOfLongestSubstring",
@@ -142,7 +142,7 @@ function lengthOfLongestSubstring(s) {
 // 测试用例
 console.log(lengthOfLongestSubstring("abcabcbb")); // 输出: 3 ("abc")
 console.log(lengthOfLongestSubstring("bbbbb"));    // 输出: 1 ("b")
-console.log(lengthOfLongestSubstring("pwwkew"));   // 输出: 3 ("wke")`
+console.log(lengthOfLongestSubstring("pwwkew"));   // 输出: 3 ("wke")`,
   },
   {
     id: "floatEqual",
@@ -165,7 +165,7 @@ console.log(floatEqual(0.1 + 0.2, 0.3)); // 输出: true
 
 // 更多示例
 console.log(floatEqual(1.0000001, 1.0000002, 0.0001)); // 输出: true
-console.log(floatEqual(1.1, 1.2, 0.05)); // 输出: false`
+console.log(floatEqual(1.1, 1.2, 0.05)); // 输出: false`,
   },
   {
     id: "binarySearch",
@@ -201,7 +201,7 @@ const sortedArray = [1, 3, 5, 7, 9, 11, 13, 15, 17, 19];
 console.log(binarySearch(sortedArray, 7));  // 输出: 3
 console.log(binarySearch(sortedArray, 6));  // 输出: -1 (未找到)
 console.log(binarySearch(sortedArray, 1));  // 输出: 0
-console.log(binarySearch(sortedArray, 19)); // 输出: 9`
+console.log(binarySearch(sortedArray, 19)); // 输出: 9`,
   },
   {
     id: "bubbleSort",
@@ -244,7 +244,7 @@ function bubbleSort(arr) {
 const unsortedArray = [64, 34, 25, 12, 22, 11, 90];
 console.log("原数组:", unsortedArray);
 console.log("排序后:", bubbleSort(unsortedArray));
-// 输出: [11, 12, 22, 25, 34, 64, 90]`
+// 输出: [11, 12, 22, 25, 34, 64, 90]`,
   },
   {
     id: "quickSort",
@@ -288,7 +288,7 @@ function quickSort(arr) {
 const unsortedArray = [64, 34, 25, 12, 22, 11, 90, 5];
 console.log("原数组:", unsortedArray);
 console.log("快排结果:", quickSort(unsortedArray));
-// 输出: [5, 11, 12, 22, 25, 34, 64, 90]`
+// 输出: [5, 11, 12, 22, 25, 34, 64, 90]`,
   },
   {
     id: "myCall",
@@ -326,7 +326,7 @@ function greet(greeting, punctuation) {
 }
 
 const person = { name: 'Alice' };
-console.log(greet.myCall(person, 'Hello', '!')); // 输出: "Hello, I'm Alice!"`
+console.log(greet.myCall(person, 'Hello', '!')); // 输出: "Hello, I'm Alice!"`,
   },
   {
     id: "myApply",
@@ -366,7 +366,7 @@ function calculate(operation, a, b) {
 }
 
 const calculator = { name: 'Calculator' };
-console.log(calculate.myApply(calculator, ['+', 10, 5])); // 输出: "Calculator calculated: 10 + 5 = 15"`
+console.log(calculate.myApply(calculator, ['+', 10, 5])); // 输出: "Calculator calculated: 10 + 5 = 15"`,
   },
   {
     id: "myBind",
@@ -395,7 +395,7 @@ function multiply(a, b, c) {
 
 const math = { name: 'Math' };
 const boundMultiply = multiply.myBind(math, 2); // 预设第一个参数为2
-console.log(boundMultiply(3, 4)); // 输出: "Math: 2 * 3 * 4 = 24"`
+console.log(boundMultiply(3, 4)); // 输出: "Math: 2 * 3 * 4 = 24"`,
   },
   {
     id: "myInstanceof",
@@ -432,7 +432,7 @@ function Animal() {}
 const cat = new Animal();
 console.log(myInstanceof(cat, Animal)); // 输出: true
 console.log(myInstanceof(cat, Object)); // 输出: true
-console.log(myInstanceof(123, Number)); // 输出: false（基本类型直接返回false）`
+console.log(myInstanceof(123, Number)); // 输出: false（基本类型直接返回false）`,
   },
   {
     id: "deepClone",
@@ -445,52 +445,59 @@ console.log(myInstanceof(123, Number)); // 输出: false（基本类型直接返
  * @returns {any} 深拷贝后的对象
  */
 function deepClone(obj) {
-  // 如果传入的对象不是对象或者为null，则直接返回该对象
-  if (typeof obj !== "object" || obj === null) {
+  if (obj === null || typeof obj !== "object") {
+    // 如果是基本类型或 null，直接返回
     return obj;
   }
 
-  let clone;
-  // 如果传入的对象是数组
-  if (Array.isArray(obj)) {
-    clone = [];
-    // 遍历数组中的每个元素，递归调用deepClone进行深拷贝
-    for (let i = 0; i < obj.length; i++) {
-      clone[i] = deepClone(obj[i]);
-    }
-  } else {
-    // 如果传入的对象不是数组，则初始化为空对象
-    clone = {};
-    // 遍历对象的每个属性，递归调用deepClone进行深拷贝
-    for (let key in obj) {
-      if (obj.hasOwnProperty(key)) {
-        clone[key] = deepClone(obj[key]);
-      }
+  if (obj instanceof Date) {
+    // 如果是 Date 对象，返回一个新的 Date
+    return new Date(obj);
+  }
+
+  if (obj instanceof RegExp) {
+    // 如果是正则表达式，返回一个新的 RegExp
+    return new RegExp(obj);
+  }
+
+  // 如果是数组或对象，递归拷贝
+  const clone = Array.isArray(obj) ? [] : {};
+
+  for (let key in obj) {
+    if (obj.hasOwnProperty(key)) {
+      clone[key] = deepClone(obj[key]); // 递归拷贝每个属性
     }
   }
 
   return clone;
 }
 
-// 使用示例
-const original = {
-  name: 'Alice',
-  age: 30,
-  hobbies: ['reading', 'swimming'],
+// 测试
+const obj = {
+  name: "Alice",
+  age: 25,
+  hobbies: ["reading", "coding"],
   address: {
-    city: 'New York',
-    country: 'USA'
-  }
+    city: "Beijing",
+    street: "Main St"
+  },
+  birthDate: new Date(),
+  regex: /test/g
 };
 
-const cloned = deepClone(original);
-cloned.hobbies.push('coding');
-cloned.address.city = 'Los Angeles';
+const deepCopy = deepClone(obj);
 
-console.log('原对象:', original);
-// hobbies 仍然是 ['reading', 'swimming']，city 仍然是 'New York'
-console.log('克隆对象:', cloned);
-// hobbies 是 ['reading', 'swimming', 'coding']，city 是 'Los Angeles'`
+deepCopy.name = "Bob";
+deepCopy.address.city = "Shanghai";
+deepCopy.birthDate.setFullYear(2000); // 不会影响原对象
+
+console.log(obj.name);          // "Alice"
+console.log(deepCopy.name);     // "Bob"
+console.log(obj.address.city);  // "Beijing"
+console.log(deepCopy.address.city); // "Shanghai"
+console.log(obj.birthDate.getFullYear());  // 原年份
+console.log(deepCopy.birthDate.getFullYear()); // 2000
+`,
   },
   {
     id: "simpleLimit",
@@ -552,7 +559,7 @@ const createTask = (id, delay) => () => {
 runTask(createTask(1, 1000)).then((result) => console.log(result));
 runTask(createTask(2, 2000)).then((result) => console.log(result));
 runTask(createTask(3, 1500)).then((result) => console.log(result));
-runTask(createTask(4, 800)).then((result) => console.log(result));`
+runTask(createTask(4, 800)).then((result) => console.log(result));`,
   },
   {
     id: "lazyLoad",
@@ -685,7 +692,7 @@ const lazyLoader = new LazyLoad({
 // 页面加载完成后初始化
 document.addEventListener('DOMContentLoaded', () => {
   lazyLoader.init();
-});`
+});`,
   },
   {
     id: "setOperations",
@@ -713,14 +720,22 @@ console.log('并集:', union);
 console.log('交集:', intersection);
 console.log('差集 (a-b):', difference);
 
-// 判断当前页面是否在 iframe 中
+`,
+  },
+
+  {
+    id: "iframe",
+    title: "判断当前页面是否在 iframe 中",
+    description: "手写reduce函数实现",
+    code: `
+    // 判断当前页面是否在 iframe 中
 const isInIframe = window.self !== window.top;
 
 if (isInIframe) {
   console.log("当前页面被嵌入在 iframe 中");
 } else {
   console.log("当前页面是顶级窗口");
-}`
+}`,
   },
   {
     id: "myReduce",
@@ -780,7 +795,7 @@ const fruitObj = fruits.myReduce((acc, fruit, index) => {
   acc[fruit] = index;
   return acc;
 }, {});
-console.log('数组转对象:', fruitObj); // 输出: {apple: 0, banana: 1, orange: 2}`
+console.log('数组转对象:', fruitObj); // 输出: {apple: 0, banana: 1, orange: 2}`,
   },
   {
     id: "fibonacciMemoized",
@@ -817,7 +832,7 @@ function fibonacciMemoized() {
 }
 
 const fib = fibonacciMemoized();
-console.log(fib(40)); // 输出: 102334155 (计算非常快)`
+console.log(fib(40)); // 输出: 102334155 (计算非常快)`,
   },
   {
     id: "treeTraversal",
@@ -894,7 +909,7 @@ depthFirstTraversal(root, (value) => console.log(value));
 
 console.log("BFS遍历结果:");
 breadthFirstTraversal(root, (value) => console.log(value));
-// 输出: A B C D E F`
+// 输出: A B C D E F`,
   },
   {
     id: "arrayToTree",
@@ -947,7 +962,7 @@ function toTree(arr, parentId) {
 }
 
 const result = toTree(data, "");
-console.log(JSON.stringify(result, null, 2));`
+console.log(JSON.stringify(result, null, 2));`,
   },
   {
     id: "restoreIpAddresses",
@@ -1009,7 +1024,7 @@ console.log(restoreIpAddresses("25525511135")); // 输出: ["255.255.11.135","25
 console.log(restoreIpAddresses("0000")); // 输出: ["0.0.0.0"]
 
 // 示例3
-console.log(restoreIpAddresses("101023")); // 输出: ["1.0.10.23","1.0.102.3","10.1.0.23","10.10.2.3","101.0.2.3"]`
+console.log(restoreIpAddresses("101023")); // 输出: ["1.0.10.23","1.0.102.3","10.1.0.23","10.10.2.3","101.0.2.3"]`,
   },
   {
     id: "memoize",
@@ -1049,7 +1064,7 @@ const expensiveCalculation = memoize(function(x, y) {
 });
 
 console.log(expensiveCalculation(10, 3)); // 执行计算
-console.log(expensiveCalculation(10, 3)); // 从缓存返回`
+console.log(expensiveCalculation(10, 3)); // 从缓存返回`,
   },
   {
     id: "arrayChunk",
@@ -1073,7 +1088,7 @@ function arrayChunk(array, chunkSize) {
 
 // 示例
 console.log(arrayChunk([1, 2, 3, 4, 5, 6, 7, 8], 3)); // 输出: [[1, 2, 3], [4, 5, 6], [7, 8]]
-console.log(arrayChunk(['a', 'b', 'c', 'd'], 2)); // 输出: [['a', 'b'], ['c', 'd']]`
+console.log(arrayChunk(['a', 'b', 'c', 'd'], 2)); // 输出: [['a', 'b'], ['c', 'd']]`,
   },
   {
     id: "deepFlatten",
@@ -1108,7 +1123,7 @@ function deepFlattenES6(arr) {
   return arr.reduce((acc, val) =>
     Array.isArray(val) ? acc.concat(deepFlattenES6(val)) : acc.concat(val), []
   );
-}`
+}`,
   },
   {
     id: "arrayUnique",
@@ -1170,7 +1185,7 @@ const users = [
   { id: 1, name: 'Alice' },
   { id: 3, name: 'Charlie' }
 ];
-console.log(uniqueObjects(users, 'id')); // [{ id: 1, name: 'Alice' }, { id: 2, name: 'Bob' }, { id: 3, name: 'Charlie' }]`
+console.log(uniqueObjects(users, 'id')); // [{ id: 1, name: 'Alice' }, { id: 2, name: 'Bob' }, { id: 3, name: 'Charlie' }]`,
   },
   {
     id: "isPlainObject",
@@ -1215,7 +1230,7 @@ class MyClass {}
 console.log(isPlainObject(new MyClass())); // false
 
 function MyFunction() {}
-console.log(isPlainObject(new MyFunction())); // false`
+console.log(isPlainObject(new MyFunction())); // false`,
   },
   {
     id: "formatNumber",
@@ -1272,6 +1287,6 @@ console.log(formatNumberAdvanced(1234567.89, {
   locale: 'zh-CN',
   style: 'currency',
   currency: 'CNY'
-})); // "¥1,234,567.89"`
-  }
+})); // "¥1,234,567.89"`,
+  },
 ];
