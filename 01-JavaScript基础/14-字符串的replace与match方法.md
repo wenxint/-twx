@@ -80,16 +80,51 @@ console.log(replaced); // 输出: 'Hi, Hi!'
 
 #### （2）替换函数
 
-通过传入函数，可动态生成替换内容，函数参数为匹配到的子串、捕获组等：
+通过传入函数，可动态生成替换内容，函数参数依次为：匹配的子串、捕获组（多个）、匹配的偏移量、原字符串，返回替换后的字符串：
+
 ```javascript
+// 替换函数完整参数示例
+const htmlStr = '<div class="container">文本内容</div>';
+
+// 使用替换函数展示所有可能的参数
+const result = htmlStr.replace(/<(\w+)\s+class="([^"]+)">(.*?)<\/\1>/g, 
+  function(match, tag, className, content, offset, string) {
+    console.log('完整匹配:', match);         // 输出: '<div class="container">文本内容</div>'
+    console.log('第1个捕获组:', tag);        // 输出: 'div'
+    console.log('第2个捕获组:', className);  // 输出: 'container'
+    console.log('第3个捕获组:', content);    // 输出: '文本内容'
+    console.log('匹配的偏移量:', offset);     // 输出: 0
+    console.log('原字符串:', string);        // 输出: '<div class="container">文本内容</div>'
+    
+    // 返回替换后的内容
+    return `<${tag} class="${className}-modified">${content.toUpperCase()}</${tag}>`;
+  }
+);
+
+console.log(result); // 输出: '<div class="container-modified">文本内容</div>'
+
+// 实际应用示例：将美元价格转换为欧元（假设汇率1:0.9）
 const priceStr = 'Price: $100, $200';
-// 将美元价格转换为欧元（假设汇率1:0.9）
-const euroStr = priceStr.replace(/\$\d+/g, (match) => {
-  const num = parseInt(match.slice(1));
-  return `€${(num * 0.9).toFixed(2)}`;
+const euroStr = priceStr.replace(/\$(\d+)/g, (match, amount, offset, string) => {
+  console.log('匹配的子串:', match);     // 例如: '$100'
+  console.log('捕获组(金额):', amount);   // 例如: '100'
+  console.log('匹配的偏移量:', offset);   // 例如: 7 (对于第一个匹配)
+  console.log('原字符串:', string);      // 'Price: $100, $200'
+  
+  const euroAmount = (parseInt(amount) * 0.9).toFixed(2);
+  return `€${euroAmount}`;
 });
+
 console.log(euroStr); // 输出: 'Price: €90.00, €180.00'
 ```
+
+替换函数的参数解释：
+- **match**: 匹配的子字符串
+- **p1, p2, ...**: 正则表达式中的捕获组匹配的字符串（如果有的话）
+- **offset**: 匹配到的子字符串在原字符串中的偏移量
+- **string**: 被检索的原始字符串
+
+替换函数必须有返回值，该返回值将作为替换字符串使用。
 
 ### match() 的匹配结果
 
