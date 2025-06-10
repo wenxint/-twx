@@ -80,7 +80,7 @@ console.log("开始执行MyAll...");
 const startTimeMyAll = Date.now();
 
 Promise.MyAll([promise1, promise2, promise3, promise4])
-  .then((cookieresults) => {
+  .then((results) => {
     const endTimeMyAll = Date.now();
     console.log("MyAll结果:", results);
     console.log("MyAll执行时间:", endTimeMyAll - startTimeMyAll, "ms");
@@ -479,139 +479,116 @@ console.log(myInstanceof(123, Number)); // 输出: false（基本类型直接返
  * @returns {any} 深拷贝后的对象
  */
 function deepClone(obj) {
-  // 如果传入的对象不是对象或者为null，则直接返回该对象
-  if (typeof obj !== "object" || obj === null) {
+  if (obj === null || typeof obj !== "object") {
+    // 如果是基本类型或 null，直接返回
     return obj;
   }
 
-  let clone;
-  // 如果传入的对象是数组
-  if (Array.isArray(obj)) {
-    clone = [];
-    // 遍历数组中的每个元素，递归调用deepClone进行深拷贝
-    for (let i = 0; i < obj.length; i++) {
-      clone[i] = deepClone(obj[i]);
-    }
-  } else {
-    // 如果传入的对象不是数组，则初始化为空对象
-    clone = {};
-    // 遍历对象的每个属性，递归调用deepClone进行深拷贝
-    for (let key in obj) {
-      if (obj.hasOwnProperty(key)) {
-        clone[key] = deepClone(obj[key]);
-      }
+  if (obj instanceof Date) {
+    // 如果是 Date 对象，返回一个新的 Date
+    return new Date(obj);
+  }
+
+  if (obj instanceof RegExp) {
+    // 如果是正则表达式，返回一个新的 RegExp
+    return new RegExp(obj);
+  }
+
+  // 如果是数组或对象，递归拷贝
+  const clone = Array.isArray(obj) ? [] : {};
+
+  for (let key in obj) {
+    if (obj.hasOwnProperty(key)) {
+      clone[key] = deepClone(obj[key]); // 递归拷贝每个属性
     }
   }
 
   return clone;
 }
 
+// 测试
+const obj = {
+  name: "Alice",
+  age: 25,
+  hobbies: ["reading", "coding"],
+  address: {
+    city: "Beijing",
+    street: "Main St",
+  },
+  birthDate: new Date(),
+  regex: /test/g,
+};
+
+const deepCopy = deepClone(obj);
+
+deepCopy.name = "Bob";
+deepCopy.address.city = "Shanghai";
+deepCopy.birthDate.setFullYear(2000); // 不会影响原对象
+
+console.log(obj.name); // "Alice"
+console.log(deepCopy.name); // "Bob"
+console.log(obj.address.city); // "Beijing"
+console.log(deepCopy.address.city); // "Shanghai"
+console.log(obj.birthDate.getFullYear()); // 原年份
+console.log(deepCopy.birthDate.getFullYear()); // 2000
+
 /**
- * 控制异步请求并发数的简单函数式实现
- * @param {Array<Function>} tasks - 异步任务数组，每个任务都是返回Promise的函数
+ * 超简单版本：控制固定数量异步任务的并发执行
  * @param {number} limit - 最大并发数
- * @returns {Promise<Array>} - 所有任务的结果数组（按照添加顺序）
  */
-function limitConcurrency(tasks, limit) {
-  // 任务结果数组（保持与tasks相同顺序）
-  const results = new Array(tasks.length);
-  // 记录已完成的任务数量
-  let completedCount = 0;
+function simpleLimit(limit) {
+  // 等待执行的任务队列
+  const queue = [];
   // 当前正在执行的任务数量
-  let runningCount = 0;
-  // 下一个要执行的任务索引
-  let nextIndex = 0;
+  let activeCount = 0;
 
-  return new Promise((resolve) => {
-    // 定义执行下一批任务的函数
-    function runNextTasks() {
-      // 当所有任务都已完成时，返回结果
-      if (completedCount === tasks.length) {
-        resolve(results);
-        return;
-      }
+  // 执行队列中的下一个任务
+  const runNext = () => {
+    if (queue.length === 0) return;
 
-      // 尝试启动新任务，直到达到并发上限或任务都已分配
-      while (runningCount < limit && nextIndex < tasks.length) {
-        const taskIndex = nextIndex++;
-        const task = tasks[taskIndex];
+    // 如果正在执行的任务数量小于限制，则执行下一个任务
+    if (activeCount < limit) {
+      // 从队列中取出一个任务
+      const { fn, resolve, reject } = queue.shift();
+      activeCount++;
 
-        // 增加运行计数
-        runningCount++;
-
-        // 执行任务并处理结果
-        Promise.resolve(task())
-          .then((result) => {
-            // 保存结果到对应位置
-            results[taskIndex] = result;
-            console.log(taskIndex, "taskIndextaskIndex");
-
-            completedCount++;
-            runningCount--;
-
-            // 尝试执行更多任务
-            runNextTasks();
-          })
-          .catch((error) => {
-            // 错误处理：记录错误并继续
-            results[taskIndex] = { error };
-            completedCount++;
-            runningCount--;
-
-            // 尝试执行更多任务
-            runNextTasks();
-          });
-      }
+      Promise.resolve(fn())
+        .then(resolve)
+        .catch(reject)
+        .finally(() => {
+          activeCount--;
+          runNext(); // 任务完成后，尝试执行下一个任务
+        });
     }
+  };
 
-    // 开始执行任务
-    runNextTasks();
-  });
+  // 返回一个函数，用于添加任务
+  return (fn) => {
+    return new Promise((resolve, reject) => {
+      queue.push({ fn, resolve, reject });
+      runNext();
+    });
+  };
 }
 
-// 使用示例：控制5个setTimeout的并发执行
-const tasks = [
-  () =>
-    new Promise((resolve) =>
-      setTimeout(() => {
-        console.log("任务1完成");
-        resolve("结果1");
-      }, 5000)
-    ),
-  () =>
-    new Promise((resolve) =>
-      setTimeout(() => {
-        console.log("任务2完成");
-        resolve("结果2");
-      }, 1000)
-    ),
-  () =>
-    new Promise((resolve) =>
-      setTimeout(() => {
-        console.log("任务3完成");
-        resolve("结果3");
-      }, 1000)
-    ),
-  () =>
-    new Promise((resolve) =>
-      setTimeout(() => {
-        console.log("任务4完成");
-        resolve("结果4");
-      }, 1800)
-    ),
-  () =>
-    new Promise((resolve) =>
-      setTimeout(() => {
-        console.log("任务5完成");
-        resolve("结果5");
-      }, 1200)
-    ),
-];
+// 使用示例
+const runTask = simpleLimit(2); // 最多同时执行2个任务
 
-// 限制并发数为2
-limitConcurrency(tasks, 2).then((results) => {
-  console.log("所有任务完成，结果：", results);
-});
+// 创建5个模拟的异步任务
+const createTask = (id, delay) => () => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      console.log(`任务${id}完成，耗时${delay}ms`);
+      resolve(`任务${id}的结果`);
+    }, delay);
+  });
+};
+
+// 执行任务并获取结果
+runTask(createTask(1, 1000)).then((result) => console.log(result));
+runTask(createTask(2, 2000)).then((result) => console.log(result));
+runTask(createTask(3, 1500)).then((result) => console.log(result));
+runTask(createTask(4, 800)).then((result) => console.log(result));
 
 /**
  * 图片懒加载类
@@ -1271,139 +1248,3 @@ const fibonacci2 = memoize(function (n) {
   if (n <= 1) return n;
   return fibonacci(n - 1) + fibonacci(n - 2);
 });
-
-//贪心算法分发饼干
-// **问题描述**：有一群孩子和一些饼干，每个孩子有一个胃口值，每个饼干有一个尺寸。我们需要尽可能多地满足孩子们的胃口，每个孩子最多能得到一块饼干。
-// **贪心策略**：优先满足胃口最小的孩子，对于每个孩子，选择能满足其胃口的最小饼干。
-/**
- * @description 分发饼干 - 使尽可能多的孩子满足
- * @param {number[]} children - 每个孩子的胃口值
- * @param {number[]} cookies - 每个饼干的尺寸
- * @return {number} 最多可以满足的孩子数量
- */
-function findContentChildren(children, cookies) {
-  // 对胃口值和饼干尺寸进行排序
-  children.sort((a, b) => a - b);
-  cookies.sort((a, b) => a - b);
-
-  let child = 0;
-  let cookie = 0;
-  const assignments = [];
-
-  // 尽可能满足胃口小的孩子
-  while (child < children.length && cookie < cookies.length) {
-    // 当前饼干可以满足当前孩子
-    if (cookies[cookie] >= children[child]) {
-      assignments.push({
-        childIndex: child,
-        childGreed: children[child],
-        cookieIndex: cookie,
-        cookieSize: cookies[cookie],
-      });
-      child++;
-    }
-    cookie++;
-  }
-
-  return {
-    count: assignments.length,
-    assignments,
-  };
-}
-
-// 调用示例
-const children = [1, 2, 3];
-const cookies = [1, 1];
-
-const cookieresult = findContentChildren(children, cookies);
-console.log(`最多可以满足的孩子数量: ${cookieresult.count}`);
-// 输出: 最多可以满足的孩子数量: 1
-
-console.log(`分配详情: ${JSON.stringify(cookieresult.assignments)}`);
-// 输出: 分配详情: [{"childIndex":0,"childGreed":1,"cookieIndex":0,"cookieSize":1}]
-
-// 执行过程分析:
-// 孩子胃口排序: [1, 2, 3]
-// 饼干尺寸排序: [1, 1]
-// 第1步: 饼干1可以满足胃口为1的孩子，分配，child=1, cookie=1
-// 第2步: 饼干1不能满足胃口为2的孩子，跳过，child=1, cookie=2
-// 结果: 只有1个孩子得到满足
-
-/**
- * 实现发布-订阅模式的事件发射器类
- */
-class EventEmitter {
-  /**
-   * 构造函数，初始化事件存储对象
-   */
-  constructor() {
-    this.events = {};
-  }
-
-  /**
-   * 订阅指定事件
-   * @param {string} eventName - 事件名称
-   * @param {Function} callback - 事件触发时执行的回调函数
-   */
-  on(eventName, callback) {
-    if (!this.events[eventName]) {
-      this.events[eventName] = [];
-    }
-    this.events[eventName].push(callback);
-  }
-
-  /**
-   * 移除指定事件的订阅
-   * @param {string} eventName - 事件名称
-   * @param {Function} callback - 需要移除的回调函数
-   */
-  off(eventName, callback) {
-    if (this.events[eventName]) {
-      this.events[eventName] = this.events[eventName].filter(
-        (fn) => fn !== callback
-      );
-    }
-  }
-
-  /**
-   * 触发指定事件，执行所有订阅的回调函数
-   * @param {string} eventName - 事件名称
-   * @param {...*} args - 传递给回调函数的参数
-   */
-  emit(eventName, ...args) {
-    if (this.events[eventName]) {
-      this.events[eventName].forEach((callback) => callback(...args));
-    }
-  }
-
-  /**
-   * 订阅只触发一次的事件
-   * @param {string} eventName - 事件名称
-   * @param {Function} callback - 事件触发时执行的回调函数
-   */
-  once(eventName, callback) {
-    const wrapper = (...args) => {
-      callback(...args);
-      this.off(eventName, wrapper);
-    };
-    this.on(eventName, wrapper);
-  }
-}
-
-// 使用示例
-const emitter = new EventEmitter();
-
-// 订阅事件
-emitter.on("greet", (name) => {
-  console.log(`你好，${name}!`);
-});
-
-// 触发事件
-emitter.emit("greet", "小明"); // 输出: 你好，小明!
-
-// 订阅一次性事件
-emitter.once("notice", (msg) => {
-  console.log(`收到通知: ${msg}`);
-});
-emitter.emit("notice", "面试成功！"); // 输出: 收到通知: 面试成功！
-emitter.emit("notice", "重复通知"); // 无输出
