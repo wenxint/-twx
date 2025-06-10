@@ -27,7 +27,7 @@ www.example.com.  ← 注意最后的点代表根域
 1. **根域名服务器**：管理根域（.）的DNS服务器
 2. **顶级域名服务器**：管理顶级域（如.com、.org）的DNS服务器
 3. **权威域名服务器**：负责特定域名的DNS服务器
-4. **本地DNS服务器**：通常由ISP提供，为用户提供DNS查询服务
+4. **本地DNS服务器**：通常由ISP提供，为用户提供DNS查询服务,本地运行商提供
 5. **递归DNS服务器**：代表客户端进行DNS查询的服务器
 
 ## DNS解析过程
@@ -300,10 +300,12 @@ window.addEventListener('load', measureDNSTime);
 ### 3. 什么是CNAME记录，它与A记录有什么区别？
 
 **答**：
+
 - **A记录**（Address Record）直接将域名映射到IPv4地址
 - **CNAME记录**（Canonical Name Record）将一个域名映射到另一个域名
 
 主要区别：
+
 1. A记录指向IP地址，CNAME指向另一个域名
 2. CNAME可以实现域名的规范化，多个域名指向同一个域名，便于维护
 3. CNAME解析需要额外的一次查询，可能增加解析时间
