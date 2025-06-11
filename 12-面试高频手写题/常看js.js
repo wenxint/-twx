@@ -1248,3 +1248,10 @@ const fibonacci2 = memoize(function (n) {
   if (n <= 1) return n;
   return fibonacci(n - 1) + fibonacci(n - 2);
 });
+//生成 [a, b] 之间的随机整数
+function getRandomInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+const randomNum = getRandomInt(1, 10);
+console.log(randomNum); // 可能是 1, 2, ..., 10
