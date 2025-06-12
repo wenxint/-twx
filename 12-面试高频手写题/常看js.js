@@ -1255,3 +1255,33 @@ function getRandomInt(min, max) {
 
 const randomNum = getRandomInt(1, 10);
 console.log(randomNum); // 可能是 1, 2, ..., 10
+
+//回溯算法 实现全排列
+function permute(nums) {
+  const res = [];
+  const used = new Array(nums.length).fill(false); // 标记数字是否被使用
+
+  function backtrack(path) {
+    if (path.length === nums.length) {
+      res.push([...path]); // 当前路径完成，加入结果
+      return;
+    }
+
+    for (let i = 0; i < nums.length; i++) {
+      if (!used[i]) {
+        used[i] = true;      // 标记为已使用
+        path.push(nums[i]);  // 加入当前路径
+        backtrack(path);     // 递归选择下一个数字
+        path.pop();          // 撤销选择（回溯）
+        used[i] = false;     // 恢复未使用状态
+      }
+    }
+  }
+
+  backtrack([]);
+  return res;
+}
+
+// 测试
+console.log(permute([1, 2, 3]));
+// 输出: [[1,2,3], [1,3,2], [2,1,3], [2,3,1], [3,2,1], [3,1,2]]
