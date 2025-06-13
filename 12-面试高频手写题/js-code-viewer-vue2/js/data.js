@@ -1347,4 +1347,117 @@ console.log(formatNumberAdvanced(1234567.89, {
   currency: 'CNY'
 })); // "¥1,234,567.89"`,
   },
+  {
+    id: "permute",
+    title: "全排列算法",
+    description: "使用回溯算法实现数组全排列",
+    code: `/**
+ * 回溯算法实现全排列
+ * @param {number[]} nums - 要排列的数组
+ * @returns {number[][]} - 所有可能的全排列
+ */
+function permute(nums) {
+  const res = [];
+  const used = new Array(nums.length).fill(false); // 标记数字是否被使用
+
+  function backtrack(path) {
+    if (path.length === nums.length) {
+      res.push([...path]); // 当前路径完成，加入结果
+      return;
+    }
+
+    for (let i = 0; i < nums.length; i++) {
+      if (!used[i]) {
+        used[i] = true; // 标记为已使用
+        path.push(nums[i]); // 加入当前路径
+        backtrack(path); // 递归选择下一个数字
+        path.pop(); // 撤销选择（回溯）
+        used[i] = false; // 恢复未使用状态
+      }
+    }
+  }
+
+  backtrack([]);
+  return res;
+}
+
+// 测试
+console.log(permute([1, 2, 3]));
+// 输出: [[1,2,3], [1,3,2], [2,1,3], [2,3,1], [3,2,1], [3,1,2]]`
+  },
+  {
+    id: "lazyMan",
+    title: "LazyMan 类实现",
+    description:
+      "实现支持链式调用的 LazyMan 类，支持 sleep、eat 和 sleepFirst 方法",
+    code: `
+    /**
+ * 设计思路：
+ * 1. LazyMan本质是一个任务队列调度器，所有操作（如问候、sleep、eat等）都被封装为任务函数，按顺序依次执行。
+ * 2. 每次调用sleep、eat等方法时，都是往队列中添加一个任务（函数）。sleepFirst则是插入到队列最前面。
+ * 3. 构造时，问候语任务最先加入队列，并用setTimeout保证所有链式方法注册完毕后再开始执行。
+ * 4. 每个任务执行完毕后，自动调用next方法执行下一个任务，实现链式异步调度。
+ * 5. 通过类封装，保证每个LazyMan实例互不影响，支持多次链式调用。
+ */
+
+/**
+ * @description 实现LazyMan，支持sleep、sleepFirst、eat链式调用
+ * @param {string} name - 名字
+ * @returns {Object} 支持链式调用的LazyMan实例
+ */
+    class LazyMan {
+  constructor(name) {
+    this.name = name;
+    this.tasks = [];
+    
+    console.log(\`Hi! This is \${name}!\`);
+    
+    // 使用setTimeout确保所有任务在同步代码执行完后才开始
+    setTimeout(() => {
+      this.next();
+    }, 0);
+    
+    return this;
+  }
+  
+  next() {
+    const task = this.tasks.shift();
+    task && task();
+  }
+  
+  sleep(time) {
+    this.tasks.push(() => {
+      setTimeout(() => {
+        console.log(\`Wake up after \${time}\`);
+        this.next();
+      }, time * 1000);
+    });
+    return this;
+  }
+  
+  sleepFirst(time) {
+    this.tasks.unshift(() => {
+      setTimeout(() => {
+        console.log(\`Wake up after \${time}\`);
+        this.next();
+      }, time * 1000);
+    });
+    return this;
+  }
+  
+  eat(food) {
+    this.tasks.push(() => {
+      console.log(\`Eat \${food}~\`);
+      this.next();
+    });
+    return this;
+  }
+}
+
+// 测试用例
+// new LazyMan("Hank");
+// new LazyMan("Hank").sleep(10).eat("dinner");
+// new LazyMan("Hank").eat("dinner").eat("supper");
+// new LazyMan("Hank").eat("supper").sleepFirst(5);`,
+  },
 ];
