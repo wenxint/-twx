@@ -1,104 +1,99 @@
-// 引入调试辅助函数（如果在同一文件中可以直接使用）
-// const { debugWhen, debugOnCondition } = require('./debug_helper.js');
+/**
+ * 设计思路：
+ * 1. LazyMan本质是一个任务队列调度器，所有操作（如问候、sleep、eat等）都被封装为任务函数，按顺序依次执行。
+ * 2. 每次调用sleep、eat等方法时，都是往队列中添加一个任务（函数）。sleepFirst则是插入到队列最前面。
+ * 3. 构造时，问候语任务最先加入队列，并用setTimeout保证所有链式方法注册完毕后再开始执行。
+ * 4. 每个任务执行完毕后，自动调用next方法执行下一个任务，实现链式异步调度。
+ * 5. 通过类封装，保证每个LazyMan实例互不影响，支持多次链式调用。
+ */
 
 /**
- * 调试辅助函数 - 快速检测特定数组状态
+ * @description 实现LazyMan，支持sleep、sleepFirst、eat链式调用
+ * @param {string} name - 名字
+ * @returns {Object} 支持链式调用的LazyMan实例
  */
-function debugWhen(currentArray, targetArray, label = '调试点') {
-  if (JSON.stringify(currentArray) === JSON.stringify(targetArray)) {
-    console.log(`🚀 ${label}:`, currentArray);
-    debugger; // 触发断点
-    return true;
-  }
-  return false;
+function LazyMan(name) {
+  // 实际返回一个类实例，隐藏实现细节
+  return new _LazyManClass(name);
 }
 
 /**
- * @description 使用回溯算法生成数组的全排列
- * @param {number[]} nums - 输入数组
- * @return {number[][]} 所有可能的排列
+ * @class _LazyManClass
+ * @description LazyMan调度器，内部维护任务队列
  */
-function permute(nums) {
-  const res = [];                                    // 存储所有排列结果
-  const used = new Array(nums.length).fill(false);  // 标记数字是否被使用
+class _LazyManClass {
+  /**
+   * 构造函数，初始化任务队列并加入问候任务
+   * @param {string} name
+   */
+  constructor(name) {
+    this.tasks = [];
+    // 问候语任务，始终第一个执行
+    this.tasks.push(() => {
+      console.log(`Hi! This is ${name}!`);
+      this._next(); // 执行下一个任务
+    });
+    // 用setTimeout确保链式方法注册完毕后再开始执行任务队列
+    setTimeout(() => this._next(), 0);
+  }
 
   /**
-   * 回溯函数
-   * @param {number[]} path - 当前构建的排列路径
+   * @private
+   * 执行下一个任务
    */
-  function backtrack(path) {
-    // 🎯 调试：检测特定路径（更简洁的方式）
-    debugWhen(path, [2, 1, 3], '找到目标排列');
-
-    // 你也可以同时检测多个状态
-    // debugWhen(path, [2, 1], '中间状态：以2,1开始');
-    // debugWhen(path, [1, 2, 3], '另一个目标排列');
-
-    // 终止条件：当前路径长度等于原数组长度
-    if (path.length === nums.length) {
-      res.push([...path]); // 复制当前路径并加入结果
-      return;
-    }
-
-    // 遍历所有可能的选择
-    for (let i = 0; i < nums.length; i++) {
-      if (!used[i]) {        // 如果当前数字未被使用
-        used[i] = true;      // 标记为已使用
-        path.push(nums[i]);  // 将数字加入当前路径
-        backtrack(path);     // 递归探索下一层
-       let a= path.pop();          // 撤销选择（回溯）
-        // console.log(path.pop());
-        console.log(a);
-        used[i] = false;     // 恢复未使用状态
-        console.log(used);
-      }
-    }
+  _next() {
+    const task = this.tasks.shift();
+    if (task) task();
   }
 
-  backtrack([]);
-  return res;
+  /**
+   * @description 延迟指定秒数后再执行后续任务
+   * @param {number} time - 延迟秒数
+   * @returns {this}
+   */
+  sleep(time) {
+    this.tasks.push(() => {
+      setTimeout(() => {
+        console.log(`Wake up after ${time}`);
+        this._next();
+      }, time * 1000);
+    });
+    return this;
+  }
+
+  /**
+   * @description 立即延迟指定秒数（插入队列最前），再执行后续任务
+   * @param {number} time - 延迟秒数
+   * @returns {this}
+   */
+  sleepFirst(time) {
+    this.tasks.unshift(() => {
+      setTimeout(() => {
+        console.log(`Wake up after ${time}`);
+        this._next();
+      }, time * 1000);
+    });
+    return this;
+  }
+
+  /**
+   * @description 吃指定食物，输出提示
+   * @param {string} food - 食物名称
+   * @returns {this}
+   */
+  eat(food) {
+    this.tasks.push(() => {
+      console.log(`Eat ${food}~`);
+      this._next();
+    });
+    return this;
+  }
 }
 
-console.log(permute([1, 2, 3]));
+// 测试用例
+// LazyMan("Hank");
+// LazyMan("Hank").sleep(10).eat("dinner");
+// LazyMan("Hank").eat("dinner").eat("supper");
+// LazyMan("Hank").eat("supper").sleepFirst(5);
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// function wrongPermute(nums) {
-//   const res = [];
-
-//   function backtrack(path) {
-//     if (path.length === nums.length) {
-//       res.push([...path]);
-//       return;
-//     }
-
-//     for (let i = 0; i < nums.length; i++) {
-//       path.push(nums[i]);  // 直接添加，可能重复使用同一个数字
-//       backtrack(path);
-//       path.pop();
-//     }
-//   }
-
-//   backtrack([]);
-//   return res;
-// }
-
-// // 结果会包含重复使用同一位置数字的排列，如[1,1,1]
-// console.log(wrongPermute([1, 2, 3]));
