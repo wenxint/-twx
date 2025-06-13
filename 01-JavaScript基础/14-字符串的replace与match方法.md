@@ -87,7 +87,7 @@ console.log(replaced); // 输出: 'Hi, Hi!'
 const htmlStr = '<div class="container">文本内容</div>';
 
 // 使用替换函数展示所有可能的参数
-const result = htmlStr.replace(/<(\w+)\s+class="([^"]+)">(.*?)<\/\1>/g, 
+const result = htmlStr.replace(/<(\w+)\s+class="([^"]+)">(.*?)<\/\1>/g,
   function(match, tag, className, content, offset, string) {
     console.log('完整匹配:', match);         // 输出: '<div class="container">文本内容</div>'
     console.log('第1个捕获组:', tag);        // 输出: 'div'
@@ -95,6 +95,11 @@ const result = htmlStr.replace(/<(\w+)\s+class="([^"]+)">(.*?)<\/\1>/g,
     console.log('第3个捕获组:', content);    // 输出: '文本内容'
     console.log('匹配的偏移量:', offset);     // 输出: 0
     console.log('原字符串:', string);        // 输出: '<div class="container">文本内容</div>'
+    
+    // 关键说明：非贪婪匹配的实际行为
+    // 虽然第三个捕获组使用了非贪婪量词`*?`，但由于后续需要匹配`</\1>`（即标签结束部分），
+    // 因此`.*?`会匹配到最近的能让`</\1>`成功匹配的位置。在此示例中，只有匹配完整的"文本内容"
+    // 才能让`</div>`正确匹配，因此最终捕获组获取的是完整内容而非部分内容。
     
     // 返回替换后的内容
     return `<${tag} class="${className}-modified">${content.toUpperCase()}</${tag}>`;
