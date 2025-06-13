@@ -165,7 +165,6 @@ var str = "100000000000",
   // - g：全局匹配模式（替换所有符合条件的位置）
   reg = /(?=(\B\d{3})+$)/g;
 str.replace(reg, ",");
-str.replace(reg, ",");
 
 // 实现一个函数，0.1+0.2=0.3
 /**
@@ -362,6 +361,36 @@ function quickSort(arr) {
 // 调用示例
 const unsortedArr = [34, 12, 45, 6, 89, 23]; // 创建一个未排序的数组
 console.log(quickSort(unsortedArr)); // 输出: [6, 12, 23, 34, 45, 89]，展示排序后的结果
+
+
+// 手写new
+function myNew(constructor, ...args) {
+  // 1. 创建一个新的空对象，并将其原型指向构造函数的 prototype
+  const obj = Object.create(constructor.prototype);
+
+  // 2. 将构造函数的 this 绑定到这个新对象
+  const result = constructor.apply(obj, args);
+
+  // 3. 如果构造函数返回一个对象，则返回该对象；否则返回新创建的对象
+  return result instanceof Object ? result : obj;
+}
+
+function Person(name, age) {
+  this.name = name;
+  this.age = age;
+}
+
+Person.prototype.sayHello = function () {
+  console.log(`Hello, my name is ${this.name} and I'm ${this.age} years old.`);
+};
+
+// 使用原生的 new
+const person1 = new Person("Alice", 25);
+person1.sayHello(); // 输出: Hello, my name is Alice and I'm 25 years old.
+
+// 使用我们的 myNew
+const person2 = myNew(Person, "Bob", 30);
+person2.sayHello(); // 输出: Hello, my name is Bob and I'm 30 years old.
 
 // 手写call方法：修改函数执行时的this指向并立即执行
 Function.prototype.myCall = function (context, ...args) {
@@ -1269,11 +1298,11 @@ function permute(nums) {
 
     for (let i = 0; i < nums.length; i++) {
       if (!used[i]) {
-        used[i] = true;      // 标记为已使用
-        path.push(nums[i]);  // 加入当前路径
-        backtrack(path);     // 递归选择下一个数字
-        path.pop();          // 撤销选择（回溯）
-        used[i] = false;     // 恢复未使用状态
+        used[i] = true; // 标记为已使用
+        path.push(nums[i]); // 加入当前路径
+        backtrack(path); // 递归选择下一个数字
+        path.pop(); // 撤销选择（回溯）
+        used[i] = false; // 恢复未使用状态
       }
     }
   }

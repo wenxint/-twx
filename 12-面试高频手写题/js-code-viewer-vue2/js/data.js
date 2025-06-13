@@ -144,6 +144,29 @@ console.log(lengthOfLongestSubstring("abcabcbb")); // 输出: 3 ("abc")
 console.log(lengthOfLongestSubstring("bbbbb"));    // 输出: 1 ("b")
 console.log(lengthOfLongestSubstring("pwwkew"));   // 输出: 3 ("wke")`,
   },
+
+  {
+    id: "cancelAxios",
+    title: "取消axios请求",
+    description: "取消axios请求",
+    code: `const controller = new AbortController();
+    axios.get("/foo/bar", { signal: controller.signal }).then(function (response) {
+      //...
+    });
+    controller.abort();`,
+  },
+  {
+    id: "thousandthplace",
+    title: "千分位分隔符",
+    description: "千分位分隔符正则表达式",
+    code: `/**
+ * 千分位分隔符正则表达式
+ * 将数字转换为千分位格式
+ */
+function formatNumberWithCommas(num) {
+  return num.toString().replace(/(?=(\\B\\d{3})+$)/g, ",");
+}`,
+  },
   {
     id: "floatEqual",
     title: "浮点数相等比较",
@@ -289,6 +312,41 @@ const unsortedArray = [64, 34, 25, 12, 22, 11, 90, 5];
 console.log("原数组:", unsortedArray);
 console.log("快排结果:", quickSort(unsortedArray));
 // 输出: [5, 11, 12, 22, 25, 34, 64, 90]`,
+  },
+  {
+    id: "myNew",
+    title: "手写 New 方法",
+    description: "自定义实现 New()",
+    code: `
+    // 手写new
+function myNew(constructor, ...args) {
+  // 1. 创建一个新的空对象，并将其原型指向构造函数的 prototype
+  const obj = Object.create(constructor.prototype);
+
+  // 2. 将构造函数的 this 绑定到这个新对象
+  const result = constructor.apply(obj, args);
+
+  // 3. 如果构造函数返回一个对象，则返回该对象；否则返回新创建的对象
+  return result instanceof Object ? result : obj;
+}
+
+function Person(name, age) {
+  this.name = name;
+  this.age = age;
+}
+
+Person.prototype.sayHello = function () {
+  console.log('Hello, my name is ' + this.name + ' and I\'m ' + this.age + ' years old.');
+};
+
+// 使用原生的 new
+const person1 = new Person("Alice", 25);
+person1.sayHello(); // 输出: Hello, my name is Alice and I'm 25 years old.
+
+// 使用我们的 myNew
+const person2 = myNew(Person, "Bob", 30);
+person2.sayHello(); // 输出: Hello, my name is Bob and I'm 30 years old.
+    `,
   },
   {
     id: "myCall",
