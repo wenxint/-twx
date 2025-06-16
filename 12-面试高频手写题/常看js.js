@@ -1406,7 +1406,68 @@ class _LazyManClass {
   }
 }
 
-// 测试用例
+/**
+ * 将给定的数字或字符串转换为十进制数。
+ * 如果传入的是数字，直接返回该数字；如果是字符串，则根据进制或字符串前缀进行转换。
+ * 如果转换失败，返回 null。
+ * 
+ * @param {number|string} num - 要转换的数字或字符串。
+ * @param {number} [radix] - 可选参数，指定字符串的进制。如果未提供，将根据字符串前缀自动判断。
+ * @returns {number|null} - 转换后的十进制数，如果转换失败则返回 null。
+ */
+function convertToDecimal(num, radix) {
+  // 如果传入的是数字，直接返回该数字
+  if (typeof num === 'number') {
+    return num;
+  }
+
+  // 如果传入的是字符串
+  if (typeof num === 'string') {
+    // 如果未指定进制
+    if (radix === undefined) {
+      // 处理十六进制字符串
+      if (num.startsWith('0x') || num.startsWith('0X')) {
+        return parseInt(num, 16);
+      }
+      // 处理二进制字符串
+      if (num.startsWith('0b') || num.startsWith('0B')) {
+        return parseInt(num, 2);
+      }
+      // 处理八进制字符串
+      if (num.startsWith('0o') || num.startsWith('0O')) {
+        return parseInt(num, 8);
+      }
+      // 默认使用十进制
+      radix = 10;
+    }
+
+    // 尝试使用 parseInt 进行转换
+    const intResult = parseInt(num, radix);
+    // 如果转换成功，返回转换结果
+    if (!isNaN(intResult)) {
+      return intResult;
+    }
+    
+    // 若 parseInt 转换失败，尝试使用 parseFloat 进行转换
+    const floatResult = parseFloat(num);
+    // 如果 parseFloat 转换成功，返回转换结果；否则返回 null
+    return isNaN(floatResult) ? null : floatResult;
+  }
+
+  // 如果传入的既不是数字也不是字符串，返回 null
+  return null;
+}
+
+// 调用案例
+console.log(convertToDecimal(123)); // 输出: 123，因为传入的是数字，直接返回
+console.log(convertToDecimal('0x1A')); // 输出: 26，自动识别为十六进制字符串并转换
+console.log(convertToDecimal('0b1010')); // 输出: 10，自动识别为二进制字符串并转换
+console.log(convertToDecimal('0o12')); // 输出: 10，自动识别为八进制字符串并转换
+console.log(convertToDecimal('123', 10)); // 输出: 123，指定十进制进行转换
+console.log(convertToDecimal('12.3')); // 输出: 12.3，使用 parseFloat 转换
+console.log(convertToDecimal('abc')); // 输出: null，转换失败
+
+// LazyMan测试用例
 // LazyMan("Hank");
 // LazyMan("Hank").sleep(10).eat("dinner");
 // LazyMan("Hank").eat("dinner").eat("supper");

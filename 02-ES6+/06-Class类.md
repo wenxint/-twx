@@ -121,6 +121,10 @@ class Person {
 
 静态方法使用`static`关键字定义，这些方法不会被实例继承，而是直接通过类来调用：
 
+注意
+
+1. \*\*`static` 方法中的 `this` = 类本身\*\*（构造函数）。
+
 ```javascript
 class Person {
   constructor(name, age) {
@@ -209,6 +213,7 @@ dog.fetch(); // 输出: 旺财去捡球
 ### super关键字
 
 `super`关键字有两种用法：
+
 1. 作为函数调用时，代表父类的构造函数。
 2. 作为对象时，指向父类的原型对象。
 
@@ -472,21 +477,22 @@ console.log(instance1.getData()); // { timestamp: 1632402345678 }
 ## 面试常见问题
 
 1. **Class与构造函数的区别是什么？**
+
    - Class是ES6引入的语法糖，底层仍基于原型
    - Class不会提升，而函数声明会被提升
    - Class中的代码自动运行在严格模式下
    - Class内部的方法不可枚举
    - 必须使用new调用Class，不能作为普通函数调用
-
 2. **为什么在子类构造函数中必须先调用super()?**
-   - 子类的this对象是通过父类的构造函数创建的，必须先调用super()来创建this对象，然后再通过this添加新属性
 
+   - 子类的this对象是通过父类的构造函数创建的，必须先调用super()来创建this对象，然后再通过this添加新属性
 3. **私有字段有什么应用场景？**
+
    - 封装内部实现细节，防止外部直接访问和修改
    - 避免属性名冲突
    - 提高代码的安全性和可维护性
-
 4. **如何实现类的混入(Mixin)模式？**
+
    ```javascript
    // 定义混入对象
    const CanEat = {
@@ -515,9 +521,10 @@ console.log(instance1.getData()); // { timestamp: 1632402345678 }
    person.eat(); // 吃东西
    person.sleep(); // 睡觉
    ```
-
 5. **如何确保一个类的方法不会被子类覆盖？**
+
    - 可以使用私有方法或Symbol定义方法名：
+
    ```javascript
    const _privateMethod = Symbol('privateMethod');
 
@@ -531,4 +538,7 @@ console.log(instance1.getData()); // { timestamp: 1632402345678 }
      }
    }
    ```
+
+```
+
 ```
