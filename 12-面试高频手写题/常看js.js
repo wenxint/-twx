@@ -619,6 +619,64 @@ runTask(createTask(2, 2000)).then((result) => console.log(result));
 runTask(createTask(3, 1500)).then((result) => console.log(result));
 runTask(createTask(4, 800)).then((result) => console.log(result));
 
+
+/**
+ * 控制请求的并发数，确保同时执行的请求数量不超过指定的最大值。
+ * @param {Array<Function>} requests - 一个包含请求函数的数组，每个请求函数应返回一个 Promise。
+ * @param {number} maxConcurrency - 允许的最大并发请求数。
+ */
+function controlConcurrency(requests, maxConcurrency) {
+  // 复制请求数组到队列中，用于后续处理
+  const queue = [...requests]; 
+  // 记录当前正在执行的请求数量
+  let running = 0; 
+
+  /**
+   * 处理请求队列的异步函数，不断从队列中取出请求并执行，直到队列清空或达到最大并发数。
+   */
+  const processQueue = async () => {
+    // 当队列中还有请求且当前并发数未达到最大值时，继续处理请求
+    while (queue.length > 0 && running < maxConcurrency) {
+      // 从队列头部取出一个请求
+      const request = queue.shift(); 
+      // 增加当前并发数
+      running++;
+      // 执行请求并等待其完成
+      await request(); 
+      // 减少当前并发数
+      running--;
+      // 递归调用自身，继续处理队列中的剩余请求
+      processQueue(); 
+    }
+  };
+
+  // 启动请求队列的处理过程
+  processQueue(); 
+}
+
+// 示例：模拟 8 个请求，最多并发 2 个
+// 使用 Array.from 方法创建一个包含 8 个请求函数的数组
+const requests = Array.from(
+  { length: 8 },
+  // 为每个索引创建一个返回 Promise 的请求函数
+  (_, i) => () =>
+    new Promise((resolve) => {
+      // 打印请求开始的日志
+      console.log(`Request ${i + 1} started`);
+      // 使用 setTimeout 模拟请求的耗时操作，随机延时 0 到 2000 毫秒
+      setTimeout(() => {
+        // 打印请求完成的日志
+        console.log(`Request ${i + 1} finished`);
+        // 标记 Promise 已完成
+        resolve(); 
+      }, Math.random() * 2000); 
+    })
+);
+
+// 调用 controlConcurrency 函数，传入请求数组和最大并发数
+controlConcurrency(requests, 2);
+
+
 /**
  * 图片懒加载类
  * @class LazyLoad
