@@ -1474,3 +1474,32 @@ console.log(convertToDecimal('abc')); // 输出: null，转换失败
 // LazyMan("Hank").eat("supper").sleepFirst(5);
 
 
+/**
+ * @description 使用双指针法判断字符串是否为回文
+ * @param {string} str - 要判断的字符串
+ * @return {boolean} 如果字符串是回文返回 true，否则返回 false
+ */
+function isPalindrome(str) {
+  // 初始化左指针，指向字符串的起始位置
+  let left = 0;
+  // 初始化右指针，指向字符串的末尾位置
+  let right = str.length - 1;
+
+  while (left < right) {
+    // 如果左右指针指向的字符不相等，则不是回文
+    if (str[left] !== str[right]) {
+      return false;
+    }
+    // 左指针右移
+    left++;
+    // 右指针左移
+    right--;
+  }
+
+  // 遍历完所有字符都相等，说明是回文
+  return true;
+}
+
+// 使用示例
+console.log(isPalindrome('racecar')); // 输出: true
+console.log(isPalindrome('hello')); // 输出: false
