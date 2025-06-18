@@ -626,20 +626,20 @@ runTask(createTask(4, 800)).then((result) => console.log(result));
     // 当队列中还有请求且当前并发数未达到最大值时，继续处理请求
     while (queue.length > 0 && running < maxConcurrency) {
       // 从队列头部取出一个请求
-      const request = queue.shift(); 
+      const request = queue.shift();
       // 增加当前并发数
       running++;
       // 执行请求并等待其完成
-      await request(); 
+      await request();
       // 减少当前并发数
       running--;
       // 递归调用自身，继续处理队列中的剩余请求
-      processQueue(); 
+      processQueue();
     }
   };
 
   // 启动请求队列的处理过程
-  processQueue(); 
+  processQueue();
 }
 
 // 示例：模拟 8 个请求，最多并发 2 个
@@ -650,14 +650,14 @@ const requests = Array.from(
   (_, i) => () =>
     new Promise((resolve) => {
       // 打印请求开始的日志
-      console.log("Request ${i + 1} started");
+      console.log(\`Request \${i + 1} started\`);
       // 使用 setTimeout 模拟请求的耗时操作，随机延时 0 到 2000 毫秒
       setTimeout(() => {
         // 打印请求完成的日志
-        console.log("Request ${i + 1} finished");
+        console.log(\`Request \${i + 1} finished\`);
         // 标记 Promise 已完成
-        resolve(); 
-      }, Math.random() * 2000); 
+        resolve();
+      }, Math.random() * 2000);
     })
 );
 
@@ -1438,6 +1438,12 @@ console.log(permute([1, 2, 3]));
     description:
       "实现支持链式调用的 LazyMan 类，支持 sleep、eat 和 sleepFirst 方法",
     code: `
+function LazyMan(name) {
+  // 实际返回一个类实例，隐藏实现细节
+  return new _LazyManClass(name);
+}
+
+
     /**
  * 设计思路：
  * 1. LazyMan本质是一个任务队列调度器，所有操作（如问候、sleep、eat等）都被封装为任务函数，按顺序依次执行。
@@ -1456,22 +1462,22 @@ console.log(permute([1, 2, 3]));
   constructor(name) {
     this.name = name;
     this.tasks = [];
-    
+
     console.log(\`Hi! This is \${name}!\`);
-    
+
     // 使用setTimeout确保所有任务在同步代码执行完后才开始
     setTimeout(() => {
       this.next();
     }, 0);
-    
+
     return this;
   }
-  
+
   next() {
     const task = this.tasks.shift();
     task && task();
   }
-  
+
   sleep(time) {
     this.tasks.push(() => {
       setTimeout(() => {
@@ -1481,7 +1487,7 @@ console.log(permute([1, 2, 3]));
     });
     return this;
   }
-  
+
   sleepFirst(time) {
     this.tasks.unshift(() => {
       setTimeout(() => {
@@ -1491,7 +1497,7 @@ console.log(permute([1, 2, 3]));
     });
     return this;
   }
-  
+
   eat(food) {
     this.tasks.push(() => {
       console.log(\`Eat \${food}~\`);
@@ -1506,5 +1512,103 @@ console.log(permute([1, 2, 3]));
 // new LazyMan("Hank").sleep(10).eat("dinner");
 // new LazyMan("Hank").eat("dinner").eat("supper");
 // new LazyMan("Hank").eat("supper").sleepFirst(5);`,
+  },
+  {
+    id: "dataConversionTools",
+    title: "数据转换与工具函数",
+    description: "包含进制转换、回文判断和数组分割等工具函数",
+    code: `/**
+ * 将给定的数字或字符串转换为十进制数
+ * 如果传入的是数字，直接返回该数字；如果是字符串，则根据进制或字符串前缀进行转换
+ * 如果转换失败，返回 null
+ * 
+ * @param {number|string} num - 要转换的数字或字符串
+ * @param {number} [radix] - 可选参数，指定字符串的进制
+ * @returns {number|null} - 转换后的十进制数，如果转换失败则返回 null
+ */
+function convertToDecimal(num, radix) {
+  if (typeof num === 'number') {
+    return num;
+  }
+
+  if (typeof num === 'string') {
+    if (radix === undefined) {
+      if (num.startsWith('0x') || num.startsWith('0X')) {
+        return parseInt(num, 16);
+      }
+      if (num.startsWith('0b') || num.startsWith('0B')) {
+        return parseInt(num, 2);
+      }
+      if (num.startsWith('0o') || num.startsWith('0O')) {
+        return parseInt(num, 8);
+      }
+      radix = 10;
+    }
+
+    const intResult = parseInt(num, radix);
+    if (!isNaN(intResult)) {
+      return intResult;
+    }
+    
+    const floatResult = parseFloat(num);
+    return isNaN(floatResult) ? null : floatResult;
+  }
+
+  return null;
+}
+
+// 调用案例
+console.log(convertToDecimal(123)); // 输出: 123
+console.log(convertToDecimal('0x1A')); // 输出: 26
+console.log(convertToDecimal('0b1010')); // 输出: 10
+console.log(convertToDecimal('0o12')); // 输出: 10
+console.log(convertToDecimal('123', 10)); // 输出: 123
+console.log(convertToDecimal('12.3')); // 输出: 12.3
+console.log(convertToDecimal('abc')); // 输出: null
+
+/**
+ * 判断字符串是否为回文
+ * @param {string} str - 要判断的字符串
+ * @return {boolean} 如果字符串是回文返回 true，否则返回 false
+ */
+function isPalindrome(str) {
+  let left = 0;
+  let right = str.length - 1;
+
+  while (left < right) {
+    if (str[left] !== str[right]) {
+      return false;
+    }
+    left++;
+    right--;
+  }
+
+  return true;
+}
+
+// 使用示例
+console.log(isPalindrome('racecar')); // 输出: true
+console.log(isPalindrome('hello')); // 输出: false
+
+/**
+ * 将数组按指定大小分割成多个子数组
+ * @param {Array} inputArr - 要分割的原始数组
+ * @param {number} chunkSize - 每个子数组包含的元素数量
+ * @return {Array} 分割后的子数组组成的新数组
+ */
+function chunkArray(inputArr, chunkSize) {
+  let newArr = [];
+  for (let i = 0; i < inputArr.length; i += chunkSize) {
+    console.log(inputArr.slice(i, i + chunkSize));
+    newArr.push(inputArr.slice(i, i + chunkSize));
+  }
+  console.log(newArr);
+  return newArr;
+}
+
+// 调用示例
+let arr = [1, 2, 3, 4, 5];
+let size = 2;
+chunkArray(arr, size);`
   },
 ];

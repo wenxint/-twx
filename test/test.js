@@ -1,16 +1,8 @@
-const target = {
-  name: '目标对象',
-  getName() {
-    return this.name; // this指向会动态变化
-  }
-};
-
-const proxy = new Proxy(target, {});
-console.log(target,'target');
-console.log(target.name,'target.name');
-console.log(proxy,'proxy');
-console.log(proxy.name,'proxy.name');
-
-
-console.log(target.getName()); // '目标对象'（this指向target）
-console.log(proxy.getName());  // undefined（this指向proxy，而proxy没有name属性）
+let arr = [1, 2, 3, 4, 5];
+let newArr = [];
+let size = 2;
+for (let i = 0; i < arr.length; i += size) {
+  console.log(arr.slice(i, i + size));
+  newArr.push(arr.slice(i, i + size));
+}
+console.log(newArr);

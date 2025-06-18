@@ -1561,3 +1561,29 @@ function isPalindrome(str) {
 // 使用示例
 console.log(isPalindrome('racecar')); // 输出: true
 console.log(isPalindrome('hello')); // 输出: false
+
+/**
+ * @description 将一个数组按指定大小分割成多个子数组，并打印分割过程和最终结果
+ * @param {Array} inputArr - 要分割的原始数组
+ * @param {number} chunkSize - 每个子数组包含的元素数量
+ * @return {Array} 分割后的子数组组成的新数组
+ */
+function chunkArray(inputArr, chunkSize) {
+  // 定义一个空数组，用于存储分割后的子数组
+  let newArr = [];
+  // 使用 for 循环遍历原始数组，步长为 chunkSize
+  for (let i = 0; i < inputArr.length; i += chunkSize) {
+    // 打印从索引 i 开始，长度为 chunkSize 的子数组
+    console.log(inputArr.slice(i, i + chunkSize));
+    // 将从索引 i 开始，长度为 chunkSize 的子数组添加到 newArr 中
+    newArr.push(inputArr.slice(i, i + chunkSize));
+  }
+  // 打印分割后的子数组组成的新数组
+  console.log(newArr);
+  return newArr;
+}
+
+// 调用示例
+let arr = [1, 2, 3, 4, 5];
+let size = 2;
+chunkArray(arr, size);
