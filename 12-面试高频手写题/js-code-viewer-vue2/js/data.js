@@ -1514,69 +1514,114 @@ function LazyMan(name) {
 // new LazyMan("Hank").eat("supper").sleepFirst(5);`,
   },
   {
-    id: "dataConversionTools",
-    title: "数据转换与工具函数",
-    description: "包含进制转换、回文判断和数组分割等工具函数",
+    id: "convertToDecimal",
+    title: "数字进制转换",
+    description: "将不同进制的数字转换为十进制",
     code: `/**
- * 将给定的数字或字符串转换为十进制数
- * 如果传入的是数字，直接返回该数字；如果是字符串，则根据进制或字符串前缀进行转换
- * 如果转换失败，返回 null
- * 
- * @param {number|string} num - 要转换的数字或字符串
- * @param {number} [radix] - 可选参数，指定字符串的进制
- * @returns {number|null} - 转换后的十进制数，如果转换失败则返回 null
+ * 将给定的数字或字符串转换为十进制数。
+ * 如果传入的是数字，直接返回该数字；如果是字符串，则根据进制或字符串前缀进行转换。
+ * 如果转换失败，返回 null。
+ *
+ * @param {number|string} num - 要转换的数字或字符串。
+ * @param {number} [radix] - 可选参数，指定字符串的进制。如果未提供，将根据字符串前缀自动判断。
+ * @returns {number|null} - 转换后的十进制数，如果转换失败则返回 null。
  */
 function convertToDecimal(num, radix) {
+  // 如果传入的是数字，直接返回该数字
   if (typeof num === 'number') {
     return num;
   }
 
+  // 如果传入的是字符串
   if (typeof num === 'string') {
+    // 如果未指定进制
     if (radix === undefined) {
+      // 处理十六进制字符串
       if (num.startsWith('0x') || num.startsWith('0X')) {
         return parseInt(num, 16);
       }
+      // 处理二进制字符串
       if (num.startsWith('0b') || num.startsWith('0B')) {
         return parseInt(num, 2);
       }
+      // 处理八进制字符串
       if (num.startsWith('0o') || num.startsWith('0O')) {
         return parseInt(num, 8);
       }
+      // 默认使用十进制
       radix = 10;
     }
 
+    // 尝试使用 parseInt 进行转换
     const intResult = parseInt(num, radix);
+    // 如果转换成功，返回转换结果
     if (!isNaN(intResult)) {
       return intResult;
     }
-    
+
+    // 若 parseInt 转换失败，尝试使用 parseFloat 进行转换
     const floatResult = parseFloat(num);
+    // 如果 parseFloat 转换成功，返回转换结果；否则返回 null
     return isNaN(floatResult) ? null : floatResult;
   }
 
+  // 如果传入的既不是数字也不是字符串，返回 null
   return null;
 }
 
 // 调用案例
-console.log(convertToDecimal(123)); // 输出: 123
-console.log(convertToDecimal('0x1A')); // 输出: 26
-console.log(convertToDecimal('0b1010')); // 输出: 10
-console.log(convertToDecimal('0o12')); // 输出: 10
-console.log(convertToDecimal('123', 10)); // 输出: 123
-console.log(convertToDecimal('12.3')); // 输出: 12.3
-console.log(convertToDecimal('abc')); // 输出: null
-
-/**
- * 判断字符串是否为回文
+console.log(convertToDecimal(123)); // 输出: 123，因为传入的是数字，直接返回
+console.log(convertToDecimal('0x1A')); // 输出: 26，自动识别为十六进制字符串并转换
+console.log(convertToDecimal('0b1010')); // 输出: 10，自动识别为二进制字符串并转换
+console.log(convertToDecimal('0o12')); // 输出: 10，自动识别为八进制字符串并转换
+console.log(convertToDecimal('123', 10)); // 输出: 123，指定十进制进行转换
+console.log(convertToDecimal('12.3')); // 输出: 12.3，使用 parseFloat 转换
+console.log(convertToDecimal('abc')); // 输出: null，转换失败`,
+  },
+  {
+    id: "isPalindrome",
+    title: "回文字符串判断",
+    description: "使用双指针法判断字符串是否为回文",
+    code: `/**
+ * @description 使用双指针法判断字符串是否为回文
  * @param {string} str - 要判断的字符串
  * @return {boolean} 如果字符串是回文返回 true，否则返回 false
  */
 function isPalindrome(str) {
+  // 初始化左指针，指向字符串的起始位置
   let left = 0;
+  // 初始化右指针，指向字符串的末尾位置
   let right = str.length - 1;
 
   while (left < right) {
+    // 如果左右指针指向的字符不相等，则不是回文
     if (str[left] !== str[right]) {
+      return false;
+    }
+    // 左指针右移
+    left++;
+    // 右指针左移
+    right--;
+  }
+
+  // 遍历完所有字符都相等，说明是回文
+  return true;
+}
+
+// 使用示例
+console.log(isPalindrome('racecar')); // 输出: true
+console.log(isPalindrome('hello')); // 输出: false
+
+// 扩展：忽略大小写和非字母数字字符的回文判断
+function isPalindromeAdvanced(str) {
+  // 转换为小写并过滤掉非字母数字字符
+  const cleanStr = str.toLowerCase().replace(/[^a-z0-9]/g, '');
+
+  let left = 0;
+  let right = cleanStr.length - 1;
+
+  while (left < right) {
+    if (cleanStr[left] !== cleanStr[right]) {
       return false;
     }
     left++;
@@ -1586,29 +1631,52 @@ function isPalindrome(str) {
   return true;
 }
 
-// 使用示例
-console.log(isPalindrome('racecar')); // 输出: true
-console.log(isPalindrome('hello')); // 输出: false
-
-/**
- * 将数组按指定大小分割成多个子数组
+// 高级版本测试
+console.log(isPalindromeAdvanced('A man, a plan, a canal: Panama')); // 输出: true
+console.log(isPalindromeAdvanced('race a car')); // 输出: false`,
+  },
+  {
+    id: "chunkArray",
+    title: "数组分割",
+    description: "将数组按指定大小分割成多个子数组",
+    code: `/**
+ * @description 将一个数组按指定大小分割成多个子数组
  * @param {Array} inputArr - 要分割的原始数组
  * @param {number} chunkSize - 每个子数组包含的元素数量
  * @return {Array} 分割后的子数组组成的新数组
  */
 function chunkArray(inputArr, chunkSize) {
+  // 参数验证
+  if (!Array.isArray(inputArr)) {
+    throw new Error('第一个参数必须是数组');
+  }
+
+  if (chunkSize <= 0 || !Number.isInteger(chunkSize)) {
+    throw new Error('分割大小必须是正整数');
+  }
+
+  // 定义一个空数组，用于存储分割后的子数组
   let newArr = [];
+
+  // 使用 for 循环遍历原始数组，步长为 chunkSize
   for (let i = 0; i < inputArr.length; i += chunkSize) {
-    console.log(inputArr.slice(i, i + chunkSize));
+    // 将从索引 i 开始，长度为 chunkSize 的子数组添加到 newArr 中
     newArr.push(inputArr.slice(i, i + chunkSize));
   }
-  console.log(newArr);
+
   return newArr;
 }
 
 // 调用示例
-let arr = [1, 2, 3, 4, 5];
-let size = 2;
-chunkArray(arr, size);`
+const arr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+console.log('原数组:', arr);
+console.log('按2分割:', chunkArray(arr, 2)); // [[1,2], [3,4], [5,6], [7,8], [9,10]]
+console.log('按3分割:', chunkArray(arr, 3)); // [[1,2,3], [4,5,6], [7,8,9], [10]]
+console.log('按4分割:', chunkArray(arr, 4)); // [[1,2,3,4], [5,6,7,8], [9,10]]
+
+// 字符串数组示例
+const fruits = ['apple', 'banana', 'cherry', 'date', 'elderberry'];
+console.log('水果按2分组:', chunkArray(fruits, 2)); // [['apple','banana'], ['cherry','date'], ['elderberry']]`,
   },
+
 ];
