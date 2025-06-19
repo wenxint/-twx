@@ -362,7 +362,6 @@ function quickSort(arr) {
 const unsortedArr = [34, 12, 45, 6, 89, 23]; // 创建一个未排序的数组
 console.log(quickSort(unsortedArr)); // 输出: [6, 12, 23, 34, 45, 89]，展示排序后的结果
 
-
 // 手写new
 function myNew(constructor, ...args) {
   // 1. 创建一个新的空对象，并将其原型指向构造函数的 prototype
@@ -619,7 +618,6 @@ runTask(createTask(2, 2000)).then((result) => console.log(result));
 runTask(createTask(3, 1500)).then((result) => console.log(result));
 runTask(createTask(4, 800)).then((result) => console.log(result));
 
-
 /**
  * 控制请求的并发数，确保同时执行的请求数量不超过指定的最大值。
  * @param {Array<Function>} requests - 一个包含请求函数的数组，每个请求函数应返回一个 Promise。
@@ -627,9 +625,9 @@ runTask(createTask(4, 800)).then((result) => console.log(result));
  */
 function controlConcurrency(requests, maxConcurrency) {
   // 复制请求数组到队列中，用于后续处理
-  const queue = [...requests]; 
+  const queue = [...requests];
   // 记录当前正在执行的请求数量
-  let running = 0; 
+  let running = 0;
 
   /**
    * 处理请求队列的异步函数，不断从队列中取出请求并执行，直到队列清空或达到最大并发数。
@@ -638,20 +636,20 @@ function controlConcurrency(requests, maxConcurrency) {
     // 当队列中还有请求且当前并发数未达到最大值时，继续处理请求
     while (queue.length > 0 && running < maxConcurrency) {
       // 从队列头部取出一个请求
-      const request = queue.shift(); 
+      const request = queue.shift();
       // 增加当前并发数
       running++;
       // 执行请求并等待其完成
-      await request(); 
+      await request();
       // 减少当前并发数
       running--;
       // 递归调用自身，继续处理队列中的剩余请求
-      processQueue(); 
+      processQueue();
     }
   };
 
   // 启动请求队列的处理过程
-  processQueue(); 
+  processQueue();
 }
 
 // 示例：模拟 8 个请求，最多并发 2 个
@@ -668,14 +666,13 @@ const requests = Array.from(
         // 打印请求完成的日志
         console.log(`Request ${i + 1} finished`);
         // 标记 Promise 已完成
-        resolve(); 
-      }, Math.random() * 2000); 
+        resolve();
+      }, Math.random() * 2000);
     })
 );
 
 // 调用 controlConcurrency 函数，传入请求数组和最大并发数
 controlConcurrency(requests, 2);
-
 
 /**
  * 图片懒加载类
@@ -1468,31 +1465,31 @@ class _LazyManClass {
  * 将给定的数字或字符串转换为十进制数。
  * 如果传入的是数字，直接返回该数字；如果是字符串，则根据进制或字符串前缀进行转换。
  * 如果转换失败，返回 null。
- * 
+ *
  * @param {number|string} num - 要转换的数字或字符串。
  * @param {number} [radix] - 可选参数，指定字符串的进制。如果未提供，将根据字符串前缀自动判断。
  * @returns {number|null} - 转换后的十进制数，如果转换失败则返回 null。
  */
 function convertToDecimal(num, radix) {
   // 如果传入的是数字，直接返回该数字
-  if (typeof num === 'number') {
+  if (typeof num === "number") {
     return num;
   }
 
   // 如果传入的是字符串
-  if (typeof num === 'string') {
+  if (typeof num === "string") {
     // 如果未指定进制
     if (radix === undefined) {
       // 处理十六进制字符串
-      if (num.startsWith('0x') || num.startsWith('0X')) {
+      if (num.startsWith("0x") || num.startsWith("0X")) {
         return parseInt(num, 16);
       }
       // 处理二进制字符串
-      if (num.startsWith('0b') || num.startsWith('0B')) {
+      if (num.startsWith("0b") || num.startsWith("0B")) {
         return parseInt(num, 2);
       }
       // 处理八进制字符串
-      if (num.startsWith('0o') || num.startsWith('0O')) {
+      if (num.startsWith("0o") || num.startsWith("0O")) {
         return parseInt(num, 8);
       }
       // 默认使用十进制
@@ -1505,7 +1502,7 @@ function convertToDecimal(num, radix) {
     if (!isNaN(intResult)) {
       return intResult;
     }
-    
+
     // 若 parseInt 转换失败，尝试使用 parseFloat 进行转换
     const floatResult = parseFloat(num);
     // 如果 parseFloat 转换成功，返回转换结果；否则返回 null
@@ -1518,19 +1515,18 @@ function convertToDecimal(num, radix) {
 
 // 调用案例
 console.log(convertToDecimal(123)); // 输出: 123，因为传入的是数字，直接返回
-console.log(convertToDecimal('0x1A')); // 输出: 26，自动识别为十六进制字符串并转换
-console.log(convertToDecimal('0b1010')); // 输出: 10，自动识别为二进制字符串并转换
-console.log(convertToDecimal('0o12')); // 输出: 10，自动识别为八进制字符串并转换
-console.log(convertToDecimal('123', 10)); // 输出: 123，指定十进制进行转换
-console.log(convertToDecimal('12.3')); // 输出: 12.3，使用 parseFloat 转换
-console.log(convertToDecimal('abc')); // 输出: null，转换失败
+console.log(convertToDecimal("0x1A")); // 输出: 26，自动识别为十六进制字符串并转换
+console.log(convertToDecimal("0b1010")); // 输出: 10，自动识别为二进制字符串并转换
+console.log(convertToDecimal("0o12")); // 输出: 10，自动识别为八进制字符串并转换
+console.log(convertToDecimal("123", 10)); // 输出: 123，指定十进制进行转换
+console.log(convertToDecimal("12.3")); // 输出: 12.3，使用 parseFloat 转换
+console.log(convertToDecimal("abc")); // 输出: null，转换失败
 
 // LazyMan测试用例
 // LazyMan("Hank");
 // LazyMan("Hank").sleep(10).eat("dinner");
 // LazyMan("Hank").eat("dinner").eat("supper");
 // LazyMan("Hank").eat("supper").sleepFirst(5);
-
 
 /**
  * @description 使用双指针法判断字符串是否为回文
@@ -1559,8 +1555,8 @@ function isPalindrome(str) {
 }
 
 // 使用示例
-console.log(isPalindrome('racecar')); // 输出: true
-console.log(isPalindrome('hello')); // 输出: false
+console.log(isPalindrome("racecar")); // 输出: true
+console.log(isPalindrome("hello")); // 输出: false
 
 /**
  * @description 将一个数组按指定大小分割成多个子数组，并打印分割过程和最终结果
@@ -1587,3 +1583,73 @@ function chunkArray(inputArr, chunkSize) {
 let arr = [1, 2, 3, 4, 5];
 let size = 2;
 chunkArray(arr, size);
+
+/**
+ * @description 自定义实现 Array.prototype.map 方法。该方法会创建一个新数组，其结果是该数组中的每个元素是调用一次提供的回调函数后的返回值。
+ * @param {Function} callback - 生成新数组元素的函数，该函数接收三个参数：
+ *   - currentValue：数组中正在处理的当前元素。
+ *   - index：数组中正在处理的当前元素的索引。
+ *   - array：调用 myMap 方法的数组。
+ * @param {any} [thisArg] - 可选参数，执行 callback 函数时使用的 this 值。
+ * @returns {Array} - 一个由原数组每个元素执行回调函数的结果组成的新数组。
+ */
+Array.prototype.myMap = function (callback, thisArg) {
+  // 1. 检查回调函数是否为函数类型
+  if (typeof callback !== "function") {
+    throw new TypeError(callback + " is not a function");
+  }
+
+  // 2. 获取数组和长度
+  const array = this;
+  const length = array.length;
+
+  // 3. 创建新数组用于存储结果
+  const result = new Array(length);
+
+  // 4. 遍历数组
+  for (let i = 0; i < length; i++) {
+    // 跳过稀疏数组的空位
+    if (i in array) {
+      // 调用回调函数，传入当前元素、索引、原数组
+      // 如果提供了 thisArg，则作为回调函数的 this 值
+      result[i] = callback.call(thisArg, array[i], i, array);
+    }
+  }
+
+  // 5. 返回新数组
+  return result;
+};
+
+/**
+ * @description 将下划线命名的字符串转换为驼峰命名法。此实现存在问题，本意是将匹配到的小写字母转为大写，但代码中使用了 toLowerCase，导致未实现驼峰转换。
+ * @param {string} str - 需要转换的下划线命名的字符串
+ * @returns {string} 转换后的驼峰命名法字符串
+ */
+function getCamelCase(str) {
+  // 使用正则表达式匹配下划线后跟一个小写字母的模式，并尝试替换
+  return str.replace(/_([a-z])/g, function (all, i) {
+    // 此处应使用 toUpperCase 来实现驼峰转换，当前代码有误
+    return i.toLowerCase();
+  });
+}
+/**
+ * @description 将下划线命名的字符串转换为驼峰命名法。
+ * @param {string} str - 需要转换的下划线命名的字符串
+ * @returns {string} 转换后的驼峰命名法字符串
+ */
+function getCamelCase(str) {
+  // 将输入的字符串按下划线分割成数组
+  let arr = str.split("_");
+  // 遍历数组，将除第一个元素外的每个元素的首字母转换为大写
+  return arr
+    .map((item, index) => {
+      if (index === 0) {
+        // 第一个元素保持不变
+        return item;
+      } else {
+        // 注意：此处存在拼写错误，应为 charAt 而非 chartAt
+        return item.charAt(0).toUpperCase() + item.slice(1);
+      }
+    })
+    .join("");
+}
