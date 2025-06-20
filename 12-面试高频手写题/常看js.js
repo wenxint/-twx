@@ -1653,3 +1653,35 @@ function getCamelCase(str) {
     })
     .join("");
 }
+
+
+// 定义一个空对象 tarobj，后续将对其进行数据劫持操作
+let tarobj = {}
+// 通过 id 获取输入框元素，后续用于监听输入事件和更新输入框的值
+let input = document.getElementById('input')
+// 通过 id 获取 span 元素，后续用于更新其显示的文本内容
+let span = document.getElementById('span')
+// 数据劫持：使用 Object.defineProperty 方法对 tarobj 对象的 'text' 属性进行劫持
+Object.defineProperty(tarobj, 'text', {
+  // 表示该属性的描述符可以被修改，也可以被删除
+  configurable: true,
+  // 表示该属性可以在对象的属性枚举中出现
+  enumerable: true,
+  // 当访问 tarobj.text 时触发此方法，打印提示信息表明正在获取数据
+  get() {
+    console.log('获取数据了')
+  },
+  // 当给 tarobj.text 赋值时触发此方法，打印提示信息表明数据已更新，并更新输入框和 span 元素的内容
+  set(newVal) {
+    console.log('数据更新了')
+    input.value = newVal
+    span.innerHTML = newVal
+  }
+})
+// 输入监听：给输入框添加 keyup 事件监听器，当用户松开键盘按键时触发回调函数
+input.addEventListener('keyup', function(e) {
+  // 将输入框的值赋给 tarobj 的 text 属性，触发 set 方法更新相关元素内容
+  // 注意：此处原代码可能存在笔误，obj 应改为 tarobj
+  tarobj.text = e.target.value
+})
+
