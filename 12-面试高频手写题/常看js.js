@@ -674,6 +674,27 @@ const requests = Array.from(
 // 调用 controlConcurrency 函数，传入请求数组和最大并发数
 controlConcurrency(requests, 2);
 
+const imgList = [...document.querySelectorAll("img")];
+
+var io = new IntersectionObserver(
+  (entries) => {
+    entries.forEach((item) => {
+      // isIntersecting是一个Boolean值，判断目标元素当前是否可见
+      if (item.isIntersecting) {
+        item.target.src = item.target.dataset.src;
+        // 图片加载后即停止监听该元素
+        io.unobserve(item.target);
+      }
+    });
+  },
+  {
+    root: document.querySelector(".root"),
+  }
+);
+
+// observe遍历监听所有img节点
+imgList.forEach((img) => io.observe(img));
+
 /**
  * 图片懒加载类
  * @class LazyLoad
@@ -1654,34 +1675,32 @@ function getCamelCase(str) {
     .join("");
 }
 
-
 // 定义一个空对象 tarobj，后续将对其进行数据劫持操作
-let tarobj = {}
+let tarobj = {};
 // 通过 id 获取输入框元素，后续用于监听输入事件和更新输入框的值
-let input = document.getElementById('input')
+let input = document.getElementById("input");
 // 通过 id 获取 span 元素，后续用于更新其显示的文本内容
-let span = document.getElementById('span')
+let span = document.getElementById("span");
 // 数据劫持：使用 Object.defineProperty 方法对 tarobj 对象的 'text' 属性进行劫持
-Object.defineProperty(tarobj, 'text', {
+Object.defineProperty(tarobj, "text", {
   // 表示该属性的描述符可以被修改，也可以被删除
   configurable: true,
   // 表示该属性可以在对象的属性枚举中出现
   enumerable: true,
   // 当访问 tarobj.text 时触发此方法，打印提示信息表明正在获取数据
   get() {
-    console.log('获取数据了')
+    console.log("获取数据了");
   },
   // 当给 tarobj.text 赋值时触发此方法，打印提示信息表明数据已更新，并更新输入框和 span 元素的内容
   set(newVal) {
-    console.log('数据更新了')
-    input.value = newVal
-    span.innerHTML = newVal
-  }
-})
+    console.log("数据更新了");
+    input.value = newVal;
+    span.innerHTML = newVal;
+  },
+});
 // 输入监听：给输入框添加 keyup 事件监听器，当用户松开键盘按键时触发回调函数
-input.addEventListener('keyup', function(e) {
+input.addEventListener("keyup", function (e) {
   // 将输入框的值赋给 tarobj 的 text 属性，触发 set 方法更新相关元素内容
   // 注意：此处原代码可能存在笔误，obj 应改为 tarobj
-  tarobj.text = e.target.value
-})
-
+  tarobj.text = e.target.value;
+});

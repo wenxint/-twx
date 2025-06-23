@@ -670,7 +670,26 @@ controlConcurrency(requests, 2);
     id: "lazyLoad",
     title: "图片懒加载",
     description: "图片懒加载类的实现",
-    code: `/**
+    code: `
+const imgList = [...document.querySelectorAll('img')]
+
+var io = new IntersectionObserver((entries) =>{
+  entries.forEach(item => {
+    // isIntersecting是一个Boolean值，判断目标元素当前是否可见
+    if (item.isIntersecting) {
+      item.target.src = item.target.dataset.src
+      // 图片加载后即停止监听该元素
+      io.unobserve(item.target)
+    }
+  })
+}, {
+  root: document.querySelector('.root')
+})
+
+// observe遍历监听所有img节点
+imgList.forEach(img => io.observe(img))
+    
+/**
  * 图片懒加载类
  * @class LazyLoad
  */
@@ -1678,5 +1697,4 @@ console.log('按4分割:', chunkArray(arr, 4)); // [[1,2,3,4], [5,6,7,8], [9,10]
 const fruits = ['apple', 'banana', 'cherry', 'date', 'elderberry'];
 console.log('水果按2分组:', chunkArray(fruits, 2)); // [['apple','banana'], ['cherry','date'], ['elderberry']]`,
   },
-
 ];
