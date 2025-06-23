@@ -1704,3 +1704,97 @@ input.addEventListener("keyup", function (e) {
   // 注意：此处原代码可能存在笔误，obj 应改为 tarobj
   tarobj.text = e.target.value;
 });
+
+
+/**
+ * 堆排序实现
+ * @param {number[]} arr - 待排序数组
+ * @returns {number[]} 排序后的数组
+ */
+function heapSort(arr) {
+  // 1. 构建最大堆
+  buildMaxHeap(arr);
+
+  // 2. 排序过程
+  for (let i = arr.length - 1; i > 0; i--) {
+    // 交换堆顶与当前末尾元素
+    [arr[0], arr[i]] = [arr[i], arr[0]];
+    // 调整剩余元素为最大堆（堆大小减1）
+    heapify(arr, i, 0);
+  }
+  return arr;
+}
+
+/**
+ * 构建最大堆
+ * @param {number[]} arr - 待构建堆的数组
+ */
+function buildMaxHeap(arr) {
+  // 从最后一个非叶子节点开始向上调整
+  const startIdx = Math.floor(arr.length / 2) - 1;
+  for (let i = startIdx; i >= 0; i--) {
+    heapify(arr, arr.length, i);
+  }
+}
+
+/**
+ * 堆调整（使以i为根的子树成为最大堆）
+ * @param {number[]} arr - 待调整的数组
+ * @param {number} heapSize - 堆的大小
+ * @param {number} i - 当前需要调整的节点索引
+ */
+function heapify(arr, heapSize, i) {
+  let largest = i;          // 初始化最大值为当前节点
+  const left = 2 * i + 1;   // 左子节点索引
+  const right = 2 * i + 2;  // 右子节点索引
+
+  // 如果左子节点大于当前节点，更新最大值索引
+  if (left < heapSize && arr[left] > arr[largest]) {
+    largest = left;
+  }
+
+  // 如果右子节点大于当前最大值，更新最大值索引
+  if (right < heapSize && arr[right] > arr[largest]) {
+    largest = right;
+  }
+
+  // 如果最大值不是当前节点，则交换并递归调整受影响的子树
+  if (largest !== i) {
+    [arr[i], arr[largest]] = [arr[largest], arr[i]];
+    heapify(arr, heapSize, largest);
+  }
+}
+
+// 示例用法
+const array = [12, 11, 13, 5, 6, 7];
+console.log(heapSort(array)); // 输出: [5, 6, 7, 11, 12, 13]
+
+
+// 函数组合（composition）是将多个函数组合成一个函数的技术，数据从右向左流动。管道（pipeline）类似，但方向相反，数据从左向右流动。
+
+// 定义基本函数：给输入值加 10
+const add10 = x => x + 10;
+// 定义基本函数：将输入值乘以 2
+const multiply2 = x => x * 2;
+// 定义基本函数：从输入值中减去 5
+const subtract5 = x => x - 5;
+
+// 实现函数组合（从右到左执行函数）
+// ...fns 是一个剩余参数，接收多个函数作为参数
+// 返回一个新函数，该函数接收一个初始值 x
+// 使用 reduceRight 方法从右向左依次执行传入的函数
+const compose = (...fns) => x => fns.reduceRight((acc, fn) => fn(acc), x);
+// 使用 compose 函数组合 subtract5、multiply2 和 add10 三个函数
+const computeWithCompose = compose(subtract5, multiply2, add10);
+// 计算 subtract5(multiply2(add10(5))) 的结果并打印
+console.log(computeWithCompose(5)); // 25
+
+// 实现管道（从左到右执行函数）
+// ...fns 是一个剩余参数，接收多个函数作为参数
+// 返回一个新函数，该函数接收一个初始值 x
+// 使用 reduce 方法从左向右依次执行传入的函数
+const pipe = (...fns) => x => fns.reduce((acc, fn) => fn(acc), x);
+// 使用 pipe 函数组合 add10、multiply2 和 subtract5 三个函数
+const computeWithPipe = pipe(add10, multiply2, subtract5);
+// 计算 subtract5(multiply2(add10(5))) 的结果并打印
+console.log(computeWithPipe(5)); // 25
