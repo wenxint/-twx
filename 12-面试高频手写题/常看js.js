@@ -1705,7 +1705,6 @@ input.addEventListener("keyup", function (e) {
   tarobj.text = e.target.value;
 });
 
-
 /**
  * 堆排序实现
  * @param {number[]} arr - 待排序数组
@@ -1744,9 +1743,9 @@ function buildMaxHeap(arr) {
  * @param {number} i - 当前需要调整的节点索引
  */
 function heapify(arr, heapSize, i) {
-  let largest = i;          // 初始化最大值为当前节点
-  const left = 2 * i + 1;   // 左子节点索引
-  const right = 2 * i + 2;  // 右子节点索引
+  let largest = i; // 初始化最大值为当前节点
+  const left = 2 * i + 1; // 左子节点索引
+  const right = 2 * i + 2; // 右子节点索引
 
   // 如果左子节点大于当前节点，更新最大值索引
   if (left < heapSize && arr[left] > arr[largest]) {
@@ -1769,21 +1768,23 @@ function heapify(arr, heapSize, i) {
 const array = [12, 11, 13, 5, 6, 7];
 console.log(heapSort(array)); // 输出: [5, 6, 7, 11, 12, 13]
 
-
 // 函数组合（composition）是将多个函数组合成一个函数的技术，数据从右向左流动。管道（pipeline）类似，但方向相反，数据从左向右流动。
 
 // 定义基本函数：给输入值加 10
-const add10 = x => x + 10;
+const add10 = (x) => x + 10;
 // 定义基本函数：将输入值乘以 2
-const multiply2 = x => x * 2;
+const multiply2 = (x) => x * 2;
 // 定义基本函数：从输入值中减去 5
-const subtract5 = x => x - 5;
+const subtract5 = (x) => x - 5;
 
 // 实现函数组合（从右到左执行函数）
 // ...fns 是一个剩余参数，接收多个函数作为参数
 // 返回一个新函数，该函数接收一个初始值 x
 // 使用 reduceRight 方法从右向左依次执行传入的函数
-const compose = (...fns) => x => fns.reduceRight((acc, fn) => fn(acc), x);
+const compose =
+  (...fns) =>
+  (x) =>
+    fns.reduceRight((acc, fn) => fn(acc), x);
 // 使用 compose 函数组合 subtract5、multiply2 和 add10 三个函数
 const computeWithCompose = compose(subtract5, multiply2, add10);
 // 计算 subtract5(multiply2(add10(5))) 的结果并打印
@@ -1793,8 +1794,58 @@ console.log(computeWithCompose(5)); // 25
 // ...fns 是一个剩余参数，接收多个函数作为参数
 // 返回一个新函数，该函数接收一个初始值 x
 // 使用 reduce 方法从左向右依次执行传入的函数
-const pipe = (...fns) => x => fns.reduce((acc, fn) => fn(acc), x);
+const pipe =
+  (...fns) =>
+  (x) =>
+    fns.reduce((acc, fn) => fn(acc), x);
 // 使用 pipe 函数组合 add10、multiply2 和 subtract5 三个函数
 const computeWithPipe = pipe(add10, multiply2, subtract5);
 // 计算 subtract5(multiply2(add10(5))) 的结果并打印
 console.log(computeWithPipe(5)); // 25
+
+//尾调用优化
+//尾调用优化（Tail Call Optimization，TCO）是一种 JavaScript 引擎优化技术，用于减少函数调用栈的深度，从而提高性能。
+//当一个函数的执行完成后，其返回值将直接作为另一个函数的参数，而不需要额外的函数调用栈帧。
+//尾调用优化使得函数可以在调用栈的底部执行，而不需要额外的栈帧，从而避免了栈溢出的风险。
+//尾调用优化的实现依赖于 JavaScript 引擎，而不是 JavaScript 语言本身。
+//在现代 JavaScript 引擎中，如 V8 引擎，已经实现了尾调用优化。
+//然而，并非所有的函数都可以进行尾调用优化。只有在函数的最后一行调用另一个函数，并且不使用该函数的返回值时，才可以进行尾调用优化。
+
+function factorial(num) {
+  if (num === 1) return 1;
+  return num * factorial(num - 1);
+}
+
+function factorial(num, total = 1) {
+  if (num === 1) return total;
+  return factorial(num - 1, num * total);
+}
+
+factorial(5); // 120
+factorial(10); // 3628800
+
+/**
+ * 判断字符串是否为回文
+ * 核心思想：对撞指针从两端向中间移动，逐一比较对应字符
+ */
+function isPalindrome(s) {
+  // 预处理：只保留字母和数字，转为小写
+  const cleaned = s.toLowerCase().replace(/[^a-z0-9]/g, "");
+
+  let left = 0; // 左指针从头开始
+  let right = cleaned.length - 1; // 右指针从尾开始
+
+  while (left < right) {
+    if (cleaned[left] !== cleaned[right]) {
+      return false; // 发现不匹配字符
+    }
+    left++; // 左指针右移
+    right--; // 右指针左移
+  }
+
+  return true; // 所有字符都匹配
+}
+
+// 调用示例
+console.log(isPalindrome("A man a plan a canal Panama")); // true
+console.log(isPalindrome("race a car")); // false

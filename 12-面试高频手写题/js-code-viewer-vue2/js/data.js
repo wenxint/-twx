@@ -1247,7 +1247,21 @@ function deepFlattenES6(arr) {
   return arr.reduce((acc, val) =>
     Array.isArray(val) ? acc.concat(deepFlattenES6(val)) : acc.concat(val), []
   );
-}`,
+}
+ let arr = [1, 2, [888, 555],[666,888], 111];
+    function test(arr) {
+      let a = [];
+      for (let i = 0; i < arr.length; i++) {
+        if (Array.isArray(arr[i])) {
+         a=[...a,...test(arr[i])]
+        } else {
+          a.push(arr[i]);
+        }
+      }
+      return a
+    }
+    console.log(test(arr));  
+`,
   },
   {
     id: "arrayUnique",

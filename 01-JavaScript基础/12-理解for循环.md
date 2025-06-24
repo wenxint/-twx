@@ -123,22 +123,10 @@ const newArr = arr.filter(item => item !== 2);
 console.log(newArr); // 输出 [1, 3]
 ```
 
-3. **创建数组副本**：遍历副本数组，操作原数组，避免索引错位。
-
 ```javascript
-let arr = [1, 2, 2, 3, 2, 4];
-const copyArr = [...arr]; // 创建原数组的副本
 
-for (let i = 0; i < copyArr.length; i++) {
-  if (copyArr[i] === 2) {
-    arr.splice(i, 1); // 操作原数组，副本索引保持不变
-    // 无需调整i，因为副本数组的索引不会变化
-  }
-}
-console.log(arr); // [1, 3, 4]（所有2都被正确删除）
 ```
 
-**原理**：通过创建原数组的副本进行遍历，确保遍历过程中索引不会因原数组修改而变化，同时操作原数组进行元素删除。这种方法结合了直接修改原数组和避免索引错位的优点，但会额外占用一定内存空间。注意
 
 ```javascript
 // 引用类型元素的处理
