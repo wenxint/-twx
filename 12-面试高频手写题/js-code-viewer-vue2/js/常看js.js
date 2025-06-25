@@ -320,6 +320,47 @@ const messyArr = [5, 3, 8, 4, 6]; // 创建一个未排序的数组
 console.log(bubbleSort(messyArr)); // 输出: [3, 4, 5, 6, 8]，展示排序后的结果
 
 // https://juejin.cn/post/7353456468094599205?searchId=202505271123555EE696FDB0964BA59F47#heading-28
+
+/**
+ * 插入排序
+ *
+ * 核心思想：
+ * 类似于整理扑克牌，将每张牌插入到手中已排序牌的正确位置。
+ * 将数组分为已排序和未排序两部分，逐个将未排序元素插入到已排序部分的适当位置。
+ *
+ * 算法步骤：
+ * 1. 从第二个元素开始，将其作为待插入元素
+ * 2. 将待插入元素与已排序部分的元素从后向前比较
+ * 3. 找到合适位置后插入
+ * 4. 重复步骤1-3直到所有元素处理完毕
+ *
+ * @param {Array} arr 待排序数组
+ * @param {Function} compareFn 比较函数
+ * @returns {Array} 排序后的数组
+ * @time O(n²) 平均和最坏情况，O(n) 最好情况（已排序）
+ * @space O(1) 原地排序
+ */
+function insertionSort(arr, compareFn = (a, b) => a - b) {
+  const result = [...arr];
+
+  for (let i = 1; i < result.length; i++) {
+    const current = result[i]; // 当前要插入的元素
+    let j = i - 1;
+
+    // 在已排序部分找到插入位置
+    while (j >= 0 && compareFn(result[j], current) > 0) {
+      result[j + 1] = result[j]; // 被插入元素后移
+      j--;
+    }
+
+    result[j + 1] = current; // 插入到正确位置
+  }
+
+  return result;
+}
+const selectionSortarr = [5, 2, 9, 1, 5, 6];
+selectionSort(selectionSortarr);
+console.log(selectionSortarr); // [1, 2, 5, 5, 6, 9]
 /**
  * @description 快速排序算法
  * @param {number[]} arr - 输入数组
@@ -361,6 +402,99 @@ function quickSort(arr) {
 // 调用示例
 const unsortedArr = [34, 12, 45, 6, 89, 23]; // 创建一个未排序的数组
 console.log(quickSort(unsortedArr)); // 输出: [6, 12, 23, 34, 45, 89]，展示排序后的结果
+
+/**
+ * 堆排序
+ *
+ * 核心思想：
+ * 1. 建堆：将无序数组构造成最大堆，最大堆的特点是每个节点的值都大于或等于其子节点的值。
+ * 2. 排序：反复提取堆顶（即数组的第一个元素）的最大元素，将其放到数组的末尾。
+ * 3. 调整：每次提取堆顶元素后，重新调整堆结构，使其继续保持最大堆的性质。
+ *
+ * @param {Array} arr 待排序数组，数组中的元素应为可比较大小的类型，如数字或字符串。
+ * @returns {Array} 排序后的数组，原数组会被直接修改，返回的是排序后的原数组引用。
+ * @time O(n log n) 所有情况，无论数组初始状态如何，堆排序的时间复杂度都是 O(n log n)。
+ * @space O(1) 原地排序，只需要常数级的额外空间，不需要额外的数组来存储排序结果。
+ */
+function heapSort(arr) {
+  // 获取数组的长度，后续建堆和排序过程会用到这个长度信息。
+  const n = arr.length;
+
+  // 建堆阶段：从最后一个非叶子节点开始，逐步向上调整每个节点，构建最大堆。
+  // 最后一个非叶子节点的索引为 Math.floor(n / 2) - 1，因为叶子节点不需要调整。
+  // 从这个节点开始，依次对每个非叶子节点调用 heapify 函数进行调整。
+  for (let i = Math.floor(n / 2) - 1; i >= 0; i--) {
+    // 调用 heapify 函数，对以索引 i 为根节点的子树进行调整，使其满足最大堆的性质。
+    heapify(arr, n, i);
+  }
+
+  // 排序阶段：反复提取堆顶元素（即数组的第一个元素，它是当前堆中的最大值），并将其放到数组的末尾。
+  // 每提取一次堆顶元素，堆的大小就减 1，直到堆中只剩下一个元素。
+  for (let i = n - 1; i > 0; i--) {
+    // 调用 swap 函数，将堆顶元素（索引为 0）和当前未排序部分的最后一个元素（索引为 i）交换位置。
+    // 这样，当前的最大值就被放到了数组的末尾，成为已排序部分的一部分。
+    swap(arr, 0, i);
+    // 交换后，堆的结构可能被破坏，需要重新调整堆。
+    // 此时，堆的大小变为 i，因为最后一个元素已经是排序好的，不需要再参与堆的调整。
+    // 从根节点（索引为 0）开始调用 heapify 函数，重新构建最大堆。
+    heapify(arr, i, 0);
+  }
+
+  // 返回排序后的数组，由于排序过程是在原数组上进行的，所以返回的是原数组的引用。
+  return arr;
+}
+
+/**
+ * 堆调整函数，用于将以索引 i 为根节点的子树调整为最大堆。
+ * @param {Array} arr 数组，包含待调整的元素。
+ * @param {number} n 堆的大小，即当前参与堆调整的元素个数。
+ * @param {number} i 要调整的节点索引，从该节点开始向下调整，使其满足最大堆的性质。
+ */
+function heapify(arr, n, i) {
+  // 假设当前节点（索引为 i）是父节点和其子节点中的最大值。
+  let largest = i;
+  // 计算当前节点的左子节点的索引，在完全二叉树中，左子节点的索引为 2 * i + 1。
+  const left = 2 * i + 1;
+  // 计算当前节点的右子节点的索引，在完全二叉树中，右子节点的索引为 2 * i + 2。
+  const right = 2 * i + 2;
+
+  // 检查左子节点是否存在（即左子节点的索引小于堆的大小），并且左子节点的值是否大于当前假设的最大值节点的值。
+  // 如果满足条件，则更新最大值节点的索引为左子节点的索引。
+  if (left < n && arr[left] > arr[largest]) {
+    largest = left;
+  }
+
+  // 检查右子节点是否存在（即右子节点的索引小于堆的大小），并且右子节点的值是否大于当前假设的最大值节点的值。
+  // 如果满足条件，则更新最大值节点的索引为右子节点的索引。
+  if (right < n && arr[right] > arr[largest]) {
+    largest = right;
+  }
+
+  // 如果最大值节点的索引不等于当前节点的索引，说明当前节点不是父节点和其子节点中的最大值。
+  // 此时需要交换当前节点和最大值节点的值，并递归调用 heapify 函数，继续调整以最大值节点为根的子树。
+  if (largest !== i) {
+    // 调用 swap 函数，交换当前节点（索引为 i）和最大值节点（索引为 largest）的值。
+    swap(arr, i, largest);
+    // 递归调用 heapify 函数，对以最大值节点（索引为 largest）为根的子树进行调整，确保其满足最大堆的性质。
+    heapify(arr, n, largest);
+  }
+}
+
+/**
+ * 交换数组中两个元素的位置
+ * @param {Array} arr 数组
+ * @param {number} i 第一个元素的索引
+ * @param {number} j 第二个元素的索引
+ */
+function swap(arr, i, j) {
+  [arr[i], arr[j]] = [arr[j], arr[i]];
+}
+
+// 调用案例
+const unsortedArray = [34, 12, 45, 6, 89, 23];
+console.log("排序前的数组:", unsortedArray);
+const sortedArray = heapSort(unsortedArray);
+console.log("排序后的数组:", sortedArray);
 
 // 手写new
 function myNew(constructor, ...args) {

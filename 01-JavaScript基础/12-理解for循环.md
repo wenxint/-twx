@@ -123,6 +123,19 @@ const newArr = arr.filter(item => item !== 2);
 console.log(newArr); // 输出 [1, 3]
 ```
 
+3. **正序遍历修正索引**：删除元素后将索引减1，确保下一次循环检查当前位置。
+
+```javascript
+const arr = [2, 2, 3, 4]; 
+for (let i = 0; i < arr.length; i++) { 
+  if (arr[i] === 2) { 
+    arr.splice(i, 1); 
+    i--; // 关键：删除后索引回退一位 
+  } 
+} 
+console.log(arr); // [3, 4]（正确）
+```
+
 ```javascript
 
 ```
