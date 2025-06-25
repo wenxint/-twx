@@ -114,29 +114,27 @@ setTimeout(clear, 5000);`,
  * 使用滑动窗口算法
  */
 function lengthOfLongestSubstring(s) {
-  if (!s) return 0;
+ // 1. 初始化数据结构
+    const charIndex = new Map();  // 哈希表：记录字符最后出现位置
+    let left = 0;                 // 窗口左边界
+    let maxLength = 0;            // 记录找到的最大长度
 
-  let maxLength = 0;
-  let left = 0; // 窗口左边界
-  const charSet = new Set(); // 存储当前窗口中的字符
+    // 2. 遍历字符串，右边界不断向右移动
+    for (let right = 0; right < s.length; right++) {
+        const char = s[right];    // 当前处理的字符
 
-  for (let right = 0; right < s.length; right++) {
-    const char = s[right];
+        // 3. 检查是否出现重复字符
+        if (charIndex.has(char) && charIndex.get(char) >= left) {
+            // 重复了！需要移动左边界
+            left = charIndex.get(char) + 1;
+        }
 
-    // 如果字符已存在，收缩左边界
-    while (charSet.has(char)) {
-      charSet.delete(s[left]);
-      left++;
+        // 4. 更新字符位置和最大长度
+        charIndex.set(char, right);                    // 记录当前字符位置
+        maxLength = Math.max(maxLength, right - left + 1);  // 更新最大长度
     }
 
-    // 添加当前字符
-    charSet.add(char);
-
-    // 更新最大长度
-    maxLength = Math.max(maxLength, right - left + 1);
-  }
-
-  return maxLength;
+    return maxLength;
 }
 
 // 测试用例

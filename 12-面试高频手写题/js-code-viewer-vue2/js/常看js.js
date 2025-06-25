@@ -129,18 +129,26 @@ mySetInterval(() => console.log("Hello, world!"), 1000);
 //要找到字符串中出现的不重复字符的最长长度
 
 function lengthOfLongestSubstring(s) {
-  let start = 0; // 窗口起始位置
-  let maxLength = 0; // 最长不重复子串的长度
-  let seen = new Set(); // 用于存储窗口内的字符
-  for (let end = 0; end < s.length; end++) {
-    // 如果当前字符已经在窗口内，则移动窗口的起始位置
-    while (seen.has(s[end])) {
-      seen.delete(s[start]);
-      start++;
-    } // 将当前字符添加到窗口内
-    seen.add(s[end]); // 更新最长不重复子串的长度
-    maxLength = Math.max(maxLength, end - start + 1);
+  // 1. 初始化数据结构
+  const charIndex = new Map();  // 哈希表：记录字符最后出现位置
+  let left = 0;                 // 窗口左边界
+  let maxLength = 0;            // 记录找到的最大长度
+
+  // 2. 遍历字符串，右边界不断向右移动
+  for (let right = 0; right < s.length; right++) {
+      const char = s[right];    // 当前处理的字符
+
+      // 3. 检查是否出现重复字符
+      if (charIndex.has(char) && charIndex.get(char) >= left) {
+          // 重复了！需要移动左边界
+          left = charIndex.get(char) + 1;
+      }
+
+      // 4. 更新字符位置和最大长度
+      charIndex.set(char, right);                    // 记录当前字符位置
+      maxLength = Math.max(maxLength, right - left + 1);  // 更新最大长度
   }
+
   return maxLength;
 }
 // 示例
