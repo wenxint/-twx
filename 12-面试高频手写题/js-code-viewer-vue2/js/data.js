@@ -190,129 +190,7 @@ console.log(floatEqual(0.1 + 0.2, 0.3)); // 输出: true
 console.log(floatEqual(1.0000001, 1.0000002, 0.0001)); // 输出: true
 console.log(floatEqual(1.1, 1.2, 0.05)); // 输出: false`,
   },
-  {
-    id: "binarySearch",
-    title: "二分查找",
-    description: "在有序数组中进行二分查找",
-    code: `/**
- * 二分查找算法
- * 在有序数组中查找目标值的位置
- * 时间复杂度: O(log n)
- */
-function binarySearch(arr, target) {
-  let left = 0;
-  let right = arr.length - 1;
 
-  while (left <= right) {
-    // 防止整数溢出的中点计算方式
-    const mid = Math.floor(left + (right - left) / 2);
-
-    if (arr[mid] === target) {
-      return mid; // 找到目标，返回索引
-    } else if (arr[mid] < target) {
-      left = mid + 1; // 在右半部分查找
-    } else {
-      right = mid - 1; // 在左半部分查找
-    }
-  }
-
-  return -1; // 未找到目标
-}
-
-// 测试用例
-const sortedArray = [1, 3, 5, 7, 9, 11, 13, 15, 17, 19];
-console.log(binarySearch(sortedArray, 7));  // 输出: 3
-console.log(binarySearch(sortedArray, 6));  // 输出: -1 (未找到)
-console.log(binarySearch(sortedArray, 1));  // 输出: 0
-console.log(binarySearch(sortedArray, 19)); // 输出: 9`,
-  },
-  {
-    id: "bubbleSort",
-    title: "冒泡排序",
-    description: "冒泡排序算法实现",
-    code: `/**
- * 冒泡排序算法
- * 重复地遍历数组，比较相邻元素并交换，直到没有交换发生
- * 时间复杂度: O(n²)，空间复杂度: O(1)
- */
-function bubbleSort(arr) {
-  const n = arr.length;
-  // 复制数组，避免修改原数组
-  const result = [...arr];
-
-  // 外层循环：控制排序的轮数
-  for (let i = 0; i < n - 1; i++) {
-    let swapped = false; // 优化标志，检测是否发生交换
-
-    // 内层循环：每轮比较相邻元素
-    for (let j = 0; j < n - 1 - i; j++) {
-      // 如果前一个元素大于后一个元素，则交换
-      if (result[j] > result[j + 1]) {
-        // 交换元素
-        [result[j], result[j + 1]] = [result[j + 1], result[j]];
-        swapped = true;
-      }
-    }
-
-    // 如果这一轮没有发生交换，说明数组已经有序
-    if (!swapped) {
-      break;
-    }
-  }
-
-  return result;
-}
-
-// 测试用例
-const unsortedArray = [64, 34, 25, 12, 22, 11, 90];
-console.log("原数组:", unsortedArray);
-console.log("排序后:", bubbleSort(unsortedArray));
-// 输出: [11, 12, 22, 25, 34, 64, 90]`,
-  },
-  {
-    id: "quickSort",
-    title: "快速排序",
-    description: "快速排序算法实现",
-    code: `/**
- * 快速排序算法
- * 使用分治思想，选择基准元素，将数组分为小于和大于基准的两部分
- * 平均时间复杂度: O(n log n)，最坏情况: O(n²)
- */
-function quickSort(arr) {
-  // 基本情况：长度小于等于1的数组已经有序
-  if (arr.length <= 1) {
-    return arr;
-  }
-
-  // 选择基准元素（这里选择中间元素）
-  const pivotIndex = Math.floor(arr.length / 2);
-  const pivot = arr[pivotIndex];
-
-  // 分割数组
-  const left = [];  // 小于基准的元素
-  const right = []; // 大于基准的元素
-  const equal = []; // 等于基准的元素
-
-  for (let i = 0; i < arr.length; i++) {
-    if (arr[i] < pivot) {
-      left.push(arr[i]);
-    } else if (arr[i] > pivot) {
-      right.push(arr[i]);
-    } else {
-      equal.push(arr[i]);
-    }
-  }
-
-  // 递归排序左右两部分，并合并结果
-  return [...quickSort(left), ...equal, ...quickSort(right)];
-}
-
-// 测试用例
-const unsortedArray = [64, 34, 25, 12, 22, 11, 90, 5];
-console.log("原数组:", unsortedArray);
-console.log("快排结果:", quickSort(unsortedArray));
-// 输出: [5, 11, 12, 22, 25, 34, 64, 90]`,
-  },
   {
     id: "myNew",
     title: "手写 New 方法",
@@ -688,7 +566,7 @@ var io = new IntersectionObserver((entries) =>{
 
 // observe遍历监听所有img节点
 imgList.forEach(img => io.observe(img))
-    
+
 /**
  * 图片懒加载类
  * @class LazyLoad
@@ -1260,7 +1138,7 @@ function deepFlattenES6(arr) {
       }
       return a
     }
-    console.log(test(arr));  
+    console.log(test(arr));
 `,
   },
   {
@@ -1711,4 +1589,297 @@ console.log('按4分割:', chunkArray(arr, 4)); // [[1,2,3,4], [5,6,7,8], [9,10]
 const fruits = ['apple', 'banana', 'cherry', 'date', 'elderberry'];
 console.log('水果按2分组:', chunkArray(fruits, 2)); // [['apple','banana'], ['cherry','date'], ['elderberry']]`,
   },
+
 ];
+
+// 新增的代码片段
+const additionalCodeData = [
+  {
+    id: "binarySearch",
+    title: "二分查找算法",
+    description: "在已排序数组中快速查找目标值",
+    code: `/**
+ * @description 二分查找算法
+ * @param {number[]} arr - 已排序的输入数组（升序）
+ * @param {number} target - 目标值
+ * @return {number} 目标值的索引（未找到返回-1）
+ */
+function binarySearch(arr, target) {
+  // 初始化左右指针，定义搜索范围的边界
+  // 时间复杂度：O(1) - 常数时间的初始化操作
+  let left = 0; // 搜索范围的左边界，初始为数组第一个元素
+  let right = arr.length - 1; // 搜索范围的右边界，初始为数组最后一个元素
+
+  // 当左指针小于等于右指针时，搜索范围内还有元素，继续搜索
+  // 循环最多执行log₂n次，因为每次迭代都将搜索范围缩小一半
+  while (left <= right) {
+    // 计算中间位置，使用Math.floor确保得到整数索引
+    // 使用(left + right) / 2可能导致大数溢出，更安全的写法是：left + Math.floor((right - left) / 2)
+    const mid = Math.floor((left + right) / 2);
+
+    // 找到目标值，直接返回索引位置（最好情况：O(1)）
+    if (arr[mid] === target) return mid;
+
+    // 中间值小于目标值，说明目标在右半部分
+    // 将左边界移到中间位置的右侧，缩小搜索范围为右半部分
+    if (arr[mid] < target) {
+      left = mid + 1; // 排除了mid及左侧的所有元素
+    } else {
+      // 中间值大于目标值，说明目标在左半部分
+      // 将右边界移到中间位置的左侧，缩小搜索范围为左半部分
+      right = mid - 1; // 排除了mid及右侧的所有元素
+    }
+  }
+
+  // 搜索范围为空仍未找到目标值，返回-1表示不存在
+  return -1;
+}
+
+// 调用示例
+const sortedArr2 = [2, 5, 8, 12, 16, 23, 38, 56, 72, 91]; // 创建一个已排序的数组
+console.log(binarySearch(sortedArr2, 23)); // 输出: 5，表示23在数组中的索引位置
+console.log(binarySearch(sortedArr2, 10)); // 输出: -1，表示10不在数组中`,
+  },
+  {
+    id: "bubbleSort",
+    title: "冒泡排序算法",
+    description: "通过相邻元素交换实现数组排序",
+    code: `/**
+ * @description 冒泡排序算法
+ * @param {number[]} arr - 输入数组
+ * @return {number[]} 排序后的数组
+ */
+function bubbleSort(arr) {
+  // 获取数组长度，用于控制循环次数
+  // 时间复杂度：O(1)，常数时间操作
+  const len = arr.length;
+
+  // 外层循环：控制排序轮数，最多需要n-1轮（n为数组长度）
+  // 时间复杂度：O(n)，最多执行n-1次
+  for (let i = 0; i < len - 1; i++) {
+    // 优化标志：记录本轮是否发生交换，用于提前终止
+    // 如果一轮中没有交换，说明数组已经有序
+    let swapped = false;
+
+    // 内层循环：比较并交换相邻元素
+    // 每轮比较次数递减，因为每轮结束后最大的元素已经到达正确位置
+    // 时间复杂度：O(n-i-1)，随着i增加而减少
+    for (let j = 0; j < len - 1 - i; j++) {
+      // 比较相邻元素，如果前一个大于后一个，则交换位置
+      // 这确保较大的元素逐渐"冒泡"到数组末尾
+      if (arr[j] > arr[j + 1]) {
+        // 使用ES6解构赋值语法交换元素，无需临时变量
+        // 时间复杂度：O(1)，常数时间操作
+        [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]]; // 交换相邻元素
+        swapped = true; // 标记本轮发生了交换
+      }
+    }
+
+    // 优化：如果本轮没有发生交换，说明数组已经有序，可以提前终止
+    // 最好情况下（已排序数组），时间复杂度降至O(n)
+    if (!swapped) break; // 提前终止：若本轮无交换则已排序完成
+  }
+
+  // 返回排序后的数组（原地排序，返回原数组的引用）
+  // 总体时间复杂度：O(n²)，因为有两层嵌套循环
+  // 空间复杂度：O(1)，只使用了少量额外变量
+  return arr;
+}
+
+// 调用示例
+const messyArr = [5, 3, 8, 4, 6]; // 创建一个未排序的数组
+console.log(bubbleSort(messyArr)); // 输出: [3, 4, 5, 6, 8]，展示排序后的结果`,
+  },
+  {
+    id: "insertionSort",
+    title: "插入排序算法",
+    description: "将元素逐个插入到已排序部分的正确位置",
+    code: `/**
+ * 插入排序
+ *
+ * 核心思想：
+ * 类似于整理扑克牌，将每张牌插入到手中已排序牌的正确位置。
+ * 将数组分为已排序和未排序两部分，逐个将未排序元素插入到已排序部分的适当位置。
+ *
+ * 算法步骤：
+ * 1. 从第二个元素开始，将其作为待插入元素
+ * 2. 将待插入元素与已排序部分的元素从后向前比较
+ * 3. 找到合适位置后插入
+ * 4. 重复步骤1-3直到所有元素处理完毕
+ *
+ * @param {Array} arr 待排序数组
+ * @param {Function} compareFn 比较函数
+ * @returns {Array} 排序后的数组
+ * @time O(n²) 平均和最坏情况，O(n) 最好情况（已排序）
+ * @space O(1) 原地排序
+ */
+function insertionSort(arr, compareFn = (a, b) => a - b) {
+  const result = [...arr];
+
+  for (let i = 1; i < result.length; i++) {
+    const current = result[i]; // 当前要插入的元素
+    let j = i - 1;
+
+    // 在已排序部分找到插入位置
+    while (j >= 0 && compareFn(result[j], current) > 0) {
+      result[j + 1] = result[j]; // 被插入元素后移
+      j--;
+    }
+
+    result[j + 1] = current; // 插入到正确位置
+  }
+
+  return result;
+}
+
+// 使用示例
+const selectionSortarr = [5, 2, 9, 1, 5, 6];
+console.log(insertionSort(selectionSortarr)); // [1, 2, 5, 5, 6, 9]`,
+  },
+  {
+    id: "quickSort",
+    title: "快速排序算法",
+    description: "基于分治策略的高效排序算法",
+    code: `/**
+ * @description 快速排序算法
+ * @param {number[]} arr - 输入数组
+ * @return {number[]} 排序后的数组
+ */
+function quickSort(arr) {
+  // 基准情况：如果数组长度小于等于1，已经是排序状态，直接返回
+  // 这是递归终止条件，确保算法最终会结束
+  if (arr.length <= 1) return arr; // 基准情况：长度≤1直接返回
+
+  // 选择中间元素作为基准值（pivot）
+  // 选择策略影响算法效率，中间元素通常比首尾元素更平衡
+  // 更好的做法是随机选择基准值，以避免最坏情况
+  const pivot = arr[Math.floor(arr.length / 2)]; // 选择中间元素作为基准值
+
+  // 创建三个数组，分别存储小于、等于和大于基准值的元素
+  // 空间复杂度：O(n)，需要额外空间存储这些数组
+  const left = []; // 存储所有小于基准值的元素
+  const middle = []; // 存储所有等于基准值的元素
+  const right = []; // 存储所有大于基准值的元素
+
+  // 遍历原数组，将每个元素放入对应的分区
+  // 时间复杂度：O(n)，需要遍历数组中的每个元素一次
+  for (const num of arr) {
+    // 根据元素与基准值的比较结果，将其放入对应数组
+    // 每次比较和push操作的时间复杂度都是O(1)
+    if (num < pivot) left.push(num); // 小于基准值，放入left数组
+    else if (num === pivot) middle.push(num); // 等于基准值，放入middle数组
+    else right.push(num); // 大于基准值，放入right数组
+  }
+
+  // 递归地对left和right数组进行排序，并与middle数组合并
+  // 这是分治算法的核心：将问题分解为更小的子问题，解决后合并结果
+  // 时间复杂度：T(n) = 2T(n/2) + O(n)，根据主定理，解为O(n log n)
+  // 最坏情况（如已排序数组）：T(n) = T(n-1) + O(n)，解为O(n²)
+  return [...quickSort(left), ...middle, ...quickSort(right)];
+}
+
+// 调用示例
+const unsortedArr = [34, 12, 45, 6, 89, 23]; // 创建一个未排序的数组
+console.log(quickSort(unsortedArr)); // 输出: [6, 12, 23, 34, 45, 89]，展示排序后的结果`,
+  },
+  {
+    id: "heapSort",
+    title: "堆排序算法",
+    description: "基于堆数据结构的排序算法",
+    code: `/**
+ * 堆排序
+ *
+ * 核心思想：
+ * 1. 建堆：将无序数组构造成最大堆，最大堆的特点是每个节点的值都大于或等于其子节点的值。
+ * 2. 排序：反复提取堆顶（即数组的第一个元素）的最大元素，将其放到数组的末尾。
+ * 3. 调整：每次提取堆顶元素后，重新调整堆结构，使其继续保持最大堆的性质。
+ *
+ * @param {Array} arr 待排序数组，数组中的元素应为可比较大小的类型，如数字或字符串。
+ * @returns {Array} 排序后的数组，原数组会被直接修改，返回的是排序后的原数组引用。
+ * @time O(n log n) 所有情况，无论数组初始状态如何，堆排序的时间复杂度都是 O(n log n)。
+ * @space O(1) 原地排序，只需要常数级的额外空间，不需要额外的数组来存储排序结果。
+ */
+function heapSort(arr) {
+  // 获取数组的长度，后续建堆和排序过程会用到这个长度信息。
+  const n = arr.length;
+
+  // 建堆阶段：从最后一个非叶子节点开始，逐步向上调整每个节点，构建最大堆。
+  // 最后一个非叶子节点的索引为 Math.floor(n / 2) - 1，因为叶子节点不需要调整。
+  // 从这个节点开始，依次对每个非叶子节点调用 heapify 函数进行调整。
+  for (let i = Math.floor(n / 2) - 1; i >= 0; i--) {
+    // 调用 heapify 函数，对以索引 i 为根节点的子树进行调整，使其满足最大堆的性质。
+    heapify(arr, n, i);
+  }
+
+  // 排序阶段：反复提取堆顶元素（即数组的第一个元素，它是当前堆中的最大值），并将其放到数组的末尾。
+  // 每提取一次堆顶元素，堆的大小就减 1，直到堆中只剩下一个元素。
+  for (let i = n - 1; i > 0; i--) {
+    // 调用 swap 函数，将堆顶元素（索引为 0）和当前未排序部分的最后一个元素（索引为 i）交换位置。
+    // 这样，当前的最大值就被放到了数组的末尾，成为已排序部分的一部分。
+    swap(arr, 0, i);
+    // 交换后，堆的结构可能被破坏，需要重新调整堆。
+    // 此时，堆的大小变为 i，因为最后一个元素已经是排序好的，不需要再参与堆的调整。
+    // 从根节点（索引为 0）开始调用 heapify 函数，重新构建最大堆。
+    heapify(arr, i, 0);
+  }
+
+  // 返回排序后的数组，由于排序过程是在原数组上进行的，所以返回的是原数组的引用。
+  return arr;
+}
+
+/**
+ * 堆调整函数，用于将以索引 i 为根节点的子树调整为最大堆。
+ * @param {Array} arr 数组，包含待调整的元素。
+ * @param {number} n 堆的大小，即当前参与堆调整的元素个数。
+ * @param {number} i 要调整的节点索引，从该节点开始向下调整，使其满足最大堆的性质。
+ */
+function heapify(arr, n, i) {
+  // 假设当前节点（索引为 i）是父节点和其子节点中的最大值。
+  let largest = i;
+  // 计算当前节点的左子节点的索引，在完全二叉树中，左子节点的索引为 2 * i + 1。
+  const left = 2 * i + 1;
+  // 计算当前节点的右子节点的索引，在完全二叉树中，右子节点的索引为 2 * i + 2。
+  const right = 2 * i + 2;
+
+  // 检查左子节点是否存在（即左子节点的索引小于堆的大小），并且左子节点的值是否大于当前假设的最大值节点的值。
+  // 如果满足条件，则更新最大值节点的索引为左子节点的索引。
+  if (left < n && arr[left] > arr[largest]) {
+    largest = left;
+  }
+
+  // 检查右子节点是否存在（即右子节点的索引小于堆的大小），并且右子节点的值是否大于当前假设的最大值节点的值。
+  // 如果满足条件，则更新最大值节点的索引为右子节点的索引。
+  if (right < n && arr[right] > arr[largest]) {
+    largest = right;
+  }
+
+  // 如果最大值节点的索引不等于当前节点的索引，说明当前节点不是父节点和其子节点中的最大值。
+  // 此时需要交换当前节点和最大值节点的值，并递归调用 heapify 函数，继续调整以最大值节点为根的子树。
+  if (largest !== i) {
+    // 调用 swap 函数，交换当前节点（索引为 i）和最大值节点（索引为 largest）的值。
+    swap(arr, i, largest);
+    // 递归调用 heapify 函数，对以最大值节点（索引为 largest）为根的子树进行调整，确保其满足最大堆的性质。
+    heapify(arr, n, largest);
+  }
+}
+
+/**
+ * 交换数组中两个元素的位置
+ * @param {Array} arr 数组
+ * @param {number} i 第一个元素的索引
+ * @param {number} j 第二个元素的索引
+ */
+function swap(arr, i, j) {
+  [arr[i], arr[j]] = [arr[j], arr[i]];
+}
+
+// 调用案例
+const unsortedArray = [34, 12, 45, 6, 89, 23];
+console.log("排序前的数组:", unsortedArray);
+const sortedArray = heapSort([...unsortedArray]); // 使用副本避免修改原数组
+console.log("排序后的数组:", sortedArray);`,
+  }
+];
+
+// 合并到主数组
+window.CODE_DATA = [...window.CODE_DATA, ...additionalCodeData];
