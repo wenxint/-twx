@@ -159,6 +159,208 @@ element.getAttribute('class');
 element.removeAttribute('class');
 element.hasAttribute('class');
 
+// 修改属性 - 详细API说明
+element.setAttribute('class', 'new-class');  // 设置属性
+element.getAttribute('class');                // 获取属性
+element.removeAttribute('class');             // 移除属性
+element.hasAttribute('class');                // 检查属性是否存在
+
+/**
+ * getAttribute系列API详解
+ */
+// 1. 基础属性操作
+const input = document.querySelector('input');
+
+// 设置属性
+input.setAttribute('type', 'email');
+input.setAttribute('placeholder', '请输入邮箱');
+input.setAttribute('required', ''); // 布尔属性设置为空字符串
+
+// 获取属性
+console.log(input.getAttribute('type'));        // "email"
+console.log(input.getAttribute('placeholder')); // "请输入邮箱"
+console.log(input.getAttribute('required'));    // "" (空字符串)
+console.log(input.getAttribute('nonexistent')); // null
+
+// 检查属性存在性
+console.log(input.hasAttribute('required'));    // true
+console.log(input.hasAttribute('disabled'));    // false
+
+// 移除属性
+input.removeAttribute('required');
+
+// 2. 属性 vs 属性访问器的区别
+const img = document.querySelector('img');
+img.setAttribute('src', 'relative-path.jpg');
+console.log(img.getAttribute('src'));  // "relative-path.jpg" (原始值)
+console.log(img.src);                  // "http://domain.com/relative-path.jpg" (解析后的完整URL)
+
+/**
+ * dataset API - HTML5数据属性
+ * 用于操作data-*属性，提供了更方便的JavaScript访问方式
+ */
+
+// HTML示例
+// <div id="user" data-user-id="123" data-user-name="张三" data-user-age="25" data-active="true"></div>
+
+const userElement = document.getElementById('user');
+
+// 1. 读取data属性
+console.log(userElement.dataset.userId);    // "123"
+console.log(userElement.dataset.userName);  // "张三"
+console.log(userElement.dataset.userAge);   // "25"
+console.log(userElement.dataset.active);    // "true"
+
+// 2. 设置data属性
+userElement.dataset.userId = '456';
+userElement.dataset.userRole = 'admin';  // 创建新的data-user-role属性
+userElement.dataset.lastLogin = '2024-01-15';
+
+// 3. 删除data属性
+delete userElement.dataset.active;
+
+// 4. 检查data属性是否存在
+console.log('userId' in userElement.dataset);     // true
+console.log('nonexistent' in userElement.dataset); // false
+
+// 5. 遍历所有data属性
+for (const key in userElement.dataset) {
+  console.log(`${key}: ${userElement.dataset[key]}`);
+}
+
+// 6. 获取所有data属性名
+console.log(Object.keys(userElement.dataset)); // ["userId", "userName", "userAge", "userRole", "lastLogin"]
+
+/**
+ * 命名转换规则
+ * HTML中的kebab-case会自动转换为JavaScript中的camelCase
+ */
+// HTML: data-user-full-name="李四"
+// JavaScript: element.dataset.userFullName
+
+/**
+ * dataset vs getAttribute的对比
+ */
+const element = document.querySelector('[data-count="42"]');
+
+// 使用getAttribute
+element.setAttribute('data-count', '100');
+console.log(element.getAttribute('data-count')); // "100"
+
+// 使用dataset
+element.dataset.count = '200';
+console.log(element.dataset.count); // "200"
+
+// 两种方式是等价的，但dataset更简洁
+console.log(element.getAttribute('data-count') === element.dataset.count); // true
+
+/**
+ * 实际应用示例
+ */
+// 1. 存储配置信息
+function initializeComponent(element) {
+  const config = {
+    autoplay: element.dataset.autoplay === 'true',
+    duration: parseInt(element.dataset.duration, 10) || 1000,
+    animation: element.dataset.animation || 'fade'
+  };
+
+  console.log('组件配置:', config);
+  // 基于配置初始化组件...
+}
+
+// 2. 事件委托中使用data属性
+document.addEventListener('click', function(event) {
+  const button = event.target.closest('[data-action]');
+  if (button) {
+    const action = button.dataset.action;
+    const target = button.dataset.target;
+
+    switch (action) {
+      case 'delete':
+        deleteItem(target);
+        break;
+      case 'edit':
+        editItem(target);
+        break;
+      case 'view':
+        viewItem(target);
+        break;
+    }
+  }
+});
+
+// 3. 状态管理
+function toggleUserStatus(userId) {
+  const userCard = document.querySelector(`[data-user-id="${userId}"]`);
+  const currentStatus = userCard.dataset.status;
+  const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
+
+  userCard.dataset.status = newStatus;
+  userCard.classList.toggle('inactive', newStatus === 'inactive');
+}
+
+/**
+ * 性能考虑和最佳实践
+ */
+// 1. 批量设置data属性
+function setUserData(element, userData) {
+  // 一次性设置多个属性
+  Object.assign(element.dataset, {
+    userId: userData.id,
+    userName: userData.name,
+    userRole: userData.role,
+    lastActive: userData.lastActive
+  });
+}
+
+// 2. 类型转换辅助函数
+function getDatasetValue(element, key, type = 'string', defaultValue = null) {
+  const value = element.dataset[key];
+  if (value === undefined) return defaultValue;
+
+  switch (type) {
+    case 'number':
+      return parseInt(value, 10) || defaultValue;
+    case 'float':
+      return parseFloat(value) || defaultValue;
+    case 'boolean':
+      return value === 'true';
+    case 'json':
+      try {
+        return JSON.parse(value);
+      } catch {
+        return defaultValue;
+      }
+    default:
+      return value;
+  }
+}
+
+// 使用示例
+const count = getDatasetValue(element, 'count', 'number', 0);
+const enabled = getDatasetValue(element, 'enabled', 'boolean', false);
+const config = getDatasetValue(element, 'config', 'json', {});
+
+/**
+ * 与其他属性API的区别总结
+ */
+// 1. 标准HTML属性 - 直接属性访问（推荐）
+element.id = 'new-id';
+element.className = 'new-class';
+element.src = 'new-image.jpg';
+
+// 2. 自定义属性 - 使用getAttribute/setAttribute
+element.setAttribute('custom-attr', 'value');
+element.getAttribute('custom-attr');
+
+// 3. data属性 - 使用dataset API（推荐）
+element.dataset.customData = 'value';
+
+// 4. aria属性 - 使用getAttribute/setAttribute
+element.setAttribute('aria-label', '关闭按钮');
+element.getAttribute('aria-label');
+
 // 直接访问常见属性
 element.id = 'new-id';
 element.className = 'new-class';
@@ -516,4 +718,159 @@ element.addEventListener('myEvent', function(e) {
 
 // 触发事件
 element.dispatchEvent(event);
+```
+
+#### 6. getAttribute() 和直接属性访问的区别
+**答**：
+`getAttribute()`和直接属性访问在获取元素属性时有以下关键区别：
+
+```javascript
+const link = document.createElement('a');
+link.href = '/path/to/page';
+link.setAttribute('href', '/path/to/page');
+
+// 1. 返回值类型不同
+console.log(link.getAttribute('href')); // "/path/to/page" (原始字符串值)
+console.log(link.href);                 // "http://localhost:3000/path/to/page" (解析后的完整URL)
+
+// 2. 对布尔属性的处理不同
+const input = document.createElement('input');
+input.setAttribute('disabled', '');
+console.log(input.getAttribute('disabled')); // "" (空字符串)
+console.log(input.disabled);                 // true (布尔值)
+
+// 3. 自定义属性的处理
+link.setAttribute('custom-attr', 'value');
+console.log(link.getAttribute('custom-attr')); // "value"
+console.log(link.customAttr);                  // undefined (不存在该属性)
+
+// 4. 大小写敏感性
+link.setAttribute('MyAttr', 'test');
+console.log(link.getAttribute('MyAttr'));      // "test"
+console.log(link.getAttribute('myattr'));      // null (大小写敏感)
+```
+
+**使用建议**：
+- 标准HTML属性：优先使用直接属性访问（如`element.id`、`element.className`）
+- 自定义属性：使用`getAttribute()`/`setAttribute()`
+- data属性：使用`dataset` API
+
+#### 7. dataset API 的使用场景和优势
+**答**：
+`dataset` API是HTML5引入的用于操作`data-*`属性的便捷接口，具有以下优势：
+
+```javascript
+// HTML: <div id="product" data-product-id="123" data-price="99.99" data-in-stock="true"></div>
+const product = document.getElementById('product');
+
+// 1. 语法简洁，自动驼峰转换
+console.log(product.dataset.productId);  // "123" (data-product-id)
+console.log(product.dataset.price);      // "99.99" (data-price)
+console.log(product.dataset.inStock);    // "true" (data-in-stock)
+
+// 2. 设置和删除更方便
+product.dataset.discount = '20%';        // 创建 data-discount="20%"
+delete product.dataset.inStock;          // 删除 data-in-stock 属性
+
+// 3. 遍历所有data属性
+for (const key in product.dataset) {
+  console.log(`${key}: ${product.dataset[key]}`);
+}
+
+// 4. 与传统方法对比
+// 传统方法
+product.setAttribute('data-category', 'electronics');
+const category = product.getAttribute('data-category');
+
+// dataset方法（更简洁）
+product.dataset.category = 'electronics';
+const category2 = product.dataset.category;
+```
+
+**实际应用场景**：
+```javascript
+// 1. 组件配置
+function initCarousel(element) {
+  const config = {
+    autoplay: element.dataset.autoplay === 'true',
+    interval: parseInt(element.dataset.interval, 10) || 3000,
+    animation: element.dataset.animation || 'slide'
+  };
+  // 基于配置初始化轮播组件
+}
+
+// 2. 事件委托中的数据传递
+document.addEventListener('click', function(event) {
+  if (event.target.matches('[data-action]')) {
+    const action = event.target.dataset.action;
+    const id = event.target.dataset.id;
+    handleAction(action, id);
+  }
+});
+
+// 3. 状态管理
+function updateProductStatus(productId, status) {
+  const productEl = document.querySelector(`[data-product-id="${productId}"]`);
+  productEl.dataset.status = status;
+  productEl.classList.toggle('out-of-stock', status === 'unavailable');
+}
+```
+
+#### 8. 如何高效地批量操作元素属性
+**答**：
+在需要批量操作元素属性时，应该选择高效的方法来避免频繁的DOM操作：
+
+```javascript
+// 1. 批量设置dataset属性
+function setElementData(element, dataObject) {
+  // 高效方式：使用Object.assign一次性设置多个属性
+  Object.assign(element.dataset, dataObject);
+
+  // 低效方式：逐个设置
+  // element.dataset.id = dataObject.id;
+  // element.dataset.name = dataObject.name;
+  // element.dataset.status = dataObject.status;
+}
+
+// 2. 批量设置标准属性
+function setBatchAttributes(element, attributes) {
+  // 使用DocumentFragment减少重排
+  const fragment = document.createDocumentFragment();
+  const clone = element.cloneNode(true);
+
+  for (const [key, value] of Object.entries(attributes)) {
+    clone.setAttribute(key, value);
+  }
+
+  element.parentNode.replaceChild(clone, element);
+}
+
+// 3. 使用CSS类而不是内联样式
+// 好的做法
+element.className = 'active highlighted important';
+// 或
+element.classList.add('active', 'highlighted', 'important');
+
+// 避免的做法（频繁操作style）
+// element.style.color = 'red';
+// element.style.backgroundColor = 'yellow';
+// element.style.border = '1px solid black';
+
+// 4. 缓存属性值避免重复查询
+function optimizedAttributeHandling(elements) {
+  const cachedValues = new Map();
+
+  elements.forEach(element => {
+    // 缓存常用属性值
+    const id = element.getAttribute('id');
+    const className = element.getAttribute('class');
+
+    cachedValues.set(element, { id, className });
+
+    // 基于缓存值进行操作
+    if (id && id.startsWith('dynamic-')) {
+      // 执行特定逻辑
+    }
+  });
+}
 ```
